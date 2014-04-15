@@ -18,12 +18,14 @@ extern "C" void __cxa_pure_virtual() {;}
 
 void setup(void);
 //
+void AlarmAON();
+void AlarmAOFF();
 void RL_Toggle();
-void printAddress(DeviceAddress deviceAddress);
 void START_SCREEN();
 void LCD_Time_Display();
 void Display_Date();
 void DS18B20_Read();
+void printAddress(DeviceAddress deviceAddress);
 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\mega\pins_arduino.h" 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"

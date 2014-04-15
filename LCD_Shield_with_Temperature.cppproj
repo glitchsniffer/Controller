@@ -429,12 +429,6 @@ vmresolved.tools.path=C:\Program Files (x86)\Arduino\hardware\tools\avr
     <Compile Include="Visual Micro\.Controller.vsarduino.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Visual Micro\.GlitchGit.vsarduino.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Visual Micro\.LCD_Shield_with_Temperature.vsarduino.h">
-      <SubType>compile</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Visual Micro\" />
