@@ -13,7 +13,7 @@
 int Serial_Debug = 1;		//  Set to 1 to enable serial debugging
 int Sample_Delay = 500;		//  Sets the delay between the samples taken
 int Temp_Type = 1;			//  Selects between 0 = Celsius or 1 = Fahrenheit
-float Version = 0.01;		//  Sets the version number for the build
+float Version = 0.02;		//  Sets the version number for the build
 int Temp_Read_Delay = 30;	//  Sets the amount of time between reading the temp sensors
 
 
@@ -48,7 +48,7 @@ byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set th
 //  ***********************************************
 
 // define the DS18B20 global variables
-const int ONE_WIRE_BUS[]={2};		// the array to define which pins you will use for the busses ie {2,3,4,5};
+const int ONE_WIRE_BUS[]={12};		// the array to define which pins you will use for the busses ie {2,3,4,5};
 #define TEMPERATURE_PRECISION 9		// temperature precision 9-12 bits
 #define NUMBER_OF_BUS 1				// how many busses will you use for the sensors
 
@@ -66,11 +66,11 @@ int RTC_Status=1;
 //  INITIALIZE THE ALARMS
 //  ***********************************************
 	
-int AlarmHourA_ON = 20;
-int AlarmMinA_ON = 7;
+int AlarmHourA_ON = 6;
+int AlarmMinA_ON = 30;
 int AlarmSecA_ON = 0;
 	
-int AlarmHourA_OFF = 21;
+int AlarmHourA_OFF = 19;
 int AlarmMinA_OFF = 0;
 int AlarmSecA_OFF = 0;
 
