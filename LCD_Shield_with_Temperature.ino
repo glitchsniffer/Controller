@@ -11,16 +11,26 @@
 //  ***********************************************
 
 int Serial_Debug = 1;		//  Set to 1 to enable serial debugging
-int Sample_Delay = 500;		//  Sets the delay between the samples taken
 int Temp_Type = 1;			//  Selects between 0 = Celsius or 1 = Fahrenheit
-float Version = 0.02;		//  Sets the version number for the build
+int Version = 0;			//  Sets the version number for the current program
+int Build = 3;				//  Sets the build number for the current program
 int Temp_Read_Delay = 30;	//  Sets the amount of time between reading the temp sensors
+
+
+//  INITIALIZE THE EEPROM
+//  ***********************************************
+
+#define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
+
+int pointer = 0;			//  Sets the pointer location to 0 initially
+byte data = 0;				//  Sets the value of data to be written to 0 initially
 
 
 //  INITIALIZE THE LCD
 //  ***********************************************
 
-#define I2C_ADDR 0x3F  //  Set the address of the LCD screen
+//#define LCD_DEV_ADDR 0x3F	//  Set the address of the LCD screen
+#define LCD_DEV_ADDR 0x27	//  Set the address of the LCD screen
 
 // Define the LCD Pins for the I2C
 #define B_Light 3
@@ -32,7 +42,7 @@ int Temp_Read_Delay = 30;	//  Sets the amount of time between reading the temp s
 #define D6 6
 #define D7 7
 
-LiquidCrystal_I2C lcd(I2C_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
+LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
 
 //  SETUP CUSTOM CHARACTERS
 byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};  //  set the lcd char for the degree symbol
@@ -243,6 +253,9 @@ void START_SCREEN()
 	lcd.setCursor(4,3);
 	lcd.print("VERSION ");
 	lcd.print(Version);
+	lcd.print(".");
+	if (Build < 10){lcd.print("0");}
+	lcd.print(Build);
 	delay(5000);
 	lcd.setCursor(0,0);
 	lcd.clear();
@@ -345,7 +358,7 @@ void DS18B20_Read()
 }
 
 //  SERIAL PRINT DS18B20 ADDRESS FUNCTION
-//  ***********************************************rt
+//  ***********************************************
 void printAddress(DeviceAddress deviceAddress)
 {
 	for (uint8_t i = 0; i < 8; i++)
@@ -356,8 +369,42 @@ void printAddress(DeviceAddress deviceAddress)
 	}
 }
 
+//  WRITE TO THE I2C EEPROM
+//  ***********************************************
 
+void writeEEPROM(int address, byte data)
+{
+	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
+	Wire.write((int)(address >> 8));			//  writes the first byte of the pointer address to the device
+	Wire.write((int)(address & 0xFF));			//  writes the second byte of the pointer address to the device
+	Wire.write(data);							//  writes the byte data to the EEPROM at the address specified above
+	Wire.endTransmission();						//  stops the write communication on the I2C
+	delay(10);
+	if (Serial_Debug = 1){
+		Serial.print("Writing to address ");
+		Serial.print(address);
+		Serial.print(" - ");
+		Serial.println(data);}
+}
 
+//  READ FROM THE I2C EEPROM
+//  ***********************************************
+
+byte readEEPROM(int address)
+{
+	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
+	Wire.write((int)(address >> 8));			//  writes the first byte of the pointer address to the device
+	Wire.write((int)(address & 0xFF));			//  writes the second byte of the pointer address to the device
+	Wire.endTransmission(); 					//  stops the write communication on the I2C
+	Wire.requestFrom(EEPROM_DEV_ADDR,1);		//  gets 1 byte of data from the device
+	data = Wire.read();
+	if (Serial_Debug = 1){
+		Serial.print("Reading from address ");
+		Serial.print(address);
+		Serial.print(" - ");
+		Serial.println(data);}
+	return data;	
+}
 
 
 
