@@ -7,23 +7,30 @@
 #include <Wire.h>               //I2C Wire library
 
 
-//  CONFIGURATION SETUP
-//  ***********************************************
-
-int Serial_Debug = 1;		//  Set to 1 to enable serial debugging
-int Temp_Type = 1;			//  Selects between 0 = Celsius or 1 = Fahrenheit
-int Version = 0;			//  Sets the version number for the current program
-int Build = 3;				//  Sets the build number for the current program
-int Temp_Read_Delay = 30;	//  Sets the amount of time between reading the temp sensors
-
-
-//  INITIALIZE THE EEPROM
+//  INITIALIZE THE EEPROM AND RETRIEVE USER SETTINGS
 //  ***********************************************
 
 #define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
 
-int pointer = 0;			//  Sets the pointer location to 0 initially
+int pointer = 20;			//  Sets the pointer location to 0 initially
 byte data = 0;				//  Sets the value of data to be written to 0 initially
+
+
+//  FACTORY DEFAULTS SETUP
+//  ***********************************************
+
+
+//  CONFIGURATION SETUP
+//  ***********************************************
+
+//data = readEEPROM(pointer);		//  Set to 1 to enable serial debugging
+//int Serial_Debug;
+int Serial_Debug = 10;	
+int Temp_Type = 1;			//  Selects between 0 = Celsius or 1 = Fahrenheit
+int Version = 0;			//  Sets the version number for the current program
+int Build = 3;				//  Sets the build number for the current program
+int Temp_Read_Delay = 30;	//  Sets the amount of time between reading the temp sensors
+int today = 0;				//  Sets the today to the current date to display on the RTC
 
 
 //  INITIALIZE THE LCD
@@ -104,6 +111,11 @@ int Relay_Count = 8;	//  Set the number of relays
 //  ***********************************************
 void setup(void)
 {
+	Serial_Debug = readEEPROM(5);
+	
+	//  SETUP THE SERIAL PORT
+	if (Serial_Debug == 1){Serial.begin(9600);}  //  start the serial port if debugging is on
+		
 	//  SETUP THE RELAYS OUTPUTS
 	for(int relay = 0; relay < Relay_Count; relay++){pinMode(Relay_Pins[relay], OUTPUT);}
 	for(int relay = 0; relay < Relay_Count; relay++){digitalWrite(Relay_Pins[relay], HIGH);}
@@ -133,8 +145,6 @@ void setup(void)
 	lcd.write(byte(6));
 	lcd.write(byte(7));
 	
-	//  SETUP THE SERIAL PORT
-	if (Serial_Debug == 1) Serial.begin(9600);  //  start the serial port if debugging is on
 	
 	//  SETUP THE RTC
 	setSyncProvider(RTC.get);		//  this function get the time from the RTC
@@ -142,6 +152,22 @@ void setup(void)
 		RTC_Status = 0;
 		Serial.println("Unable to get the RTC");}
 	else{Serial.println("RTC has set the system time");}
+		
+		//factoryDefaultset();
+		
+		data = 9;
+		data = readEEPROM(5);
+		Serial.print("Reading Serial out of EEPROM ");
+		Serial.println(data);
+		delay(500);
+	
+		data = 9;
+		data = readEEPROM(20);
+		Serial.print("Reading Temp out of EEPROM ");
+		Serial.println(data);
+		delay(500);
+	
+//	today = day;
 		
 	//  SETUP ALARMS
 	
@@ -293,6 +319,8 @@ void LCD_Time_Display()
 //  ***********************************************
 void Display_Date()
 {
+	if(day()==today){return;}
+	else{
 	lcd.setCursor(0,1);
 	lcd.print("           ");
 	lcd.setCursor(1,1);
@@ -301,6 +329,7 @@ void Display_Date()
 	lcd.print(day());
 	lcd.print("/");
 	lcd.print(year());
+	today = day();}
 }
 
 //  READ THE DS18B20 SENSORS FUNCTION
@@ -397,16 +426,29 @@ byte readEEPROM(int address)
 	Wire.write((int)(address & 0xFF));			//  writes the second byte of the pointer address to the device
 	Wire.endTransmission(); 					//  stops the write communication on the I2C
 	Wire.requestFrom(EEPROM_DEV_ADDR,1);		//  gets 1 byte of data from the device
-	data = Wire.read();
+	data = Wire.read();							//  sets the value read to data
 	if (Serial_Debug = 1){
 		Serial.print("Reading from address ");
 		Serial.print(address);
 		Serial.print(" - ");
 		Serial.println(data);}
-	return data;	
+	return data;								//  returns data to the previous call
 }
 
+//  FACTORY DEFAULTS SETUP
+//  ***********************************************
+void factoryDefaultset()
+{
+	//  Set the Serial_Debug default to 1, Serial debugging ON
+	pointer = 5;
+	data = 1;
+	writeEEPROM(pointer,data);
+	
+	//  Set the Temp_Type default to 1, Fahrenheit
+	pointer = 20;
+	data = 1;
+	writeEEPROM(pointer,data);
 
-
+}
 
 
