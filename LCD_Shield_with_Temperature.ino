@@ -28,7 +28,7 @@ byte data = 0;				//  Sets the value of data to be written to 0 initially
 int Serial_Debug = 10;	
 int Temp_Type = 1;			//  Selects between 0 = Celsius or 1 = Fahrenheit
 int Version = 0;			//  Sets the version number for the current program
-int Build = 3;				//  Sets the build number for the current program
+int Build = 4;				//  Sets the build number for the current program
 int Temp_Read_Delay = 30;	//  Sets the amount of time between reading the temp sensors
 int today = 0;				//  Sets the today to the current date to display on the RTC
 
@@ -60,7 +60,22 @@ byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};  //  set t
 byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};  //  set the lcd char for the timer bell symbol
 byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set the lcd char for the relay on symbol
 	
-	
+
+//  DEFINE BUTTON PINS
+//  ***********************************************
+#define UpButton 53			//  set the up button to pin 53
+#define DownButton 50		//  set the down button to pin 50
+#define RightButton 52		//  set the right button to pin 52
+#define LeftButton 51		//  set the left button to pin 51
+
+//#define MenuButton 19
+
+int LEDPin = 13;			//  set the onboard led on pin 13
+volatile int state = LOW;	//  allow the variable state to change the led on and off
+
+const int Button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - Button 7 respectively
+
+
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
 
@@ -92,18 +107,10 @@ int AlarmMinA_OFF = 0;
 int AlarmSecA_OFF = 0;
 
 
-//  INITIALIZE THE BUTTONS
-//  ***********************************************
-int UpButton = 53;
-int DownButton = 47;
-int LeftButton = 49;
-int RightButton = 51;
-
-
 //  INITIALIZE THE RELAYS
 //  ***********************************************
 
-int Relay_Pins[] = {23, 25, 27, 29, 31, 33, 35, 37};	//  Initialize the relay pins
+int Relay_Pins[] = {23,25,27,29,31,33,35,37};	//  Initialize the relay pins
 int Relay_Count = 8;	//  Set the number of relays
 
 
@@ -115,13 +122,24 @@ void setup(void)
 	
 	//  SETUP THE SERIAL PORT
 	if (Serial_Debug == 1){Serial.begin(9600);}  //  start the serial port if debugging is on
+	
+	//  SETUP THE BUTTONS
+	pinMode(UpButton, INPUT);		//  sets the UpButton to an input
+	pinMode(DownButton, INPUT);		//  sets the DownButton to an input
+	pinMode(LeftButton, INPUT);		//  sets the LeftButton to an input
+	pinMode(RightButton, INPUT);	//  sets the RightButton to an input
+	
+	for(int b = 0; b < 8; b++){pinMode(Button[b], INPUT);}	//  sets Button0-7 pins as inputs
+		
+	pinMode(LEDPin, OUTPUT);						//  configures led 13 to an output for testing the MenuButton
+	attachInterrupt(4, MenuButtonPress, LOW);		//  Attaches int.4, pin 19 and sets it to trigger on a low input from the menu button
 		
 	//  SETUP THE RELAYS OUTPUTS
 	for(int relay = 0; relay < Relay_Count; relay++){pinMode(Relay_Pins[relay], OUTPUT);}
 	for(int relay = 0; relay < Relay_Count; relay++){digitalWrite(Relay_Pins[relay], HIGH);}
 
 	//  SETUP THE LCD SCREEN
-	lcd.begin(20,4);  //  setup the LCD's number of columns and rows
+	lcd.begin(20,4);						//  setup the LCD's number of columns and rows
 	lcd.createChar(1, degree);				//  init custom characters as numbers
 	lcd.createChar(2, rarrow);				//  init custom characters as numbers
 	lcd.createChar(3, uarrow);				//  init custom characters as numbers
@@ -217,8 +235,10 @@ void setup(void)
 //  ***********************************************
 void loop()
 {
+	if (state == TRUE){MenuSystem();}
 	if (RTC_Status==1){Display_Date();}
 	if (RTC_Status==1){LCD_Time_Display();}
+	digitalWrite(LEDPin, state);
 	Alarm.delay(1000);
 
 //	RL_Toggle();
@@ -400,7 +420,6 @@ void printAddress(DeviceAddress deviceAddress)
 
 //  WRITE TO THE I2C EEPROM
 //  ***********************************************
-
 void writeEEPROM(int address, byte data)
 {
 	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
@@ -418,7 +437,6 @@ void writeEEPROM(int address, byte data)
 
 //  READ FROM THE I2C EEPROM
 //  ***********************************************
-
 byte readEEPROM(int address)
 {
 	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
@@ -448,7 +466,19 @@ void factoryDefaultset()
 	pointer = 20;
 	data = 1;
 	writeEEPROM(pointer,data);
-
 }
 
 
+//  MENU BUTTON PRESS INTERRUPT SERVICE ROUTINE
+//  ***********************************************
+void MenuButtonPress()
+{
+	state = !state;
+}
+
+//  MENU SYSTEM
+//  ***********************************************
+void MenuSystem()
+{
+	lcd.clear();
+}
