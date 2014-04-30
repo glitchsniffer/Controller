@@ -433,5 +433,10 @@ vmresolved.tools.path=C:\Program Files (x86)\Arduino\hardware\tools\avr
   <ItemGroup>
     <Folder Include="Visual Micro\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Menu_System.ino">
+      <SubType>compile</SubType>
+    </None>
+  </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>

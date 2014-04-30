@@ -23,15 +23,12 @@ byte data = 0;				//  Sets the value of data to be written to 0 initially
 //  CONFIGURATION SETUP
 //  ***********************************************
 
-//data = readEEPROM(pointer);		//  Set to 1 to enable serial debugging
-//int Serial_Debug;
 int Serial_Debug = 10;	
 int Temp_Type = 1;			//  Selects between 0 = Celsius or 1 = Fahrenheit
 int Version = 0;			//  Sets the version number for the current program
 int Build = 4;				//  Sets the build number for the current program
-int Temp_Read_Delay = 30;	//  Sets the amount of time between reading the temp sensors
+int Temp_Read_Delay = 10;	//  Sets the amount of time between reading the temp sensors
 int today = 0;				//  Sets the today to the current date to display on the RTC
-
 
 //  INITIALIZE THE LCD
 //  ***********************************************
@@ -71,7 +68,7 @@ byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set th
 //#define MenuButton 19
 
 int LEDPin = 13;			//  set the onboard led on pin 13
-volatile int state = LOW;	//  allow the variable state to change the led on and off
+volatile int MenuMode = 0;	//  allow the variable state to change the led on and off
 
 const int Button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - Button 7 respectively
 
@@ -121,7 +118,7 @@ void setup(void)
 	Serial_Debug = readEEPROM(5);
 	
 	//  SETUP THE SERIAL PORT
-	if (Serial_Debug == 1){Serial.begin(9600);}  //  start the serial port if debugging is on
+	if (Serial_Debug == 0){Serial.begin(9600);}  //  start the serial port if debugging is on
 	
 	//  SETUP THE BUTTONS
 	pinMode(UpButton, INPUT);		//  sets the UpButton to an input
@@ -132,7 +129,7 @@ void setup(void)
 	for(int b = 0; b < 8; b++){pinMode(Button[b], INPUT);}	//  sets Button0-7 pins as inputs
 		
 	pinMode(LEDPin, OUTPUT);						//  configures led 13 to an output for testing the MenuButton
-	attachInterrupt(4, MenuButtonPress, LOW);		//  Attaches int.4, pin 19 and sets it to trigger on a low input from the menu button
+	attachInterrupt(4, MenuButtonPress, FALLING);		//  Attaches int.4, pin 19 and sets it to trigger on a low input from the menu button
 		
 	//  SETUP THE RELAYS OUTPUTS
 	for(int relay = 0; relay < Relay_Count; relay++){pinMode(Relay_Pins[relay], OUTPUT);}
@@ -171,22 +168,20 @@ void setup(void)
 		Serial.println("Unable to get the RTC");}
 	else{Serial.println("RTC has set the system time");}
 		
-		//factoryDefaultset();
+		factoryDefaultset();
 		
 		data = 9;
 		data = readEEPROM(5);
-		Serial.print("Reading Serial out of EEPROM ");
+		Serial.print("Reading Serial out of EEPROM: ");
 		Serial.println(data);
 		delay(500);
 	
 		data = 9;
 		data = readEEPROM(20);
-		Serial.print("Reading Temp out of EEPROM ");
+		Serial.print("Reading Temp out of EEPROM: ");
 		Serial.println(data);
 		delay(500);
 	
-//	today = day;
-		
 	//  SETUP ALARMS
 	
 	Alarm.timerRepeat(Temp_Read_Delay,DS18B20_Read);
@@ -235,10 +230,12 @@ void setup(void)
 //  ***********************************************
 void loop()
 {
-	if (state == TRUE){MenuSystem();}
+	if (MenuMode == 1){MenuSystem();
+		Serial.println(MenuMode);}
 	if (RTC_Status==1){Display_Date();}
 	if (RTC_Status==1){LCD_Time_Display();}
-	digitalWrite(LEDPin, state);
+	if (MenuMode == 1){digitalWrite(LEDPin, HIGH);}
+		else{digitalWrite(LEDPin, LOW);}
 	Alarm.delay(1000);
 
 //	RL_Toggle();
@@ -428,7 +425,7 @@ void writeEEPROM(int address, byte data)
 	Wire.write(data);							//  writes the byte data to the EEPROM at the address specified above
 	Wire.endTransmission();						//  stops the write communication on the I2C
 	delay(10);
-	if (Serial_Debug = 1){
+	if (Serial_Debug = 0){
 		Serial.print("Writing to address ");
 		Serial.print(address);
 		Serial.print(" - ");
@@ -445,7 +442,7 @@ byte readEEPROM(int address)
 	Wire.endTransmission(); 					//  stops the write communication on the I2C
 	Wire.requestFrom(EEPROM_DEV_ADDR,1);		//  gets 1 byte of data from the device
 	data = Wire.read();							//  sets the value read to data
-	if (Serial_Debug = 1){
+	if (Serial_Debug = 0){
 		Serial.print("Reading from address ");
 		Serial.print(address);
 		Serial.print(" - ");
@@ -457,9 +454,9 @@ byte readEEPROM(int address)
 //  ***********************************************
 void factoryDefaultset()
 {
-	//  Set the Serial_Debug default to 1, Serial debugging ON
+	//  Set the Serial_Debug default to 0, Serial debugging ON
 	pointer = 5;
-	data = 1;
+	data = 0;
 	writeEEPROM(pointer,data);
 	
 	//  Set the Temp_Type default to 1, Fahrenheit
@@ -473,12 +470,5 @@ void factoryDefaultset()
 //  ***********************************************
 void MenuButtonPress()
 {
-	state = !state;
-}
-
-//  MENU SYSTEM
-//  ***********************************************
-void MenuSystem()
-{
-	lcd.clear();
+	MenuMode = !MenuMode;
 }
