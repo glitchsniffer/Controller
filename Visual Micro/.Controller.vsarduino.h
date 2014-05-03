@@ -31,6 +31,9 @@ byte readEEPROM(int address);
 void factoryDefaultset();
 void MenuButtonPress();
 void MenuSystem();
+void MenuStart();
+void MenuUp();
+void MenuDown();
 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\mega\pins_arduino.h" 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"

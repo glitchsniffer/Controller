@@ -75,6 +75,14 @@ const int Button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - Bu
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
+int MenuPointer = 0;		//  Current menu pointer position
+int MenuCursor = 1;			//  Current position of the menu cursor
+int MenuMaxCur = 0;			//  Current Maximum for the menu cursor
+int MenuStartCur = 0;		//  Current starting cursor
+char* MenuItems[]={"","System Config", "Timers Setup", "Sensor Addr Config","Calibration", "Test Menu",""};  //  setup menu items here
+
+//  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
+//  ***********************************************
 
 // define the DS18B20 global variables
 const int ONE_WIRE_BUS[]={12};		// the array to define which pins you will use for the busses ie {2,3,4,5};
