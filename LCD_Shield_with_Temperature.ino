@@ -26,7 +26,7 @@ byte data = 0;				//  Sets the value of data to be written to 0 initially
 int Serial_Debug = 10;	
 int Temp_Type = 1;			//  Selects between 0 = Celsius or 1 = Fahrenheit
 int Version = 0;			//  Sets the version number for the current program
-int Build = 4;				//  Sets the build number for the current program
+int Build = 5;				//  Sets the build number for the current program
 int Temp_Read_Delay = 10;	//  Sets the amount of time between reading the temp sensors
 int today = 0;				//  Sets the today to the current date to display on the RTC
 
@@ -73,13 +73,26 @@ volatile int MenuMode = 0;	//  allow the variable state to change the led on and
 const int Button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - Button 7 respectively
 
 
-//  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
+//  INITIALIZE THE MENU VARIABLES
 //  ***********************************************
-int MenuPointer = 0;		//  Current menu pointer position
-int MenuCursor = 1;			//  Current position of the menu cursor
-int MenuMaxCur = 0;			//  Current Maximum for the menu cursor
-int MenuStartCur = 0;		//  Current starting cursor
-char* MenuItems[]={"","System Config", "Timers Setup", "Sensor Addr Config","Calibration", "Test Menu",""};  //  setup menu items here
+int MPoint = 0;		//  current main menu pointer position
+int MCur = 1;			//  current position of the main menu cursor
+int MStart = 0;		//  current starting cursor
+int MLevel = 0;		//  current menu level.  main menu level=0, menu items=1, menu item selected=2
+int MLevelMax = 3;
+int M0Sel = 0;
+int M1Sel = 0;
+int M2Sel = 0;
+int M0Start = 0;
+int M1Start = 0;		//	current menu item starting cursor
+int M2Start = 0;
+int MIMax = 0;		//  current selected menu item for purposes of up and down movement
+
+char* MMItems[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Calibration",""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 3
+	char* M1Items[]={"", "Temp Type", "Temp Precision", "Set Date/Time", "Time Format", "B Light Brightnes", "Serial Debug", ""};  //  setup menu item 1 for System Config Min 0 Max 6
+	char* M2Items[]={"", "Timer 1", "Timer 2", "Timer 3", "Timer 4", ""};  //  setup menu item 2 for Timer Setup Min 0 Max 3
+	char* M3Items[]={"", "Temp Sens 1 Addr", "Temp Sens 2 Addr", "Temp Sens 3 Addr", "Temp Sens 4 Addr", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
+	char* M4Items[]={"", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Timer Setup Min 0 Max 4
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
@@ -103,10 +116,10 @@ int RTC_Status=1;
 //  INITIALIZE THE ALARMS
 //  ***********************************************
 	
+int AlarmAState = 1;
 int AlarmHourA_ON = 6;
 int AlarmMinA_ON = 30;
 int AlarmSecA_ON = 0;
-	
 int AlarmHourA_OFF = 19;
 int AlarmMinA_OFF = 0;
 int AlarmSecA_OFF = 0;
@@ -126,7 +139,7 @@ void setup(void)
 	Serial_Debug = readEEPROM(5);
 	
 	//  SETUP THE SERIAL PORT
-	if (Serial_Debug == 0){Serial.begin(9600);}  //  start the serial port if debugging is on
+	if (Serial_Debug == 0){Serial.begin(115200);}  //  start the serial port if debugging is on
 	
 	//  SETUP THE BUTTONS
 	pinMode(UpButton, INPUT);		//  sets the UpButton to an input
@@ -238,8 +251,11 @@ void setup(void)
 //  ***********************************************
 void loop()
 {
-	if (MenuMode == 1){MenuSystem();
-		Serial.println(MenuMode);}
+	if (MenuMode == 1){Serial.println("Entering Menu");
+		MLevel = 0;
+		MStart = 0;
+		MenuTitle();
+		Serial.println("Exiting Menu");}
 	if (RTC_Status==1){Display_Date();}
 	if (RTC_Status==1){LCD_Time_Display();}
 	if (MenuMode == 1){digitalWrite(LEDPin, HIGH);}
@@ -307,7 +323,7 @@ void START_SCREEN()
 	lcd.print(".");
 	if (Build < 10){lcd.print("0");}
 	lcd.print(Build);
-	delay(5000);
+	delay(1000);
 	lcd.setCursor(0,0);
 	lcd.clear();
 }

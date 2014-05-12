@@ -9,6 +9,7 @@
 */
 
 #define __AVR_ATmega2560__
+#define _VMDEBUG 1
 #define ARDUINO 101
 #define ARDUINO_MAIN
 #define F_CPU 16000000L
@@ -30,10 +31,12 @@ void writeEEPROM(int address, byte data);
 byte readEEPROM(int address);
 void factoryDefaultset();
 void MenuButtonPress();
-void MenuSystem();
-void MenuStart();
+void MenuTitle();
+void MenuLoop();
 void MenuUp();
 void MenuDown();
+void MenuSelect();
+void MenuBack();
 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\mega\pins_arduino.h" 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
