@@ -32,6 +32,7 @@ byte readEEPROM(int address);
 void factoryDefaultset();
 void MenuButtonPress();
 void MenuTitle();
+void MenuLines();
 void MenuLoop();
 void MenuUp();
 void MenuDown();

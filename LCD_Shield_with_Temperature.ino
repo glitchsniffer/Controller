@@ -75,10 +75,10 @@ const int Button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - Bu
 
 //  INITIALIZE THE MENU VARIABLES
 //  ***********************************************
-int MPoint = 0;		//  current main menu pointer position
+int MPoint = 0;			//  current main menu pointer position
 int MCur = 1;			//  current position of the main menu cursor
-int MStart = 0;		//  current starting cursor
-int MLevel = 0;		//  current menu level.  main menu level=0, menu items=1, menu item selected=2
+int MStart = 0;			//  current starting cursor
+int MLevel = 0;			//  current menu level.  main menu level=0, menu items=1, menu item selected=2
 int MLevelMax = 3;
 int M0Sel = 0;
 int M1Sel = 0;
@@ -86,13 +86,21 @@ int M2Sel = 0;
 int M0Start = 0;
 int M1Start = 0;		//	current menu item starting cursor
 int M2Start = 0;
-int MIMax = 0;		//  current selected menu item for purposes of up and down movement
+int MIMax = 0;			//  current selected menu item for purposes of up and down movement
+int mRet = 0;
 
-char* MMItems[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Calibration",""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 3
-	char* M1Items[]={"", "Temp Type", "Temp Precision", "Set Date/Time", "Time Format", "B Light Brightnes", "Serial Debug", ""};  //  setup menu item 1 for System Config Min 0 Max 6
-	char* M2Items[]={"", "Timer 1", "Timer 2", "Timer 3", "Timer 4", ""};  //  setup menu item 2 for Timer Setup Min 0 Max 3
-	char* M3Items[]={"", "Temp Sens 1 Addr", "Temp Sens 2 Addr", "Temp Sens 3 Addr", "Temp Sens 4 Addr", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
-	char* M4Items[]={"", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Timer Setup Min 0 Max 4
+char* M0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Calibration",""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 3
+	char* M1Items0[]={"", "Temp Type", "Temp Precision", "Set Date/Time", "Time Format", "B Light Brightnes", "Serial Debug", ""};  //  setup menu item 1 for System Config Min 0 Max 6
+		char* M2Items00[]={"", "Celsius", "Fahrenheit", ""};
+		char* M2Items01[]={"", "No Decimal", "1 Decimal", ""};
+		char* M2Items02[]={"", "Need Date/Time Here", ""};
+		char* M2Items03[]={"", "12 Hour", "24 Hour", ""};
+		char* M2Items04[]={"", "B Light Brightnes", ""};
+		char* M2Items05[]={"", "On", "Off", ""};
+
+	char* M1Items1[]={"", "Timer 1", "Timer 2", "Timer 3", "Timer 4", ""};  //  setup menu item 2 for Timer Setup Min 0 Max 3
+	char* M1Items2[]={"", "Temp Sens 1 Addr", "Temp Sens 2 Addr", "Temp Sens 3 Addr", "Temp Sens 4 Addr", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
+	char* M1Items3[]={"", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Timer Setup Min 0 Max 4
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************

@@ -5,6 +5,7 @@ void MenuTitle()
 {
 	lcd.clear();
 	lcd.setCursor(0,0);
+	if (MLevel <= 0){MLevel = 0;}
 	switch (MLevel)
 	{
 		case 0:
@@ -31,11 +32,20 @@ void MenuTitle()
 					MIMax = 4;
 					break;
 			}
+		case 2:
+			switch (M2Sel)
+			{
+				case 0:
+					lcd.print("     Temp Type");
+					MIMax = 1;
+					break;
+				break;
+			}
 	}
-//	MenuLines();
-//}
-//void MenuLines()
-//{
+	MenuLines();
+}
+void MenuLines()
+{
 	switch (MLevel)
 	{	
 		case 0:
@@ -47,6 +57,11 @@ void MenuTitle()
 			if (M1Start >= MIMax){M1Start = MIMax;}
 			if (M1Start < 0){M1Start = 0;}
 			MStart = M1Start;
+			break;
+		case 2:
+			if (M2Start >= MIMax){M2Start = MIMax;}
+			if (M2Start < 0){M2Start = 0;}
+			MStart = M2Start;
 			break;
 	}
 
@@ -62,23 +77,33 @@ void MenuTitle()
 		switch (MLevel)
 		{
 			case 0:
-				lcd.print(MMItems[MPoint]);
+				lcd.print(M0Items[MPoint]);
 				break;
 			case 1:
 				switch (M1Sel)
 				{
 					case 0:
-					lcd.print(M1Items[MPoint]);
-					break;
+						lcd.print(M1Items0[MPoint]);
+						break;
 					case 1:
-					lcd.print(M2Items[MPoint]);
-					break;
+						lcd.print(M1Items1[MPoint]);
+						break;
 					case 2:
-					lcd.print(M3Items[MPoint]);
-					break;
+						lcd.print(M1Items2[MPoint]);
+						break;
 					case 3:
-					lcd.print(M4Items[MPoint]);
-					break;
+						lcd.print(M1Items3[MPoint]);
+						break;
+				}
+			case 2:
+				switch (M2Sel)
+				{
+					case 0:
+						lcd.print(M2Items00[MPoint]);
+						break;
+					case 1:
+						lcd.print(M2Items01[MPoint]);
+						break;
 				}
 		}
 		MCur++;
@@ -86,15 +111,21 @@ void MenuTitle()
 	switch (MLevel)
 	{
 		case 0:
-		MPoint = M0Start;
-		break;
+			MPoint = M0Start;
+			break;
 		case 1:
-		MPoint = M1Start;
-		break;
+			MPoint = M1Start;
+			break;
+		case 2:
+			MPoint = M2Start;
+			break;
 	}
 	delay(250);
-	MenuLoop();
-	return;
+	if (mRet == 0){
+		mRet = 1;
+		MenuLoop();}
+		else{return;}
+//	MenuLoop();
 }
 void MenuLoop()
 {
@@ -116,6 +147,8 @@ void MenuLoop()
 	MLevel = 0;
 	M0Start = 0;
 	M1Start = 0;
+	M2Start = 0;
+	mRet = 0;
 	lcd.clear();
 	today = 0;
 	lcd.setCursor(0,3);
@@ -132,6 +165,9 @@ void MenuUp()
 		case 1:
 			M1Start--;
 			break;
+		case 2:
+			M2Start--;
+			break;
 	}
 	MenuTitle();
 }
@@ -145,6 +181,9 @@ void MenuDown()
 			break;
 		case 1:
 			M1Start++;
+			break;
+		case 2:
+			M2Start++;
 			break;
 	}
 	MenuTitle();
@@ -162,6 +201,10 @@ void MenuSelect()
 			M1Sel = MStart;
 			M1Start = 0;
 			break;
+		case 2:
+			M2Sel = MStart;
+			M2Start = 0;
+			break;
 	}
 	MenuTitle();
 }
@@ -172,12 +215,16 @@ void MenuBack()
 	switch (MLevel)
 	{
 		case 0:
-		M0Start = 0;
-		break;
+//			M0Start = 0;
+			break;
 		case 1:
-		M1Sel = MStart;
-		M1Start = 0;
-		break;
+			M1Sel = MStart;
+//			M1Start = 0;
+			break;
+		case 2:
+			M2Sel = MStart;
+			M2Start = 0;
+			break;
 	}
 	MenuTitle();
 }
