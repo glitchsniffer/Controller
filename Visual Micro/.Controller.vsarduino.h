@@ -38,6 +38,8 @@ void MenuUp();
 void MenuDown();
 void MenuSelect();
 void MenuBack();
+void MenuDo();
+void MenuYesNo();
 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\mega\pins_arduino.h" 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"

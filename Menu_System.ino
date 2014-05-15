@@ -32,20 +32,68 @@ void MenuTitle()
 					MIMax = 4;
 					break;
 			}
+			break;
 		case 2:
-			switch (M2Sel)
+			switch (M1Sel)
 			{
 				case 0:
-					lcd.print("     Temp Type");
-					MIMax = 1;
+					switch (M2Sel)
+					{
+						case 0:
+						lcd.print("     Temp Type");
+						MIMax = 1;
+						break;
+						case 1:
+						lcd.print("   Temp Precision");
+						MIMax = 1;
+						break;
+						case 2:
+						lcd.print("    Time Format");
+						MIMax = 1;
+						break;
+						case 3:
+						lcd.print("  B Light Brightness");
+						MIMax = 1;
+						break;
+						case 4:
+						lcd.print("   Set Date/Time");
+						MIMax = 1;
+						break;
+						case 5:
+						lcd.print("  Serial Debugging");
+						MIMax = 1;
+						break;
+					}
 					break;
-				break;
+				case 1:
+					switch (M2Sel)
+					{
+						case 0:
+						lcd.print("    Set Timer 1");
+						break;
+						case 1:
+						lcd.print("    Set Timer 2");
+						break;
+						case 2:
+						lcd.print("    Set Timer 3");
+						break;
+						case 3:
+						lcd.print("    Set Timer 4");
+						break;
+					}
+					break;
 			}
+			break;
 	}
 	MenuLines();
 }
 void MenuLines()
 {
+	if (MLevel == 2 && M1Sel > 0 && M2Sel > 0)
+	{
+		Serial.print("Doing Menu Items functions and returning");
+		return;
+	}
 	switch (MLevel)
 	{	
 		case 0:
@@ -95,16 +143,34 @@ void MenuLines()
 						lcd.print(M1Items3[MPoint]);
 						break;
 				}
+				break;
 			case 2:
-				switch (M2Sel)
-				{
+				switch (M1Sel)
 					case 0:
-						lcd.print(M2Items00[MPoint]);
+						switch (M2Sel)
+						{
+							case 0:
+							lcd.print(M2Items00[MPoint]);
+							break;
+							case 1:
+							lcd.print(M2Items01[MPoint]);
+							break;
+							case 2:
+							lcd.print(M2Items02[MPoint]);
+							break;
+							case 3:
+							lcd.print(M2Items03[MPoint]);
+							break;
+							case 4:
+							lcd.print(M2Items04[MPoint]);
+							break;
+							case 5:
+							lcd.print(M2Items05[MPoint]);
+							break;
+						}
 						break;
-					case 1:
-						lcd.print(M2Items01[MPoint]);
-						break;
-				}
+			default:
+				break;
 		}
 		MCur++;
 	}
@@ -120,6 +186,7 @@ void MenuLines()
 			MPoint = M2Start;
 			break;
 	}
+	if (MLevel == 3){MenuDo();}
 	delay(250);
 	if (mRet == 0){
 		mRet = 1;
@@ -202,6 +269,7 @@ void MenuSelect()
 			M1Start = 0;
 			break;
 		case 2:
+			
 			M2Sel = MStart;
 			M2Start = 0;
 			break;
@@ -218,6 +286,7 @@ void MenuBack()
 //			M0Start = 0;
 			break;
 		case 1:
+			switch()
 			M1Sel = MStart;
 //			M1Start = 0;
 			break;
@@ -225,6 +294,29 @@ void MenuBack()
 			M2Sel = MStart;
 			M2Start = 0;
 			break;
+		default:
+			break;
 	}
 	MenuTitle();
+}
+
+void MenuDo()
+{
+	if (M1Start < 0){M1Start = 0;}
+		
+	switch (M1Start)
+	{
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		default:
+			break;
+	}
+}
+void MenuYesNo()
+{
+	
 }
