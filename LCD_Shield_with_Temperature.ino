@@ -83,9 +83,11 @@ int MLevelMax = 3;
 int M0Sel = 0;
 int M1Sel = 0;
 int M2Sel = 0;
+int M3Sel = 0;
 int M0Start = 0;
 int M1Start = 0;		//	current menu item starting cursor
 int M2Start = 0;
+int M3Start = 0;
 int MIMax = 0;			//  current selected menu item for purposes of up and down movement
 int mRet = 0;
 
@@ -97,10 +99,22 @@ char* M0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Cali
 		char* M2Items03[]={"", "B Light Brightness", ""};
 		char* M2Items04[]={"", "Need Date/Time Here", ""};
 		char* M2Items05[]={"", "On", "Off", ""};
-
 	char* M1Items1[]={"", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", ""};  //  setup menu item 2 for Timer Setup Min 0 Max 3
-	char* M1Items2[]={"", "Temp Sens 1 Addr", "Temp Sens 2 Addr", "Temp Sens 3 Addr", "Temp Sens 4 Addr", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
+		char* M2Items10[]={"", "S Timer 1", "Exit", ""};
+		char* M2Items11[]={"", "S Timer 2", "Exit", ""};
+		char* M2Items12[]={"", "Set Timer 3", "Exit", ""};
+		char* M2Items13[]={"", "Set Timer 4", "Exit", ""};
+	char* M1Items2[]={"", "Temp Sens 1 Add", "Temp Sens 2 Add", "Temp Sens 3 Add", "Temp Sens 4 Add", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
+		char* M2Items20[]={"", "Set Sens 1 Address", "", ""};
+		char* M2Items21[]={"", "Set Sens 2 Address", "Exit", ""};
+		char* M2Items22[]={"", "Set Sens 3 Address", "Exit", ""};
+		char* M2Items23[]={"", "Set Sens 4 Address", "Exit", ""};
 	char* M1Items3[]={"", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Timer Setup Min 0 Max 4
+		char* M2Items30[]={"", "Calibrate Sensor 1", "Exit", ""};
+		char* M2Items31[]={"", "Calibrate Sensor 2", "Exit", ""};
+		char* M2Items32[]={"", "Calibrate Sensor 3", "Exit", ""};
+		char* M2Items33[]={"", "Calibrate Sensor 4", "Exit", ""};
+		char* M2Items34[]={"", "Calibrate Flow Sens", "Exit", ""};
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
@@ -196,20 +210,26 @@ void setup(void)
 		RTC_Status = 0;
 		Serial.println("Unable to get the RTC");}
 	else{Serial.println("RTC has set the system time");}
-		
+
+	readEEPROM(6);		// read the first run data from the eeprom
+	if 	(data = 0)
+	{
+		pointer = 6;
+		data = 1;
+		writeEEPROM(pointer,data);
 		factoryDefaultset();
-		
-		data = 9;
-		data = readEEPROM(5);
-		Serial.print("Reading Serial out of EEPROM: ");
-		Serial.println(data);
-		delay(500);
+	}	
+	data = 9;
+	data = readEEPROM(5);
+	Serial.print("Reading Serial out of EEPROM: ");
+	Serial.println(data);
+	delay(500);
 	
-		data = 9;
-		data = readEEPROM(20);
-		Serial.print("Reading Temp out of EEPROM: ");
-		Serial.println(data);
-		delay(500);
+	data = 9;
+	data = readEEPROM(20);
+	Serial.print("Reading Temp out of EEPROM: ");
+	Serial.println(data);
+	delay(500);
 	
 	//  SETUP ALARMS
 	

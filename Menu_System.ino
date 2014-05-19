@@ -3,6 +3,11 @@
 //  ***********************************************
 void MenuTitle()
 {
+	if (MLevel == 3)
+	{
+		MenuDo();
+		return;
+	}
 	lcd.clear();
 	lcd.setCursor(0,0);
 	if (MLevel <= 0){MLevel = 0;}
@@ -20,7 +25,7 @@ void MenuTitle()
 					MIMax = 5;
 					break;
 				case 1:
-					lcd.print("   Timer Setup");
+					lcd.print("    Timer Setup");
 					MIMax = 3;
 					break;
 				case 2:
@@ -70,15 +75,65 @@ void MenuTitle()
 					{
 						case 0:
 						lcd.print("    Set Timer 1");
+						MIMax = 1;
 						break;
 						case 1:
 						lcd.print("    Set Timer 2");
+						MIMax = 1;
 						break;
 						case 2:
 						lcd.print("    Set Timer 3");
+						MIMax = 1;
 						break;
 						case 3:
 						lcd.print("    Set Timer 4");
+						MIMax = 1;
+						break;
+					}
+					break;
+				case 2:
+					switch (M2Sel)
+					{
+						case 0:
+						lcd.print("  Temp Sens 1 Addr");
+						MIMax = 1;
+						break;
+						case 1:
+						lcd.print("  Temp Sens 2 Addr");
+						MIMax = 1;
+						break;
+						case 2:
+						lcd.print("  Temp Sens 3 Addr");
+						MIMax = 1;
+						break;
+						case 3:
+						lcd.print("  Temp Sens 4 Addr");
+						MIMax = 1;
+						break;
+					}
+					break;
+				case 3:
+					switch (M2Sel)
+					{
+						case 0:
+						lcd.print(" Temp Sens 1 Calib");
+						MIMax = 1;
+						break;
+						case 1:
+						lcd.print(" Temp Sens 2 Calib");
+						MIMax = 1;
+						break;
+						case 2:
+						lcd.print(" Temp Sens 3 Calib");
+						MIMax = 1;
+						break;
+						case 3:
+						lcd.print(" Temp Sens 4 Calib");
+						MIMax = 1;
+						break;
+						case 4:
+						lcd.print(" Flow Sensor Calib");
+						MIMax = 1;
 						break;
 					}
 					break;
@@ -89,11 +144,6 @@ void MenuTitle()
 }
 void MenuLines()
 {
-	if (MLevel == 2 && M1Sel > 0 && M2Sel > 0)
-	{
-		Serial.print("Doing Menu Items functions and returning");
-		return;
-	}
 	switch (MLevel)
 	{	
 		case 0:
@@ -110,6 +160,11 @@ void MenuLines()
 			if (M2Start >= MIMax){M2Start = MIMax;}
 			if (M2Start < 0){M2Start = 0;}
 			MStart = M2Start;
+			break;
+		case 3:
+			if (M3Start >= MIMax){M3Start = MIMax;}
+			if (M3Start < 0){M3Start = 0;}
+			MStart = M3Start;
 			break;
 	}
 
@@ -146,29 +201,86 @@ void MenuLines()
 				break;
 			case 2:
 				switch (M1Sel)
+				{
 					case 0:
 						switch (M2Sel)
 						{
 							case 0:
-							lcd.print(M2Items00[MPoint]);
-							break;
+								lcd.print(M2Items00[MPoint]);
+								break;
 							case 1:
-							lcd.print(M2Items01[MPoint]);
-							break;
+								lcd.print(M2Items01[MPoint]);
+								break;
 							case 2:
-							lcd.print(M2Items02[MPoint]);
-							break;
+								lcd.print(M2Items02[MPoint]);
+								break;
 							case 3:
-							lcd.print(M2Items03[MPoint]);
-							break;
+								lcd.print(M2Items03[MPoint]);
+								break;
 							case 4:
-							lcd.print(M2Items04[MPoint]);
-							break;
+								lcd.print(M2Items04[MPoint]);
+								break;
 							case 5:
-							lcd.print(M2Items05[MPoint]);
-							break;
+								lcd.print(M2Items05[MPoint]);
+								break;
 						}
 						break;
+					case 1:
+						switch (M2Sel)
+						{
+							case 0:
+								lcd.print(M2Items10[MPoint]);
+								break;
+							case 1:
+								lcd.print(M2Items11[MPoint]);
+								break;
+							case 2:
+								lcd.print(M2Items12[MPoint]);
+								break;
+							case 3:
+								lcd.print(M2Items13[MPoint]);
+								break;
+						}
+						break;
+					case 2:
+						switch (M2Sel)
+						{
+							case 0:
+								lcd.print(M2Items20[MPoint]);
+								break;
+							case 1:
+								lcd.print(M2Items21[MPoint]);
+								break;
+							case 2:
+								lcd.print(M2Items22[MPoint]);
+								break;
+							case 3:
+								lcd.print(M2Items23[MPoint]);
+								break;
+						}
+						break;
+					case 3:
+						switch (M2Sel)
+						{
+							case 0:
+								lcd.print(M2Items30[MPoint]);
+								break;
+							case 1:
+								lcd.print(M2Items31[MPoint]);
+								break;
+							case 2:
+								lcd.print(M2Items32[MPoint]);
+								break;
+							case 3:
+								lcd.print(M2Items33[MPoint]);
+								break;
+							case 4:
+								lcd.print(M2Items34[MPoint]);
+								break;
+						}
+						break;
+				break;
+				}
 			default:
 				break;
 		}
@@ -185,6 +297,7 @@ void MenuLines()
 		case 2:
 			MPoint = M2Start;
 			break;
+			break;
 	}
 	if (MLevel == 3){MenuDo();}
 	delay(250);
@@ -192,7 +305,6 @@ void MenuLines()
 		mRet = 1;
 		MenuLoop();}
 		else{return;}
-//	MenuLoop();
 }
 void MenuLoop()
 {
@@ -269,9 +381,12 @@ void MenuSelect()
 			M1Start = 0;
 			break;
 		case 2:
-			
 			M2Sel = MStart;
 			M2Start = 0;
+			break;
+		case 3:
+			M3Sel = MStart;
+			M3Start = 0;
 			break;
 	}
 	MenuTitle();
@@ -280,43 +395,48 @@ void MenuSelect()
 void MenuBack()
 {
 	MLevel--;
-	switch (MLevel)
-	{
-		case 0:
-//			M0Start = 0;
-			break;
-		case 1:
-			switch()
-			M1Sel = MStart;
-//			M1Start = 0;
-			break;
-		case 2:
-			M2Sel = MStart;
-			M2Start = 0;
-			break;
-		default:
-			break;
-	}
 	MenuTitle();
 }
 
 void MenuDo()
 {
-	if (M1Start < 0){M1Start = 0;}
-		
-	switch (M1Start)
-	{
-		case 0:
+	Serial.print("Doing selection, ");
+	Serial.print(M1Sel);
+	Serial.print(", ");
+	Serial.print(M2Sel);
+	Serial.print(", ");
+	Serial.println(M3Sel);
+	
+	switch (M1Sel)
+	{	case 0:
+			switch (M2Sel)
+			{
+				case 0:
+					break;
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				case 4:
+					break;
+				case 5:
+					break;				
+			}
 			break;
 		case 1:
 			break;
 		case 2:
 			break;
-		default:
+		case 3:
 			break;
 	}
+	return;
 }
-void MenuYesNo()
+void MenuBinary()
 {
-	
+	if (M2Start = 0)
+	{
+	}
 }
