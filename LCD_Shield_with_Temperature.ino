@@ -12,7 +12,7 @@
 
 #define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
 
-int pointer = 20;			//  Sets the pointer location to 0 initially
+int pointer = 0;			//  Sets the pointer location to 0 initially
 byte data = 0;				//  Sets the value of data to be written to 0 initially
 
 
@@ -24,10 +24,10 @@ byte data = 0;				//  Sets the value of data to be written to 0 initially
 //  ***********************************************
 
 int Serial_Debug = 10;	
-int Temp_Type = 1;			//  Selects between 0 = Celsius or 1 = Fahrenheit
+int TempType = 1;			//  Selects between 0 = Celsius or 1 = Fahrenheit
 int Version = 0;			//  Sets the version number for the current program
-int Build = 5;				//  Sets the build number for the current program
-int Temp_Read_Delay = 10;	//  Sets the amount of time between reading the temp sensors
+int Build = 7;				//  Sets the build number for the current program
+int Temp_Read_Delay = 10;	//  Sets the amount of time in seconds between reading the temp sensors
 int today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -100,12 +100,12 @@ char* M0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Cali
 		char* M2Items04[]={"", "Need Date/Time Here", ""};
 		char* M2Items05[]={"", "On", "Off", ""};
 	char* M1Items1[]={"", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", ""};  //  setup menu item 2 for Timer Setup Min 0 Max 3
-		char* M2Items10[]={"", "S Timer 1", "Exit", ""};
-		char* M2Items11[]={"", "S Timer 2", "Exit", ""};
+		char* M2Items10[]={"", "Set Timer 1", "Exit", ""};
+		char* M2Items11[]={"", "Set Timer 2", "Exit", ""};
 		char* M2Items12[]={"", "Set Timer 3", "Exit", ""};
 		char* M2Items13[]={"", "Set Timer 4", "Exit", ""};
 	char* M1Items2[]={"", "Temp Sens 1 Add", "Temp Sens 2 Add", "Temp Sens 3 Add", "Temp Sens 4 Add", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
-		char* M2Items20[]={"", "Set Sens 1 Address", "", ""};
+		char* M2Items20[]={"", "Set Sens 1 Address", "Exit", ""};
 		char* M2Items21[]={"", "Set Sens 2 Address", "Exit", ""};
 		char* M2Items22[]={"", "Set Sens 3 Address", "Exit", ""};
 		char* M2Items23[]={"", "Set Sens 4 Address", "Exit", ""};
@@ -124,13 +124,13 @@ const int ONE_WIRE_BUS[]={12};		// the array to define which pins you will use f
 #define TEMPERATURE_PRECISION 9		// temperature precision 9-12 bits
 #define NUMBER_OF_BUS 1				// how many busses will you use for the sensors
 
-OneWire *oneWire[NUMBER_OF_BUS];  //  Setup oneWire instances to communicate with any OneWire Devices
+OneWire *oneWire[NUMBER_OF_BUS];	//  Setup oneWire instances to communicate with any OneWire Devices
 
 DallasTemperature *sensors[NUMBER_OF_BUS];  // Pass onewire reference to Dallas temperatures.
 
-DeviceAddress tempDeviceAddress[8];  //  arrays to hold device addresses
+DeviceAddress tempDeviceAddress[8];		//  arrays to hold device addresses
 
-int numberOfDevices[NUMBER_OF_BUS];  //  define the variable to store the number of busses
+int numberOfDevices[NUMBER_OF_BUS];		//  define the variable to store the number of busses
 
 int RTC_Status=1;
 
@@ -153,12 +153,11 @@ int AlarmSecA_OFF = 0;
 int Relay_Pins[] = {23,25,27,29,31,33,35,37};	//  Initialize the relay pins
 int Relay_Count = 8;	//  Set the number of relays
 
-
-//  VOID SETUP
-//  ***********************************************
 void setup(void)
+//  ***********************************************
 {
 	Serial_Debug = readEEPROM(5);
+	TempType = readEEPROM(20);
 	
 	//  SETUP THE SERIAL PORT
 	if (Serial_Debug == 0){Serial.begin(115200);}  //  start the serial port if debugging is on
@@ -227,7 +226,7 @@ void setup(void)
 	
 	data = 9;
 	data = readEEPROM(20);
-	Serial.print("Reading Temp out of EEPROM: ");
+	Serial.print("Reading Temp Type out of EEPROM: ");
 	Serial.println(data);
 	delay(500);
 	
@@ -275,16 +274,10 @@ void setup(void)
 	DS18B20_Read();
 }
 
-//  VOID LOOP
-//  ***********************************************
 void loop()
+//  ***********************************************
 {
 	if (MenuMode == 1){Serial.println("Entering Menu");
-		MLevel = 0;
-		MStart = 0;
-		M0Sel = 0;
-		M1Sel = 0;
-		M2Sel = 0;
 		MenuTitle();
 		Serial.println("Exiting Menu");}
 	if (RTC_Status==1){Display_Date();}
@@ -297,10 +290,8 @@ void loop()
 	
 }
 
-//  ALARM A ON TOGGLE
-//  ***********************************************
-
 void AlarmAON()
+//  ***********************************************
 {
 	Serial.println("Alarm: - turn lights ON");
 	digitalWrite(Relay_Pins[0], LOW);
@@ -308,20 +299,17 @@ void AlarmAON()
 	lcd.print("+");
 }
 
-//  ALARM A OFF TOGGLE
-//  ***********************************************
-
 void AlarmAOFF()
+//  ***********************************************
 {
 	Serial.println("Alarm: - turn lights OFF");
 	digitalWrite(Relay_Pins[0], HIGH);
 	lcd.setCursor(0,3);
 	lcd.print("-");
 }
-	
-//  RELAY TOGGLE FUNCTION
-//  ***********************************************
+
 void RL_Toggle()
+//  ***********************************************
 {
 	for (int relay = 0; relay < Relay_Count; relay++){
 		digitalWrite(Relay_Pins[relay], LOW);
@@ -338,9 +326,8 @@ void RL_Toggle()
 //	delay(100);}
 }
 
-//  THE START UP SCREEN FOR THE DISPLAY
-//  ***********************************************
 void START_SCREEN()
+//  ***********************************************
 {
 	lcd.setCursor(3,0);
 	lcd.print("GLITCHSNIFFER'S");
@@ -359,9 +346,8 @@ void START_SCREEN()
 	lcd.clear();
 }
 	
-//  LCD TIME DISPLAY FUNCTION
-//  ***********************************************
 void LCD_Time_Display()
+//  ***********************************************
 {
 //	Serial.print(timeStatus());
 	Serial.println(second());
@@ -387,9 +373,8 @@ void LCD_Time_Display()
 	else{lcd.print("PM");}
 }
 
-//  LCD DISPLAY DATE FUNCTION
-//  ***********************************************
 void Display_Date()
+//  ***********************************************
 {
 	if(day()==today){return;}
 	else{
@@ -404,9 +389,8 @@ void Display_Date()
 	today = day();}
 }
 
-//  READ THE DS18B20 SENSORS FUNCTION
-//  ***********************************************
 void DS18B20_Read()
+//  ***********************************************
 {
 	int c;
 	
@@ -420,14 +404,17 @@ void DS18B20_Read()
 		for(int j=0;j<numberOfDevices[i]; j++)    // poll devices connect to the bus
 		{
 			sensors[i]->getAddress(tempDeviceAddress[j], j);
-			printAddress(tempDeviceAddress[j]);      //print ID
-			Serial.print(";");
+			if (Serial_Debug == 0){
+				printAddress(tempDeviceAddress[j]);      //print ID
+				Serial.print(";");
+			}
 			
 			int tempC = sensors[i]->getTempC(tempDeviceAddress[j]);
 			int tempF = sensors[i]->getTempF(tempDeviceAddress[j]);
 			
-			Serial.print(j);
-			Serial.print(" - ");
+			if (Serial_Debug == 0){
+				Serial.print(j);
+				Serial.print(" - ");}
 
 			lcd.setCursor(13,j);	//  Set the lcd cursor depending on what sensor your are reading
 			lcd.print("S");
@@ -438,8 +425,8 @@ void DS18B20_Read()
 			if (tempC >= 100 || tempF >= 100){lcd.setCursor(15,j);} 
 			else{lcd.setCursor(16,j);}
 			
-			//  print the temp to the LCD screen in Celsius or Fahrenheit depending on what the user set in Temp_Type	
-			if(Temp_Type == 0){
+			//  print the temp to the LCD screen in Celsius or Fahrenheit depending on what the user set in TempType	
+			if(TempType == 0){
 				lcd.print(tempC);
 				lcd.write(byte(1));
 				lcd.print("C");}
@@ -448,19 +435,19 @@ void DS18B20_Read()
 				lcd.print("F");}
 			
 			//  send the temps to the serial port
-			
-			Serial.print(tempC);
-			Serial.print("C ");
-			Serial.print(tempF);
-			Serial.println("F");
+
+			if (Serial_Debug == 0){
+				Serial.print(tempC);
+				Serial.print("C ");
+				Serial.print(tempF);
+				Serial.println("F");}
 		}
 	}
 	Serial.println();
 }
 
-//  SERIAL PRINT DS18B20 ADDRESS FUNCTION
-//  ***********************************************
 void printAddress(DeviceAddress deviceAddress)
+//  ***********************************************
 {
 	for (uint8_t i = 0; i < 8; i++)
 	{
@@ -470,9 +457,8 @@ void printAddress(DeviceAddress deviceAddress)
 	}
 }
 
-//  WRITE TO THE I2C EEPROM
-//  ***********************************************
 void writeEEPROM(int address, byte data)
+//  ***********************************************
 {
 	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
 	Wire.write((int)(address >> 8));			//  writes the first byte of the pointer address to the device
@@ -487,9 +473,8 @@ void writeEEPROM(int address, byte data)
 		Serial.println(data);}
 }
 
-//  READ FROM THE I2C EEPROM
-//  ***********************************************
 byte readEEPROM(int address)
+//  ***********************************************
 {
 	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
 	Wire.write((int)(address >> 8));			//  writes the first byte of the pointer address to the device
@@ -505,25 +490,23 @@ byte readEEPROM(int address)
 	return data;								//  returns data to the previous call
 }
 
-//  FACTORY DEFAULTS SETUP
-//  ***********************************************
 void factoryDefaultset()
+//  ***********************************************
 {
+	Serial.println("Setting Factory Defaults");
 	//  Set the Serial_Debug default to 0, Serial debugging ON
 	pointer = 5;
 	data = 0;
 	writeEEPROM(pointer,data);
 	
-	//  Set the Temp_Type default to 1, Fahrenheit
+	//  Set the TempType default to 1, Fahrenheit
 	pointer = 20;
 	data = 1;
 	writeEEPROM(pointer,data);
 }
 
-
-//  MENU BUTTON PRESS INTERRUPT SERVICE ROUTINE
-//  ***********************************************
 void MenuButtonPress()
+//  ***********************************************
 {
 	MenuMode = !MenuMode;
 }

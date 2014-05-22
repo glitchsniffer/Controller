@@ -3,14 +3,15 @@
 //  ***********************************************
 void MenuTitle()
 {
-	if (MLevel == 3)
-	{
-		MenuDo();
-		return;
-	}
-	lcd.clear();
-	lcd.setCursor(0,0);
-	if (MLevel <= 0){MLevel = 0;}
+	if (MLevel == 3)		//	menu printing is not necessary if its the final level so it just calls the do function
+		{MenuDo();
+		return;}
+		
+	lcd.clear();					//	clear the menu in preparation for setting the new title
+	lcd.setCursor(0,0);				//	set the lcd cursor back to 0,0
+	if (MLevel <= 0){MLevel = 0;}	//	keeps the menu level from going negative
+
+//	switches necessary to print the title on the menu page and to set the max number of lines for the given menu
 	switch (MLevel)
 	{
 		case 0:
@@ -140,10 +141,8 @@ void MenuTitle()
 			}
 			break;
 	}
-	MenuLines();
-}
-void MenuLines()
-{
+
+//	sets the menu navigation pointers up for the line printing for statement
 	switch (MLevel)
 	{	
 		case 0:
@@ -168,15 +167,19 @@ void MenuLines()
 			break;
 	}
 
-	int mmax = 1;
-	MPoint = MStart;
-	mmax = MPoint+3;
-	lcd.setCursor(0,2);
-	lcd.write(byte(2));
-	MCur = 1;
+	int mmax = 1;			//	sets mmax = 1 for use to only print 3 lines.
+	MPoint = MStart;		//	set the starting position of the pointer
+	mmax = MPoint+3;		//  sets the ending position of the pointer to only print 3 lines
+	lcd.setCursor(0,2);		//  moves the lcd cursor to line 3
+	lcd.write(byte(2));		//	prints the right arrow to indicate the current menu selection
+	MCur = 1;				//	sets the lcd cursor to start on line 1
+
+//	this for loop actually prints the lines.  it runs this loop 3 times to print each line
 	for (; MPoint < mmax; MPoint++)
 	{
-		lcd.setCursor(1,MCur);
+		lcd.setCursor(1,MCur);		//	move the lcd cursor to the lines location
+		
+//	determines what menu array to use when printing each line.
 		switch (MLevel)
 		{
 			case 0:
@@ -284,8 +287,10 @@ void MenuLines()
 			default:
 				break;
 		}
-		MCur++;
+		MCur++;		//	increase the cursor and return to the begining of the for loop
 	}
+	
+//	after the for loop prints the 3 lines it sets the new starting position for the pointer
 	switch (MLevel)
 	{
 		case 0:
@@ -297,10 +302,12 @@ void MenuLines()
 		case 2:
 			MPoint = M2Start;
 			break;
-			break;
 	}
-	if (MLevel == 3){MenuDo();}
 	delay(250);
+	
+//  If it just entered the menu system it will call the MenuLoop function.  Otherwise it will use the return to fall
+//  back to the MenuLoop.  This prevents an endless loop with no return and keeps the stack from piling up.  When the
+//	menu is called from the main loop it sets mRet to 0 to make sure it calls the MenuLoop the first time through.
 	if (mRet == 0){
 		mRet = 1;
 		MenuLoop();}
@@ -308,7 +315,7 @@ void MenuLines()
 }
 void MenuLoop()
 {
-	while (MenuMode == 1)
+	while (MenuMode == 1)		//  scans for a button press to do the appropriate action
 	{
 		int Down = digitalRead(DownButton);
 		int Up = digitalRead(UpButton);
@@ -320,23 +327,24 @@ void MenuLoop()
 		if (Right == 0){MenuSelect();}
 		if (Left == 0){MenuBack();}
 		
-		delay(250);
+		delay(250);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
 	}
-	Serial.println("Exiting Menu loop");
+	Serial.println("Exiting Menu loop");	//	prints this message when it exits the menu loop
+//	reset all pointers to 0 in preparation for the next time the menu is run
 	MLevel = 0;
 	M0Start = 0;
 	M1Start = 0;
 	M2Start = 0;
 	mRet = 0;
-	lcd.clear();
-	today = 0;
-	lcd.setCursor(0,3);
+	lcd.clear();			//  clear the screen
+	today = 0;				//  set today to 0 so that the date function gets called
+	lcd.setCursor(0,3);		//	starting position of the relays.
 	lcd.print("--------");	//  set the initial display for the relays
 }
 
 void MenuUp()
 {
-	switch (MLevel)
+	switch (MLevel)		//  switches to adjust the appropriate pointer
 	{
 		case 0:
 			M0Start--;
@@ -353,7 +361,7 @@ void MenuUp()
 
 void MenuDown()
 {
-	switch (MLevel)
+	switch (MLevel)		//  switches to adjust the appropriate pointer
 	{
 		case 0:
 			M0Start++;
@@ -370,22 +378,23 @@ void MenuDown()
 
 void MenuSelect()
 {
-	MLevel++;
-	switch (MLevel)
+	MLevel++;			//  increments the menu level
+	switch (MLevel)		//	switches for selecting the appropriate title and menu lines
 	{
 		case 0:
 			M0Start = 0;
 			break;
 		case 1:
-			M1Sel = MStart;
+			M1Sel = MStart;		//	sets the current position to the selected position
 			M1Start = 0;
 			break;
 		case 2:
-			M2Sel = MStart;
+			M2Sel = MStart;		//	sets the current position to the selected position
 			M2Start = 0;
 			break;
 		case 3:
-			M3Sel = MStart;
+			if (MLevel > 3){MLevel = 3;}	//  keeps the MLevel from overflowing
+			M3Sel = MStart;		//	sets the current position to the selected position
 			M3Start = 0;
 			break;
 	}
@@ -412,6 +421,17 @@ void MenuDo()
 			switch (M2Sel)
 			{
 				case 0:
+					switch (M2Start)
+					{
+						case 0:
+							writeEEPROM(20,0);
+							TempType = readEEPROM(20);
+							break;
+						case 1:
+							writeEEPROM(20,1);
+							TempType = readEEPROM(20);
+							break;
+					}
 					break;
 				case 1:
 					break;
@@ -422,21 +442,49 @@ void MenuDo()
 				case 4:
 					break;
 				case 5:
+					switch (M2Start)
+					{
+						case 0:
+							writeEEPROM(5,0);
+							Serial_Debug = readEEPROM(5);
+							break;
+						case 1:
+							writeEEPROM(5,1);
+							Serial_Debug = readEEPROM(5);
+							break;
+					}
 					break;				
 			}
 			break;
 		case 1:
+			switch (M2Sel)
+			{
+				case 0:
+					break;
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				case 4:
+					break;
+				case 5:
+					break;
+			}
 			break;
 		case 2:
 			break;
 		case 3:
 			break;
 	}
+	MLevel = MLevel-2;
+	MenuTitle();
 	return;
 }
 void MenuBinary()
 {
 	if (M2Start = 0)
-	{
+	{return;
 	}
 }
