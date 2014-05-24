@@ -3,138 +3,138 @@
 //  ***********************************************
 void MenuTitle()
 {
-	if (MLevel == 3)		//	menu printing is not necessary if its the final level so it just calls the do function
+	if (mLevel == 3)		//	menu printing is not necessary if its the final level so it just calls the do function
 		{MenuDo();
 		return;}
 		
 	lcd.clear();					//	clear the menu in preparation for setting the new title
 	lcd.setCursor(0,0);				//	set the lcd cursor back to 0,0
-	if (MLevel <= 0){MLevel = 0;}	//	keeps the menu level from going negative
+	if (mLevel <= 0){mLevel = 0;}	//	keeps the menu level from going negative
 
 //	switches necessary to print the title on the menu page and to set the max number of lines for the given menu
-	switch (MLevel)
+	switch (mLevel)
 	{
 		case 0:
 			lcd.print("     Main Menu");
-			MIMax = 3;
+			miMax = 3;
 			break;
 		case 1:
-			switch (M1Sel)
+			switch (m1Sel)
 			{
 				case 0:
 					lcd.print("   System Config");
-					MIMax = 5;
+					miMax = 5;
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
-					MIMax = 3;
+					miMax = 3;
 					break;
 				case 2:
 					lcd.print(" Sensor Addr Config");
-					MIMax = 3;
+					miMax = 3;
 					break;
 				case 3:
 					lcd.print("    Calibration");
-					MIMax = 4;
+					miMax = 4;
 					break;
 			}
 			break;
 		case 2:
-			switch (M1Sel)
+			switch (m1Sel)
 			{
 				case 0:
-					switch (M2Sel)
+					switch (m2Sel)
 					{
 						case 0:
 						lcd.print("     Temp Type");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 1:
 						lcd.print("   Temp Precision");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 2:
 						lcd.print("    Time Format");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 3:
 						lcd.print("  B Light Brightness");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 4:
 						lcd.print("   Set Date/Time");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 5:
 						lcd.print("  Serial Debugging");
-						MIMax = 1;
+						miMax = 1;
 						break;
 					}
 					break;
 				case 1:
-					switch (M2Sel)
+					switch (m2Sel)
 					{
 						case 0:
 						lcd.print("    Set Timer 1");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 1:
 						lcd.print("    Set Timer 2");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 2:
 						lcd.print("    Set Timer 3");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 3:
 						lcd.print("    Set Timer 4");
-						MIMax = 1;
+						miMax = 1;
 						break;
 					}
 					break;
 				case 2:
-					switch (M2Sel)
+					switch (m2Sel)
 					{
 						case 0:
 						lcd.print("  Temp Sens 1 Addr");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 1:
 						lcd.print("  Temp Sens 2 Addr");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 2:
 						lcd.print("  Temp Sens 3 Addr");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 3:
 						lcd.print("  Temp Sens 4 Addr");
-						MIMax = 1;
+						miMax = 1;
 						break;
 					}
 					break;
 				case 3:
-					switch (M2Sel)
+					switch (m2Sel)
 					{
 						case 0:
 						lcd.print(" Temp Sens 1 Calib");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 1:
 						lcd.print(" Temp Sens 2 Calib");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 2:
 						lcd.print(" Temp Sens 3 Calib");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 3:
 						lcd.print(" Temp Sens 4 Calib");
-						MIMax = 1;
+						miMax = 1;
 						break;
 						case 4:
 						lcd.print(" Flow Sensor Calib");
-						MIMax = 1;
+						miMax = 1;
 						break;
 					}
 					break;
@@ -143,142 +143,142 @@ void MenuTitle()
 	}
 
 //	sets the menu navigation pointers up for the line printing for statement
-	switch (MLevel)
+	switch (mLevel)
 	{	
 		case 0:
-			if (M0Start >= MIMax){M0Start = MIMax;}
-			if (M0Start < 0){M0Start = 0;}
-			MStart = M0Start;
+			if (m0Start >= miMax){m0Start = miMax;}
+			if (m0Start < 0){m0Start = 0;}
+			mStart = m0Start;
 			break;
 		case 1:
-			if (M1Start >= MIMax){M1Start = MIMax;}
-			if (M1Start < 0){M1Start = 0;}
-			MStart = M1Start;
+			if (m1Start >= miMax){m1Start = miMax;}
+			if (m1Start < 0){m1Start = 0;}
+			mStart = m1Start;
 			break;
 		case 2:
-			if (M2Start >= MIMax){M2Start = MIMax;}
-			if (M2Start < 0){M2Start = 0;}
-			MStart = M2Start;
+			if (m2Start >= miMax){m2Start = miMax;}
+			if (m2Start < 0){m2Start = 0;}
+			mStart = m2Start;
 			break;
 		case 3:
-			if (M3Start >= MIMax){M3Start = MIMax;}
-			if (M3Start < 0){M3Start = 0;}
-			MStart = M3Start;
+			if (m3Start >= miMax){m3Start = miMax;}
+			if (m3Start < 0){m3Start = 0;}
+			mStart = m3Start;
 			break;
 	}
 
 	int mmax = 1;			//	sets mmax = 1 for use to only print 3 lines.
-	MPoint = MStart;		//	set the starting position of the pointer
-	mmax = MPoint+3;		//  sets the ending position of the pointer to only print 3 lines
+	mPoint = mStart;		//	set the starting position of the pointer
+	mmax = mPoint+3;		//  sets the ending position of the pointer to only print 3 lines
 	lcd.setCursor(0,2);		//  moves the lcd cursor to line 3
 	lcd.write(byte(2));		//	prints the right arrow to indicate the current menu selection
-	MCur = 1;				//	sets the lcd cursor to start on line 1
+	mCur = 1;				//	sets the lcd cursor to start on line 1
 
 //	this for loop actually prints the lines.  it runs this loop 3 times to print each line
-	for (; MPoint < mmax; MPoint++)
+	for (; mPoint < mmax; mPoint++)
 	{
-		lcd.setCursor(1,MCur);		//	move the lcd cursor to the lines location
+		lcd.setCursor(1,mCur);		//	move the lcd cursor to the lines location
 		
 //	determines what menu array to use when printing each line.
-		switch (MLevel)
+		switch (mLevel)
 		{
 			case 0:
-				lcd.print(M0Items[MPoint]);
+				lcd.print(m0Items[mPoint]);
 				break;
 			case 1:
-				switch (M1Sel)
+				switch (m1Sel)
 				{
 					case 0:
-						lcd.print(M1Items0[MPoint]);
+						lcd.print(m1Items0[mPoint]);
 						break;
 					case 1:
-						lcd.print(M1Items1[MPoint]);
+						lcd.print(m1Items1[mPoint]);
 						break;
 					case 2:
-						lcd.print(M1Items2[MPoint]);
+						lcd.print(m1Items2[mPoint]);
 						break;
 					case 3:
-						lcd.print(M1Items3[MPoint]);
+						lcd.print(m1Items3[mPoint]);
 						break;
 				}
 				break;
 			case 2:
-				switch (M1Sel)
+				switch (m1Sel)
 				{
 					case 0:
-						switch (M2Sel)
+						switch (m2Sel)
 						{
 							case 0:
-								lcd.print(M2Items00[MPoint]);
+								lcd.print(m2Items00[mPoint]);
 								break;
 							case 1:
-								lcd.print(M2Items01[MPoint]);
+								lcd.print(m2Items01[mPoint]);
 								break;
 							case 2:
-								lcd.print(M2Items02[MPoint]);
+								lcd.print(m2Items02[mPoint]);
 								break;
 							case 3:
-								lcd.print(M2Items03[MPoint]);
+								lcd.print(m2Items03[mPoint]);
 								break;
 							case 4:
-								lcd.print(M2Items04[MPoint]);
+								lcd.print(m2Items04[mPoint]);
 								break;
 							case 5:
-								lcd.print(M2Items05[MPoint]);
+								lcd.print(m2Items05[mPoint]);
 								break;
 						}
 						break;
 					case 1:
-						switch (M2Sel)
+						switch (m2Sel)
 						{
 							case 0:
-								lcd.print(M2Items10[MPoint]);
+								lcd.print(m2Items10[mPoint]);
 								break;
 							case 1:
-								lcd.print(M2Items11[MPoint]);
+								lcd.print(m2Items11[mPoint]);
 								break;
 							case 2:
-								lcd.print(M2Items12[MPoint]);
+								lcd.print(m2Items12[mPoint]);
 								break;
 							case 3:
-								lcd.print(M2Items13[MPoint]);
+								lcd.print(m2Items13[mPoint]);
 								break;
 						}
 						break;
 					case 2:
-						switch (M2Sel)
+						switch (m2Sel)
 						{
 							case 0:
-								lcd.print(M2Items20[MPoint]);
+								lcd.print(m2Items20[mPoint]);
 								break;
 							case 1:
-								lcd.print(M2Items21[MPoint]);
+								lcd.print(m2Items21[mPoint]);
 								break;
 							case 2:
-								lcd.print(M2Items22[MPoint]);
+								lcd.print(m2Items22[mPoint]);
 								break;
 							case 3:
-								lcd.print(M2Items23[MPoint]);
+								lcd.print(m2Items23[mPoint]);
 								break;
 						}
 						break;
 					case 3:
-						switch (M2Sel)
+						switch (m2Sel)
 						{
 							case 0:
-								lcd.print(M2Items30[MPoint]);
+								lcd.print(m2Items30[mPoint]);
 								break;
 							case 1:
-								lcd.print(M2Items31[MPoint]);
+								lcd.print(m2Items31[mPoint]);
 								break;
 							case 2:
-								lcd.print(M2Items32[MPoint]);
+								lcd.print(m2Items32[mPoint]);
 								break;
 							case 3:
-								lcd.print(M2Items33[MPoint]);
+								lcd.print(m2Items33[mPoint]);
 								break;
 							case 4:
-								lcd.print(M2Items34[MPoint]);
+								lcd.print(m2Items34[mPoint]);
 								break;
 						}
 						break;
@@ -287,20 +287,20 @@ void MenuTitle()
 			default:
 				break;
 		}
-		MCur++;		//	increase the cursor and return to the begining of the for loop
+		mCur++;		//	increase the cursor and return to the begining of the for loop
 	}
 	
 //	after the for loop prints the 3 lines it sets the new starting position for the pointer
-	switch (MLevel)
+	switch (mLevel)
 	{
 		case 0:
-			MPoint = M0Start;
+			mPoint = m0Start;
 			break;
 		case 1:
-			MPoint = M1Start;
+			mPoint = m1Start;
 			break;
 		case 2:
-			MPoint = M2Start;
+			mPoint = m2Start;
 			break;
 	}
 	delay(250);
@@ -315,12 +315,12 @@ void MenuTitle()
 }
 void MenuLoop()
 {
-	while (MenuMode == 1)		//  scans for a button press to do the appropriate action
+	while (menuMode == 1)		//  scans for a button press to do the appropriate action
 	{
-		int Down = digitalRead(DownButton);
-		int Up = digitalRead(UpButton);
-		int Right = digitalRead(RightButton);
-		int Left = digitalRead(LeftButton);
+		int Down = digitalRead(downButton);
+		int Up = digitalRead(upButton);
+		int Right = digitalRead(rightButton);
+		int Left = digitalRead(leftButton);
 		
 		if (Up == 0){MenuUp();}
 		if (Down == 0){MenuDown();}
@@ -331,29 +331,30 @@ void MenuLoop()
 	}
 	Serial.println("Exiting Menu loop");	//	prints this message when it exits the menu loop
 //	reset all pointers to 0 in preparation for the next time the menu is run
-	MLevel = 0;
-	M0Start = 0;
-	M1Start = 0;
-	M2Start = 0;
+	mLevel = 0;
+	m0Start = 0;
+	m1Start = 0;
+	m2Start = 0;
 	mRet = 0;
 	lcd.clear();			//  clear the screen
 	today = 0;				//  set today to 0 so that the date function gets called
 	lcd.setCursor(0,3);		//	starting position of the relays.
 	lcd.print("--------");	//  set the initial display for the relays
+	DS18B20_Read();			//  read the temp sensors so that the display has them
 }
 
 void MenuUp()
 {
-	switch (MLevel)		//  switches to adjust the appropriate pointer
+	switch (mLevel)		//  switches to adjust the appropriate pointer
 	{
 		case 0:
-			M0Start--;
+			m0Start--;
 			break;
 		case 1:
-			M1Start--;
+			m1Start--;
 			break;
 		case 2:
-			M2Start--;
+			m2Start--;
 			break;
 	}
 	MenuTitle();
@@ -361,16 +362,16 @@ void MenuUp()
 
 void MenuDown()
 {
-	switch (MLevel)		//  switches to adjust the appropriate pointer
+	switch (mLevel)		//  switches to adjust the appropriate pointer
 	{
 		case 0:
-			M0Start++;
+			m0Start++;
 			break;
 		case 1:
-			M1Start++;
+			m1Start++;
 			break;
 		case 2:
-			M2Start++;
+			m2Start++;
 			break;
 	}
 	MenuTitle();
@@ -378,24 +379,24 @@ void MenuDown()
 
 void MenuSelect()
 {
-	MLevel++;			//  increments the menu level
-	switch (MLevel)		//	switches for selecting the appropriate title and menu lines
+	mLevel++;			//  increments the menu level
+	switch (mLevel)		//	switches for selecting the appropriate title and menu lines
 	{
 		case 0:
-			M0Start = 0;
+			m0Start = 0;
 			break;
 		case 1:
-			M1Sel = MStart;		//	sets the current position to the selected position
-			M1Start = 0;
+			m1Sel = mStart;		//	sets the current position to the selected position
+			m1Start = 0;
 			break;
 		case 2:
-			M2Sel = MStart;		//	sets the current position to the selected position
-			M2Start = 0;
+			m2Sel = mStart;		//	sets the current position to the selected position
+			m2Start = 0;
 			break;
 		case 3:
-			if (MLevel > 3){MLevel = 3;}	//  keeps the MLevel from overflowing
-			M3Sel = MStart;		//	sets the current position to the selected position
-			M3Start = 0;
+			if (mLevel > 3){mLevel = 3;}	//  keeps the MLevel from overflowing
+			m3Sel = mStart;		//	sets the current position to the selected position
+			m3Start = 0;
 			break;
 	}
 	MenuTitle();
@@ -403,33 +404,40 @@ void MenuSelect()
 
 void MenuBack()
 {
-	MLevel--;
+	mLevel--;
 	MenuTitle();
 }
 
 void MenuDo()
 {
 	Serial.print("Doing selection, ");
-	Serial.print(M1Sel);
+	Serial.print(m1Sel);
 	Serial.print(", ");
-	Serial.print(M2Sel);
+	Serial.print(m2Sel);
 	Serial.print(", ");
-	Serial.println(M3Sel);
+	Serial.println(m3Sel);
 	
-	switch (M1Sel)
+	lcd.clear();
+	lcd.setCursor(0,1);
+	
+	switch (m1Sel)
 	{	case 0:
-			switch (M2Sel)
+			switch (m2Sel)
 			{
 				case 0:
-					switch (M2Start)
+					lcd.print("  Temperature Type");
+					lcd.setCursor(0,2);
+					switch (m2Start)
 					{
 						case 0:
 							writeEEPROM(20,0);
-							TempType = readEEPROM(20);
+							tempType = readEEPROM(20);
+							lcd.print("   Set to Celsius");
 							break;
 						case 1:
 							writeEEPROM(20,1);
-							TempType = readEEPROM(20);
+							tempType = readEEPROM(20);
+							lcd.print("  Set to Fahrenheit");
 							break;
 					}
 					break;
@@ -442,22 +450,26 @@ void MenuDo()
 				case 4:
 					break;
 				case 5:
-					switch (M2Start)
+					lcd.print("  Serial Debugging");
+					lcd.setCursor(0,2);
+					switch (m2Start)
 					{
 						case 0:
 							writeEEPROM(5,0);
-							Serial_Debug = readEEPROM(5);
+							serialDebug = readEEPROM(5);
+							lcd.print("     Set to ON");
 							break;
 						case 1:
 							writeEEPROM(5,1);
-							Serial_Debug = readEEPROM(5);
+							serialDebug = readEEPROM(5);
+							lcd.print("     Set to OFF");
 							break;
 					}
 					break;				
 			}
 			break;
 		case 1:
-			switch (M2Sel)
+			switch (m2Sel)
 			{
 				case 0:
 					break;
@@ -478,13 +490,14 @@ void MenuDo()
 		case 3:
 			break;
 	}
-	MLevel = MLevel-2;
+	delay(1000);
+	mLevel = mLevel-2;
 	MenuTitle();
 	return;
 }
 void MenuBinary()
 {
-	if (M2Start = 0)
+	if (m2Start = 0)
 	{return;
 	}
 }
