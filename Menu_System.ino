@@ -23,7 +23,7 @@ void MenuTitle()
 			{
 				case 0:
 					lcd.print("   System Config");
-					miMax = 5;
+					miMax = 6;
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
@@ -46,29 +46,33 @@ void MenuTitle()
 					switch (m2Sel)
 					{
 						case 0:
-						lcd.print("     Temp Type");
-						miMax = 1;
-						break;
+							lcd.print("     Temp Type");
+							miMax = 1;
+							break;
 						case 1:
-						lcd.print("   Temp Precision");
-						miMax = 1;
-						break;
+							lcd.print("   Temp Precision");
+							miMax = 1;
+							break;
 						case 2:
-						lcd.print("    Time Format");
-						miMax = 1;
-						break;
+							lcd.print("    Time Format");
+							miMax = 1;
+							break;
 						case 3:
-						lcd.print("  B Light Brightness");
-						miMax = 1;
-						break;
+							lcd.print("  B Light Brightness");
+							miMax = 1;
+							break;
 						case 4:
-						lcd.print("   Set Date/Time");
-						miMax = 1;
-						break;
+							lcd.print("   Set Date/Time");
+							miMax = 1;
+							break;
 						case 5:
-						lcd.print("  Serial Debugging");
-						miMax = 1;
-						break;
+							lcd.print("  Serial Debugging");
+							miMax = 1;
+							break;
+						case 6:
+							lcd.print("  Temp Read Delay");
+							miMax = 1;
+							break;
 					}
 					break;
 				case 1:
@@ -225,6 +229,9 @@ void MenuTitle()
 								break;
 							case 5:
 								lcd.print(m2Items05[mPoint]);
+								break;
+							case 6:
+								lcd.print(m2Items06[mPoint]);
 								break;
 						}
 						break;
@@ -442,11 +449,50 @@ void MenuDo()
 					}
 					break;
 				case 1:
+					lcd.print("   Temp Precision");
+					lcd.setCursor(0,2);
+					switch (m2Start)
+					{
+						case 0:
+							writeEEPROM(21,0);
+							tempPrecision = readEEPROM(21);
+							lcd.print(" Set to No Decimal");
+							break;
+						case 1:
+							writeEEPROM(21,1);
+							tempPrecision = readEEPROM(21);
+							lcd.print("  Set to 1 Decimal");
+							break;
+					}
 					break;
 				case 2:
+					lcd.print("   Time Format");
+					lcd.setCursor(0,2);
+					switch (m2Start)
+					{
+						case 0:
+							writeEEPROM(23,0);
+							timeFormat = readEEPROM(23);
+							lcd.print("   Set to 24 Hour");
+							break;
+						case 1:
+							writeEEPROM(23,1);
+							timeFormat = readEEPROM(23);
+							lcd.print("   Set to 12 Hour");
+							break;
+					}
 					break;
 				case 3:
-					break;
+					lcd.print("Backlight Brightness");
+					lcd.setCursor(0,2);
+					switch (mStart)
+					{
+						case 0:
+							break;
+						case 1:
+							break;
+					}
+					break;
 				case 4:
 					break;
 				case 5:
@@ -465,8 +511,29 @@ void MenuDo()
 							lcd.print("     Set to OFF");
 							break;
 					}
-					break;				
-			}
+					break;
+				case 6:
+					lcd.print("  Temp Read Delay");
+					lcd.setCursor(0,2);
+					switch (m2Start)
+					{
+						case 0:
+							writeEEPROM(22,1);
+							tempReadDelay = readEEPROM(22);
+							lcd.print(" Read Delay Set to");
+							lcd.setCursor(9,3);
+							lcd.print(tempReadDelay);
+							break;
+						case 1:
+							writeEEPROM(22,10);
+							tempReadDelay = readEEPROM(22);
+							lcd.print("Read Delay Set to");
+							lcd.setCursor(9,3);
+							lcd.print(tempReadDelay);
+							break;
+					}
+				break;		
+			}
 			break;
 		case 1:
 			switch (m2Sel)
@@ -490,7 +557,7 @@ void MenuDo()
 		case 3:
 			break;
 	}
-	delay(1000);
+	delay(2000);
 	mLevel = mLevel-2;
 	MenuTitle();
 	return;
@@ -498,6 +565,5 @@ void MenuDo()
 void MenuBinary()
 {
 	if (m2Start = 0)
-	{return;
-	}
+	{return;}
 }

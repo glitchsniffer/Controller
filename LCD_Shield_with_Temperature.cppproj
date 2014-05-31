@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectVersion>6.1</ProjectVersion>
+    <ProjectVersion>6.2</ProjectVersion>
     <ToolchainName>com.Atmel.AVRGCC8.CPP</ToolchainName>
     <ProjectGuid>{a71e047b-0ee5-483f-8899-8e2e015a599a}</ProjectGuid>
     <avrdevice>atmega2560</avrdevice>
@@ -33,7 +33,7 @@
         <documentation help="" />
         <offline-documentation help="" />
         <dependencies>
-          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.3.0" />
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.6.0" />
         </dependencies>
       </framework-data>
     </AsfFrameworkConfig>
@@ -51,6 +51,28 @@
       </ToolNumber>
       <ToolName xmlns="">Simulator</ToolName>
     </com_atmel_avrdbg_tool_simulator>
+    <PercepioTrace>
+      <TargetOS xmlns="">FreeRTOS</TargetOS>
+      <Frequency xmlns="">64000000</Frequency>
+      <EnableTraceInterrupts xmlns="">False</EnableTraceInterrupts>
+      <EnableNonintrusive xmlns="">True</EnableNonintrusive>
+      <EnableTargetOS xmlns="">True</EnableTargetOS>
+      <EnableApplicationOutput xmlns="">True</EnableApplicationOutput>
+      <EnableDataWatchPoints xmlns="">True</EnableDataWatchPoints>
+      <EnablePC xmlns="">False</EnablePC>
+      <EnablePCPolled xmlns="">False</EnablePCPolled>
+      <PolledFrequency xmlns="">1000</PolledFrequency>
+      <EnableMcu xmlns="">False</EnableMcu>
+      <EnableOsAwareness xmlns="">False</EnableOsAwareness>
+      <HWApplicationOutput xmlns="">True</HWApplicationOutput>
+      <HWInterrupt xmlns="">True</HWInterrupt>
+      <HWIntrusiveDataWatch xmlns="">True</HWIntrusiveDataWatch>
+      <HWNonintrusiveDataWatch xmlns="">True</HWNonintrusiveDataWatch>
+      <HWPolledDataWatch xmlns="">True</HWPolledDataWatch>
+      <HWPolledProgramCounterSampling xmlns="">True</HWPolledProgramCounterSampling>
+      <HWProfiling xmlns="">True</HWProfiling>
+      <HWProgramCounterSampling xmlns="">True</HWProgramCounterSampling>
+    </PercepioTrace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -65,6 +87,7 @@
         <avrgcc.compiler.symbols.DefSymbols>
           <ListValues>
             <Value>__AVR_ATmega2560__</Value>
+            <Value>_VMDEBUG=1</Value>
             <Value>ARDUINO=101</Value>
             <Value>ARDUINO_MAIN</Value>
             <Value>F_CPU=16000000L</Value>
@@ -111,6 +134,7 @@
         <avrgcccpp.compiler.symbols.DefSymbols>
           <ListValues>
             <Value>__AVR_ATmega2560__</Value>
+            <Value>_VMDEBUG=1</Value>
             <Value>ARDUINO=101</Value>
             <Value>ARDUINO_MAIN</Value>
             <Value>F_CPU=16000000L</Value>
@@ -233,7 +257,7 @@ vmresolved.tools.path=C:\Program Files (x86)\Arduino\hardware\tools\avr
         <visualmicro.application.name>arduino10x</visualmicro.application.name>
         <visualmicro.package.name>arduino</visualmicro.package.name>
         <visualmicro.platform.name>avr</visualmicro.platform.name>
-        <arduino.upload.port>COM5</arduino.upload.port>
+        <arduino.upload.port>COM6</arduino.upload.port>
         <VM_ReCompileLibsOnSourceMacroChange>
         </VM_ReCompileLibsOnSourceMacroChange>
         <VM.DebugTextMessages.MessageWindow>1</VM.DebugTextMessages.MessageWindow>
@@ -253,6 +277,7 @@ vmresolved.tools.path=C:\Program Files (x86)\Arduino\hardware\tools\avr
         <avrgcc.compiler.symbols.DefSymbols>
           <ListValues>
             <Value>__AVR_ATmega2560__</Value>
+            <Value>_VMDEBUG=1</Value>
             <Value>ARDUINO=101</Value>
             <Value>ARDUINO_MAIN</Value>
             <Value>F_CPU=16000000L</Value>
@@ -299,6 +324,7 @@ vmresolved.tools.path=C:\Program Files (x86)\Arduino\hardware\tools\avr
         <avrgcccpp.compiler.symbols.DefSymbols>
           <ListValues>
             <Value>__AVR_ATmega2560__</Value>
+            <Value>_VMDEBUG=1</Value>
             <Value>ARDUINO=101</Value>
             <Value>ARDUINO_MAIN</Value>
             <Value>F_CPU=16000000L</Value>
@@ -421,7 +447,7 @@ vmresolved.tools.path=C:\Program Files (x86)\Arduino\hardware\tools\avr
         <visualmicro.application.name>arduino10x</visualmicro.application.name>
         <visualmicro.package.name>arduino</visualmicro.package.name>
         <visualmicro.platform.name>avr</visualmicro.platform.name>
-        <arduino.upload.port>COM5</arduino.upload.port>
+        <arduino.upload.port>COM6</arduino.upload.port>
         <VM_ReCompileLibsOnSourceMacroChange>
         </VM_ReCompileLibsOnSourceMacroChange>
         <VM.DebugTextMessages.MessageWindow>1</VM.DebugTextMessages.MessageWindow>

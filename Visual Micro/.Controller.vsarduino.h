@@ -9,6 +9,7 @@
 */
 
 #define __AVR_ATmega2560__
+#define _VMDEBUG 1
 #define ARDUINO 101
 #define ARDUINO_MAIN
 #define F_CPU 16000000L
@@ -16,7 +17,7 @@
 #define __cplusplus
 extern "C" void __cxa_pure_virtual() {;}
 
-void setup(void);
+//
 //
 void AlarmAON();
 void AlarmAOFF();
