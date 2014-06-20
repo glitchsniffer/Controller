@@ -23,7 +23,7 @@ void MenuTitle()
 			{
 				case 0:
 					lcd.print("   System Config");
-					miMax = 6;
+					miMax = 7;
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
@@ -59,7 +59,7 @@ void MenuTitle()
 							break;
 						case 3:
 							lcd.print("  B Light Brightness");
-							miMax = 1;
+							miMax = 0;
 							break;
 						case 4:
 							lcd.print("   Set Date/Time");
@@ -71,7 +71,7 @@ void MenuTitle()
 							break;
 						case 6:
 							lcd.print("  Temp Read Delay");
-							miMax = 1;
+							miMax = 0;
 							break;
 					}
 					break;
@@ -471,13 +471,13 @@ void MenuDo()
 					switch (m2Start)
 					{
 						case 0:
-							writeEEPROM(23,0);
-							timeFormat = readEEPROM(23);
+							writeEEPROM(22,0);
+							timeFormat = readEEPROM(22);
 							lcd.print("   Set to 24 Hour");
 							break;
 						case 1:
-							writeEEPROM(23,1);
-							timeFormat = readEEPROM(23);
+							writeEEPROM(22,1);
+							timeFormat = readEEPROM(22);
 							lcd.print("   Set to 12 Hour");
 							break;
 					}
@@ -485,15 +485,26 @@ void MenuDo()
 				case 3:
 					lcd.print("Backlight Brightness");
 					lcd.setCursor(0,2);
-					switch (mStart)
+					switch (m2Start)
 					{
 						case 0:
-							break;
-						case 1:
+//							int blBright = 0;
+							backlightLevel = readEEPROM(23);
+							MenuNumSel(23,backlightLevel,1,255,5,100);
+							backlightLevel = readEEPROM(23);
 							break;
 					}
-					break;
+					break;
+
 				case 4:
+					lcd.print(" Set Date and Time");
+					lcd.setCursor(0,2);
+					switch (m2Start)
+					{
+						case 0:
+							MenuTimeSet();
+							break;							
+					}
 					break;
 				case 5:
 					lcd.print("  Serial Debugging");
@@ -518,22 +529,20 @@ void MenuDo()
 					switch (m2Start)
 					{
 						case 0:
-							writeEEPROM(22,1);
-							tempReadDelay = readEEPROM(22);
-							lcd.print(" Read Delay Set to");
-							lcd.setCursor(9,3);
-							lcd.print(tempReadDelay);
-							break;
-						case 1:
-							writeEEPROM(22,10);
-							tempReadDelay = readEEPROM(22);
-							lcd.print("Read Delay Set to");
-							lcd.setCursor(9,3);
-							lcd.print(tempReadDelay);
-							break;
+						tempReadDelay = readEEPROM(26);
+						MenuNumSel(26,tempReadDelay,1,60,1,200);
+						tempReadDelay = readEEPROM(26);
+						lcd.clear();
+						lcd.setCursor(1,1);
+						lcd.print("Restart required to");
+						lcd.setCursor(1,2);
+						lcd.print("change this setting");
+						break;
 					}
-				break;		
-			}
+					break;	
+
+			}
+
 			break;
 		case 1:
 			switch (m2Sel)
@@ -562,8 +571,92 @@ void MenuDo()
 	MenuTitle();
 	return;
 }
-void MenuBinary()
+void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 {
-	if (m2Start = 0)
-	{return;}
+	int loopNumSel = 1;
+	
+	delay(250);
+	lcd.setCursor(9,2);
+	lcd.print(start);
+	
+	while (loopNumSel == 1)
+	{
+		int Down = digitalRead(downButton);
+		int Up = digitalRead(upButton);
+		int Right = digitalRead(rightButton);
+		int Left = digitalRead(leftButton);
+		
+		if (Up == 0)
+		{
+			if (start < max)
+				{	start = start+step;}
+				else{start == max;}
+		lcd.setCursor(9,2);
+		lcd.print(start);
+		lcd.print("   ");
+		}
+		if (Down == 0)
+		{
+			if (start > min)
+			{	start = start-step;}
+			else{start == min;}
+		lcd.setCursor(9,2);
+		lcd.print(start);
+		lcd.print("   ");
+		}
+		if (Right == 0)
+		{
+			writeEEPROM(addr, start);
+ 			lcd.setCursor(0,3);
+ 			lcd.print("       Saving       ");
+// 			lcd.print(numSel);			
+			delay(150);
+			loopNumSel = 0;
+		}
+		if (Left == 0)
+		{
+			lcd.setCursor(0,3);
+			lcd.print(" Exit Without Save");
+			delay(150);
+			loopNumSel = 0;
+		}
+		delay(dmicro);
+	}
+	return;
+}
+
+void MenuTimeSet()
+{
+	int loopTime = 1;
+	
+	delay(250);
+	lcd.setCursor(0,1);
+	lcd.print("");
+	
+	while (loopTime == 1)
+	{
+		int Down = digitalRead(downButton);
+		int Up = digitalRead(upButton);
+		int Right = digitalRead(rightButton);
+		int Left = digitalRead(leftButton);
+		
+		if (Up == 0)
+		{
+
+		}
+		if (Down == 0)
+		{
+
+		}
+		if (Right == 0)
+		{
+
+		}
+		if (Left == 0)
+		{
+
+		}
+		delay(150);
+	}
+	return;
 }

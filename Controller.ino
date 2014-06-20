@@ -89,14 +89,14 @@ int miMax = 0;			//  current selected menu item for purposes of up and down move
 int mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
 
 char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Calibration",""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 3
-	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", ""};  //  setup menu item 1 for System Config Min 0 Max 6
+	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", ""};  //  setup menu item 1 for System Config Min 0 Max 6
 		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
 		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
 		char* m2Items02[]={"", "24 Hour", "12 Hour", ""};
-		char* m2Items03[]={"", "B Light Brightness", ""};
+		char* m2Items03[]={"", "Set BL Brightness", ""};
 		char* m2Items04[]={"", "Need Date/Time Here", ""};
 		char* m2Items05[]={"", "On", "Off", ""};
-		char* m2Items06[]={"", "1 Second", "10 Seconds", ""};
+		char* m2Items06[]={"", "Set Temp Read Delay", ""};
 	char* m1Items1[]={"", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", ""};  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Set Timer 1", "Exit", ""};
 		char* m2Items11[]={"", "Set Timer 2", "Exit", ""};
@@ -161,10 +161,10 @@ void setup()
 	configID = readEEPROM(0);			//  reads the configID out
 	serialDebug = readEEPROM(6);		//	reads out user setting to turns serial debuggin 0 = ON or 1 = OFF
 	tempType = readEEPROM(20);			//  reads out user setting to selects between 0 = Celsius or 1 = Fahrenheit
-	tempPrecision = readEEPROM(21);	//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
-	tempReadDelay = readEEPROM(22);	//	reads out user setting for the amount of time in seconds between reading the temp sensors
-	timeFormat = readEEPROM(23);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
-	backlightLevel = readEEPROM(24);	//	reads out the user setting to control the backlight level
+	tempPrecision = readEEPROM(21);		//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
+	tempReadDelay = readEEPROM(26);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
+	timeFormat = readEEPROM(22);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
+	backlightLevel = readEEPROM(23);	//	reads out the user setting to control the backlight level
 	
 	//  SETUP THE SERIAL PORT
 	if (serialDebug == 0){Serial.begin(115200);}  //  start the serial port if debugging is on
@@ -332,7 +332,7 @@ void LCD_Time_Display()
 	{
 		case 0:
 			if(hour() >= 10){lcd.setCursor(1,0);}
-				else{lcd.setCursor(1, 0);
+				else{lcd.setCursor(1,0);
 				lcd.print('0');}
 			lcd.print(hour());
 			break;
@@ -377,7 +377,6 @@ void Display_Date()
 void DS18B20_Read()
 {
 	int c;
-	
 	//  Read the DS sensors found in void setup
 	for(int i=0;i<NUMBER_OF_BUS; i++)   // poll every bus
 	{
@@ -482,7 +481,8 @@ byte readEEPROM(int address)
 		Serial.print("Reading from address ");
 		Serial.print(address);
 		Serial.print(" - ");
-		Serial.println(data);}
+		Serial.println(data);
+		}
 	return data;								//  returns data to the previous call
 }
 
