@@ -35,8 +35,8 @@ int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
 //  ***********************************************
-//#define LCD_DEV_ADDR 0x3F		//  Set the address of the LCD screen	(Test system)
-#define LCD_DEV_ADDR 0x27		//  Set the address of the LCD screen	(Debugging system)
+#define LCD_DEV_ADDR 0x3F		//  Set the address of the LCD screen	(Both systems)
+//#define LCD_DEV_ADDR 0x27		//  Set the address of the LCD screen	(Old LCD)
 
 // Define the LCD Pins for the I2C
 #define B_Light 3
@@ -62,10 +62,10 @@ byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set th
 
 //  DEFINE BUTTON PINS
 //  ***********************************************
-#define upButton 53			//  set the up button to pin 53
-#define downButton 50		//  set the down button to pin 50
-#define rightButton 52		//  set the right button to pin 52
-#define leftButton 51		//  set the left button to pin 51
+#define upButton 53			//  set the up button to pin 53  Orange
+#define downButton 50		//  set the down button to pin 50  Blue
+#define leftButton 52		//  set the right button to pin 52  Yellow
+#define rightButton 51		//  set the left button to pin 51  Green
 
 volatile int menuMode = 0;	//  allow the variable state to change the led on and off
 
@@ -177,7 +177,7 @@ void setup()
 	
 	for(int b = 0; b < 8; b++){pinMode(button[b], INPUT);}	//  sets Button0-7 pins as inputs
 		
-	attachInterrupt(4, MenuButtonPress, FALLING);		//  Attaches int.4, pin 19(RX1) and sets it to trigger on a low input from the menu button
+	attachInterrupt(4, MenuButtonPress, RISING);		//  Attaches int.4, pin 19(RX1) and sets it to trigger on a low input from the menu button
 		
 	//  SETUP THE RELAYS OUTPUTS
 	for(int relay = 0; relay < relayCount; relay++){pinMode(relayPins[relay], OUTPUT);}

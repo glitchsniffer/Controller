@@ -329,12 +329,12 @@ void MenuLoop()
 		int Right = digitalRead(rightButton);
 		int Left = digitalRead(leftButton);
 		
-		if (Up == 0){MenuUp();}
-		if (Down == 0){MenuDown();}
-		if (Right == 0){MenuSelect();}
-		if (Left == 0){MenuBack();}
+		if (Up == 1){MenuUp();}
+		if (Down == 1){MenuDown();}
+		if (Right == 1){MenuSelect();}
+		if (Left == 1){MenuBack();}
 		
-		delay(250);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
+	delay(100);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
 	}
 	Serial.println("Exiting Menu loop");	//	prints this message when it exits the menu loop
 //	reset all pointers to 0 in preparation for the next time the menu is run
@@ -409,13 +409,13 @@ void MenuSelect()
 	MenuTitle();
 }
 
-void MenuBack()
+void MenuBack()	//  function for going back 1 level in the menu system
 {
-	mLevel--;
+	mLevel--;	//  decrements the menu level back 1 level
 	MenuTitle();
 }
 
-void MenuDo()
+void MenuDo()	//  function for doing the currently selected menu item at the final level
 {
 	Serial.print("Doing selection, ");
 	Serial.print(m1Sel);
@@ -428,7 +428,7 @@ void MenuDo()
 	lcd.setCursor(0,1);
 	
 	switch (m1Sel)
-	{	case 0:
+	{	case 0:		//  system configuration menu items
 			switch (m2Sel)
 			{
 				case 0:
@@ -544,7 +544,7 @@ void MenuDo()
 			}
 
 			break;
-		case 1:
+		case 1:		//  timers setup menu items
 			switch (m2Sel)
 			{
 				case 0:
@@ -561,9 +561,9 @@ void MenuDo()
 					break;
 			}
 			break;
-		case 2:
+		case 2:		//  sensor addressing menu items
 			break;
-		case 3:
+		case 3:		//  calibration menu items
 			break;
 	}
 	delay(2000);
@@ -586,7 +586,7 @@ void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 		int Right = digitalRead(rightButton);
 		int Left = digitalRead(leftButton);
 		
-		if (Up == 0)
+		if (Up == 1)
 		{
 			if (start < max)
 				{	start = start+step;}
@@ -595,7 +595,7 @@ void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 		lcd.print(start);
 		lcd.print("   ");
 		}
-		if (Down == 0)
+		if (Down == 1)
 		{
 			if (start > min)
 			{	start = start-step;}
@@ -604,7 +604,7 @@ void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 		lcd.print(start);
 		lcd.print("   ");
 		}
-		if (Right == 0)
+		if (Right == 1)
 		{
 			writeEEPROM(addr, start);
  			lcd.setCursor(0,3);
@@ -613,7 +613,7 @@ void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 			delay(150);
 			loopNumSel = 0;
 		}
-		if (Left == 0)
+		if (Left == 1)
 		{
 			lcd.setCursor(0,3);
 			lcd.print(" Exit Without Save");
@@ -625,7 +625,7 @@ void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 	return;
 }
 
-void MenuTimeSet()
+void MenuTimeSet(int addr, int start, int min, int max, int step, int dmicro)
 {
 	int loopTime = 1;
 	
@@ -640,19 +640,25 @@ void MenuTimeSet()
 		int Right = digitalRead(rightButton);
 		int Left = digitalRead(leftButton);
 		
-		if (Up == 0)
+		if (Up == 1)
+		{if (start < max)
+			{
+				start = start + step;
+			}
+			else{ start == max; }
+			lcd.setCursor(9, 2);
+			lcd.print(start);
+			lcd.print("   ");
+		}
+		if (Down == 1)
 		{
 
 		}
-		if (Down == 0)
+		if (Right == 1)
 		{
 
 		}
-		if (Right == 0)
-		{
-
-		}
-		if (Left == 0)
+		if (Left == 1)
 		{
 
 		}

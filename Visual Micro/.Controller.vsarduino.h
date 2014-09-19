@@ -60,7 +60,7 @@ void MenuSelect();
 void MenuBack();
 void MenuDo();
 void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro);
-void MenuTimeSet();
+void MenuTimeSet(int addr, int start, int min, int max, int step, int dmicro);
 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\mega\pins_arduino.h" 
