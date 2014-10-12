@@ -23,7 +23,7 @@ void MenuTitle()
 			{
 				case 0:
 					lcd.print("   System Config");
-					miMax = 7;
+					miMax = 8;
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
@@ -72,6 +72,10 @@ void MenuTitle()
 						case 6:
 							lcd.print("  Temp Read Delay");
 							miMax = 0;
+							break;
+						case 7:
+							lcd.print("    Erase EEPROM");
+							miMax = 1;
 							break;
 					}
 					break;
@@ -232,6 +236,9 @@ void MenuTitle()
 								break;
 							case 6:
 								lcd.print(m2Items06[mPoint]);
+								break;
+							case 7:
+								lcd.print(m2Items07[mPoint]);
 								break;
 						}
 						break;
@@ -471,13 +478,13 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 						case 0:
-							writeEEPROM(22,0);
-							timeFormat = readEEPROM(22);
+							writeEEPROM(23,0);
+							timeFormat = readEEPROM(23);
 							lcd.print("   Set to 24 Hour");
 							break;
 						case 1:
-							writeEEPROM(22,1);
-							timeFormat = readEEPROM(22);
+							writeEEPROM(23,1);
+							timeFormat = readEEPROM(23);
 							lcd.print("   Set to 12 Hour");
 							break;
 					}
@@ -495,7 +502,6 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							break;
 					}
 					break;
-
 				case 4:
 					lcd.print(" Set Date and Time");
 					lcd.setCursor(0,2);
@@ -529,9 +535,9 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 						case 0:
-						tempReadDelay = readEEPROM(26);
+						tempReadDelay = readEEPROM(22);
 						MenuNumSel(26,tempReadDelay,1,60,1,200);
-						tempReadDelay = readEEPROM(26);
+						tempReadDelay = readEEPROM(22);
 						lcd.clear();
 						lcd.setCursor(1,1);
 						lcd.print("Restart required to");
@@ -539,10 +545,23 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						lcd.print("change this setting");
 						break;
 					}
-					break;	
-
+					break;
+				case 7:
+					lcd.print("    Erase EEPROM");
+					lcd.setCursor(0, 2);
+					switch (m2Start)
+					{
+					case 0:
+						lcd.print("      Exiting");
+						break;
+					case 1:
+						lcd.print("   Erasing EEPROM");
+						eraseEEPROM();
+						lcd.print("   Erase Complete");
+						break;
+					}
+					break;
 			}
-
 			break;
 		case 1:		//  timers setup menu items
 			switch (m2Sel)
@@ -608,8 +627,7 @@ void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 		{
 			writeEEPROM(addr, start);
  			lcd.setCursor(0,3);
- 			lcd.print("       Saving       ");
-// 			lcd.print(numSel);			
+ 			lcd.print("       Saving       ");		
 			delay(150);
 			loopNumSel = 0;
 		}
@@ -625,9 +643,9 @@ void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 	return;
 }
 
-void MenuTimeSet(int addr, int start, int min, int max, int step, int dmicro)
+void MenuTimeSet ()
 {
-	int loopTime = 1;
+	/*int loopTime = 1;
 	
 	delay(250);
 	lcd.setCursor(0,1);
@@ -665,4 +683,5 @@ void MenuTimeSet(int addr, int start, int min, int max, int step, int dmicro)
 		delay(150);
 	}
 	return;
+	*/
 }

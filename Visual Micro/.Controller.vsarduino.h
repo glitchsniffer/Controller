@@ -48,10 +48,11 @@ void LCD_Time_Display();
 void Display_Date();
 void DS18B20_Read();
 void printAddress(DeviceAddress deviceAddress);
+void MenuButtonPress();
 void writeEEPROM(int address, byte data);
 byte readEEPROM(int address);
 void factoryDefaultset();
-void MenuButtonPress();
+void eraseEEPROM();
 void MenuTitle();
 void MenuLoop();
 void MenuUp();
@@ -60,7 +61,7 @@ void MenuSelect();
 void MenuBack();
 void MenuDo();
 void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro);
-void MenuTimeSet(int addr, int start, int min, int max, int step, int dmicro);
+void MenuTimeSet ();
 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\mega\pins_arduino.h" 

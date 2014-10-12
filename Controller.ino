@@ -30,13 +30,12 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 8;					//  Sets the build number for the current program
+int build = 9;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
 //  ***********************************************
 #define LCD_DEV_ADDR 0x3F		//  Set the address of the LCD screen	(Both systems)
-//#define LCD_DEV_ADDR 0x27		//  Set the address of the LCD screen	(Old LCD)
 
 // Define the LCD Pins for the I2C
 #define B_Light 3
@@ -89,14 +88,15 @@ int miMax = 0;			//  current selected menu item for purposes of up and down move
 int mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
 
 char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Calibration",""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 3
-	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", ""};  //  setup menu item 1 for System Config Min 0 Max 6
+	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", "Erase EEPROM", ""};  //  setup menu item 1 for System Config Min 0 Max 6
 		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
 		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
 		char* m2Items02[]={"", "24 Hour", "12 Hour", ""};
 		char* m2Items03[]={"", "Set BL Brightness", ""};
 		char* m2Items04[]={"", "Need Date/Time Here", ""};
 		char* m2Items05[]={"", "On", "Off", ""};
-		char* m2Items06[]={"", "Set Temp Read Delay", ""};
+		char* m2Items06[]={"", "Set Temp Read Delay", "" };
+		char* m2Items07[]={"", "Erase EEPROM", "" };
 	char* m1Items1[]={"", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", ""};  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Set Timer 1", "Exit", ""};
 		char* m2Items11[]={"", "Set Timer 2", "Exit", ""};
@@ -136,7 +136,7 @@ int RTC_Status=1;
 
 //  INITIALIZE THE ALARMS
 //  ***********************************************
-	
+
 int alarmAstate = 1;
 int alarmHourA_ON = 6;
 int alarmMinA_ON = 30;
@@ -144,6 +144,10 @@ int alarmSecA_ON = 0;
 int alarmHourA_OFF = 19;
 int alarmMinA_OFF = 0;
 int alarmSecA_OFF = 0;
+AlarmID_t AonAlarm;
+AlarmID_t AoffAlarm;
+time_t alarmA_ON = AlarmHMS(alarmHourA_ON, alarmMinA_ON, alarmSecA_ON);		//  Alarm A On time
+time_t alarmA_OFF = AlarmHMS(alarmHourA_OFF, alarmMinA_OFF, alarmSecA_OFF);		//  Alarm A On time
 
 
 //  INITIALIZE THE RELAYS
@@ -155,19 +159,20 @@ int relayCount = 8;		//  Set the number of relays
 
 void setup()
 {
+	//  SETUP THE SERIAL PORT
+	serialDebug = readEEPROM(5);		//	reads out user setting to turns serial debuggin 0 = ON or 1 = OFF
+	if (serialDebug == 0){ Serial.begin(115200); }  //  start the serial port if debugging is on
+
 	//  READ THE VARIABLES OUT OF THE EEPROM
 	e2Empty = readEEPROM(0);			//	reads the e2Empty out to determine if it needs to set defaults
-//	if (e2Empty == 0){factoryDefaultset();}
+	Serial.println(e2Empty);
+	if (e2Empty == 0){factoryDefaultset();}
 	configID = readEEPROM(0);			//  reads the configID out
-	serialDebug = readEEPROM(6);		//	reads out user setting to turns serial debuggin 0 = ON or 1 = OFF
 	tempType = readEEPROM(20);			//  reads out user setting to selects between 0 = Celsius or 1 = Fahrenheit
 	tempPrecision = readEEPROM(21);		//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
-	tempReadDelay = readEEPROM(26);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
-	timeFormat = readEEPROM(22);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
-	backlightLevel = readEEPROM(23);	//	reads out the user setting to control the backlight level
-	
-	//  SETUP THE SERIAL PORT
-	if (serialDebug == 0){Serial.begin(115200);}  //  start the serial port if debugging is on
+	tempReadDelay = readEEPROM(22);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
+	timeFormat = readEEPROM(23);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
+	backlightLevel = readEEPROM(24);	//	reads out the user setting to control the backlight level
 	
 	//  SETUP THE BUTTONS
 	pinMode(upButton, INPUT);		//  sets the UpButton to an input
@@ -208,7 +213,6 @@ void setup()
 	lcd.write(byte(6));
 	lcd.write(byte(7));
 	
-	
 	//  SETUP THE RTC
 	setSyncProvider(RTC.get);		//  this function get the time from the RTC
 	if (timeStatus()!=timeSet)		//  checks to see if it can read the RTC
@@ -218,9 +222,16 @@ void setup()
 	
 	//  SETUP ALARMS
 	Alarm.timerRepeat(tempReadDelay,DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay
-	Alarm.alarmRepeat(alarmHourA_ON,alarmMinA_ON,alarmSecA_ON, AlarmAON);		//	sets the alarmA_ON trigger time
-	Alarm.alarmRepeat(alarmHourA_OFF,alarmMinA_OFF,alarmSecA_OFF,AlarmAOFF);	//	sets the alarmA_OFF trigger time
-	
+//	Alarm.alarmRepeat(alarmHourA_ON,alarmMinA_ON,alarmSecA_ON, AlarmAON);		//	sets the alarmA_ON trigger time
+//	Alarm.alarmRepeat(alarmHourA_OFF, alarmMinA_OFF, alarmSecA_OFF, AlarmAOFF);	//	sets the alarmA_OFF trigger time
+	AonAlarm = Alarm.alarmRepeat(alarmA_ON, AlarmAON);
+	AoffAlarm = Alarm.alarmRepeat(alarmA_OFF, AlarmAOFF);
+	Serial.print("Alarm A On ID = ");
+	Serial.println(AonAlarm);
+	Serial.print("Alarm A Off ID = ");
+	Serial.println(AoffAlarm);
+
+
 	//  SETUP THE DS18B20 SENSORS
 	//  Check to see how many sensors are on the busses
 	for(int i=0;i<NUMBER_OF_BUS; i++)   //search each bus one by one
@@ -267,7 +278,6 @@ void loop()
 	if (RTC_Status==1){Display_Date();}						//  only calls Display_Date if the RTC has been set
 	if (RTC_Status==1){LCD_Time_Display();}					//  only calls LCD_Time_Display if the RTC has been set
 	Alarm.delay(1000);										//  uses the Alarm.delay to use the timer
-//	RL_Toggle();
 }
 
 void AlarmAON()
@@ -324,7 +334,6 @@ void START_SCREEN()
 	
 void LCD_Time_Display()
 {
-//	Serial.print(timeStatus());
 	Serial.println(second());
 	lcd.setCursor(0,0);
 	lcd.print("           ");
@@ -454,6 +463,11 @@ void printAddress(DeviceAddress deviceAddress)
 	}
 }
 
+void MenuButtonPress()
+{
+	menuMode = !menuMode;		//  handler toggle for the menuMode after a button press interrupt
+}
+
 void writeEEPROM(int address, byte data)
 {
 	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
@@ -462,11 +476,10 @@ void writeEEPROM(int address, byte data)
 	Wire.write(data);							//  writes the byte data to the EEPROM at the address specified above
 	Wire.endTransmission();						//  stops the write communication on the I2C
 	delay(10);
-	if (serialDebug = 0){
-		Serial.print("Writing to address ");
-		Serial.print(address);
-		Serial.print(" - ");
-		Serial.println(data);}
+	Serial.print("Writing to address ");
+	Serial.print(address);
+	Serial.print(" - ");
+	Serial.println(data);
 }
 
 byte readEEPROM(int address)
@@ -475,30 +488,52 @@ byte readEEPROM(int address)
 	Wire.write((int)(address >> 8));			//  writes the first byte of the pointer address to the device
 	Wire.write((int)(address & 0xFF));			//  writes the second byte of the pointer address to the device
 	Wire.endTransmission(); 					//  stops the write communication on the I2C
-	Wire.requestFrom(EEPROM_DEV_ADDR,1);		//  gets 1 byte of data from the device
+	Wire.requestFrom(EEPROM_DEV_ADDR, 1);		//  gets 1 byte of data from the device
 	data = Wire.read();							//  sets the value read to data
 	if (serialDebug = 0){
 		Serial.print("Reading from address ");
 		Serial.print(address);
 		Serial.print(" - ");
 		Serial.println(data);
-		}
+	}
 	return data;								//  returns data to the previous call
 }
 
 void factoryDefaultset()
 {
-// 	Serial.print("Writing Factory Defaults to EEPROM");
-// 	writeEEPROM(0,1);		//	writes the e2Empty value = 1 or Set
-// 	writeEEPROM(6,0);		//	writes the serialDebug value = 1 or OFF
-// 	writeEEPROM(20,1);		//  writes the tempType value = 1 or Fahrenheit
-// 	writeEEPROM(21,0);		//	writes the tempPrecision value = 0 or No Decimal
-// 	writeEEPROM(22,10);		//	writes the tempReadDelay value = 10 or 10 Seconds
-// 	writeEEPROM(23,0);		//	writes the timeFormat value =  1 or 12 hour
-// 	writeEEPROM(24,100);	//	writes the backlightLevel value = 100 or half
+	Serial.println("Writing Factory Defaults to EEPROM");
+
+	//  Non User Settings
+	writeEEPROM(0, 1);		//	writes the e2Empty value = 1 or Set
+	writeEEPROM(1, 1);		//  determines if this is the first run or not
+	writeEEPROM(2, 14);		//  writes the build year
+	writeEEPROM(3, 10);		//  writes the build month
+	writeEEPROM(4, 12);		//  writes the build day
+	writeEEPROM(5, 0);		//	writes the serialDebug value = 1 or OFF
+
+	//  User Settings
+	writeEEPROM(20, 1);		//  writes the tempType value = 1 or Fahrenheit
+	writeEEPROM(21, 1);		//	writes the tempPrecision value = 0 or No Decimal
+	writeEEPROM(22, 10);	//	writes the tempReadDelay value = 10 or 10 Seconds
+	writeEEPROM(23, 1);		//	writes the timeFormat value =  1 or 12 hour
+	writeEEPROM(24, 100);	//	writes the backlightLevel value = 100 or half
+	writeEEPROM(25, 30);	//  writes the backlightTimeout to be 30 seconds
+	writeEEPROM(26, 0);		//	writes the flow sensor 100% value to 0
+	writeEEPROM(27, 75);	//  writes the flow sensor user level to 75 or 75%
+
+	//  Alarm Settings
+
+	Serial.println("Factory Defaults Restored");
 }
 
-void MenuButtonPress()
+void eraseEEPROM()
 {
-	menuMode = !menuMode;		//  handler toggle for the menuMode after a button press interrupt
+	Serial.println("Erasing EE2");
+	int address = 0;
+	data = 0;
+	while (address < 256)
+	{
+		writeEEPROM(address, 0);
+		address++;
+	}
 }
