@@ -82,10 +82,24 @@ void MenuTitle()
 				case 1:
 					switch (m2Sel)
 					{
-						case 0:
-						lcd.print("    Set Timer 1");
-						miMax = 1;
-						break;
+					case 0:
+					{		  
+							int t = 0;
+							lcd.print("    Set Timer 1");
+							lcd.setCursor(0, 1);
+							lcd.print("ON-");
+							lcd.print(AlarmHourOn_0);
+							lcd.print(":");
+							lcd.print(AlarmMinOn_0);
+							lcd.print("/");
+							lcd.print("OFF-");
+							lcd.print(AlarmHourOff_0);
+							lcd.print(":");
+							lcd.print(AlarmMinOff_0);
+	
+							miMax = 1;
+							break;
+						}
 						case 1:
 						lcd.print("    Set Timer 2");
 						miMax = 1;
@@ -536,13 +550,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 						case 0:
 						tempReadDelay = readEEPROM(22);
-						MenuNumSel(26,tempReadDelay,1,60,1,200);
+						MenuNumSel(22,tempReadDelay,1,60,1,200);
 						tempReadDelay = readEEPROM(22);
-						lcd.clear();
-						lcd.setCursor(1,1);
-						lcd.print("Restart required to");
-						lcd.setCursor(1,2);
-						lcd.print("change this setting");
+						Alarm.write(ReadDelay_ID, tempReadDelay);
+						Alarm.disable(ReadDelay_ID);
+						Alarm.enable(ReadDelay_ID);
 						break;
 					}
 					break;
@@ -563,10 +575,84 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					break;
 			}
 			break;
-		case 1:		//  timers setup menu items
+		case 1:		//  timer setup menu items
 			switch (m2Sel)
 			{
 				case 0:
+				{
+					delay(250);
+					AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
+					AlarmMinOn_0 = readEEPROM(104);	//  reads out alarm setting for the mins off
+					AlarmHourOff_0 = readEEPROM(105); //  reads out alarm setting for the hour off
+					AlarmMinOff_0 = readEEPROM(106);	//  reads out alarm setting for the mins off
+
+					//  set the LCD screen up for the Hour ON edit
+					lcd.clear();
+					lcd.setCursor(0, 0);
+					lcd.print("    Timer 1 Edit");
+					lcd.setCursor(0, 1);
+					lcd.print(" Set Timer 1 Hour ON");
+					MenuNumSel(103, AlarmHourOn_0, 0, 24, 1, 220);	//  call the number selection menu
+					AlarmHourOn_0 = readEEPROM(103);
+
+					//  set the LCD screen up for the Minute ON edit
+					lcd.clear();
+					lcd.setCursor(0, 0);
+					lcd.print("    Timer 1 Edit");
+					lcd.setCursor(0, 1);
+					lcd.print("  Set Timer 1 Min ON");
+					MenuNumSel(104, AlarmMinOn_0, 0, 59, 1, 220);
+
+					//  set the LCD screen up for the Hour OFF edit
+					lcd.clear();
+					lcd.setCursor(0, 0);
+					lcd.print("    Timer 1 Edit");
+					lcd.setCursor(0, 1);
+					lcd.print(" Set Timer 1 Hour OFF");
+					MenuNumSel(105, AlarmHourOff_0, 0, 24, 1, 220);	//  call the number selection menu
+
+
+					//  set the LCD screen up for the Minute OFF edit
+					lcd.clear();
+					lcd.setCursor(0, 0);
+					lcd.print("    Timer 1 Edit");
+					lcd.setCursor(0, 1);
+					lcd.print("  Set Timer 1 Min OFF");
+					MenuNumSel(106, AlarmMinOff_0, 0, 59, 1, 220);
+
+					//  read the new alarm times from the EEPROM
+
+					AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
+					AlarmMinOn_0 = readEEPROM(104);	//  reads out alarm setting for the mins off
+					AlarmHourOff_0 = readEEPROM(105); //  reads out alarm setting for the hour off
+					AlarmMinOff_0 = readEEPROM(106);	//  reads out alarm setting for the mins off
+
+					//  write the alarms to the TimeAlarms library
+					time_t setAlarmTimeOn = AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0);
+					time_t setAlarmTimeOff = AlarmHMS(AlarmHourOff_0, AlarmMinOff_0, 0);
+
+					Serial.print("setAlarmTime ON - ");
+					Serial.println(setAlarmTimeOn);
+					Alarm.disable(AlarmIDOn_0);
+					Alarm.write(AlarmIDOn_0, AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0));
+					Alarm.enable(AlarmIDOn_0);
+
+					Serial.print("setAlarmTime OFF - ");
+					Serial.println(setAlarmTimeOff);
+					Alarm.disable(AlarmIDOff_0);
+					Alarm.write(AlarmIDOff_0, setAlarmTimeOff);
+					Alarm.enable(AlarmIDOff_0);
+					
+					int rdon;
+					rdon = Alarm.read(AlarmIDOn_0);
+					Serial.print("Alarm A On Time = ");
+					Serial.println(rdon);
+
+					int rdoff;
+					rdoff = Alarm.read(AlarmIDOff_0);
+					Serial.print("Alarm A Off Time = ");
+					Serial.println(rdoff);
+				}
 					break;
 				case 1:
 					break;
@@ -591,10 +677,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 	return;
 }
 void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
+//  EEprom addr, # to start on, minimum number to select, maximum number to select, step size, speed to run through the selection
 {
 	int loopNumSel = 1;
 	
-	delay(250);
+	delay(100);
 	lcd.setCursor(9,2);
 	lcd.print(start);
 	
@@ -606,43 +693,85 @@ void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 		int Left = digitalRead(leftButton);
 		
 		if (Up == 1)
-		{
-			if (start < max)
-				{	start = start+step;}
-				else{start == max;}
-		lcd.setCursor(9,2);
-		lcd.print(start);
-		lcd.print("   ");
-		}
+			{
+				if (start < max)
+					{start = start + step;}
+				else{ start = max - max; }
+			lcd.setCursor(9,2);
+			lcd.print(start);
+			lcd.print("   ");
+			}
 		if (Down == 1)
-		{
-			if (start > min)
-			{	start = start-step;}
-			else{start == min;}
-		lcd.setCursor(9,2);
-		lcd.print(start);
-		lcd.print("   ");
-		}
+			{
+				if (start > min)
+					{start = start-step;}
+				else{start = min + max;}
+			lcd.setCursor(9,2);
+			lcd.print(start);
+			lcd.print("   ");
+			}
 		if (Right == 1)
-		{
-			writeEEPROM(addr, start);
- 			lcd.setCursor(0,3);
- 			lcd.print("       Saving       ");		
-			delay(150);
-			loopNumSel = 0;
-		}
+			{
+				lcd.setCursor(0, 3);
+				lcd.print("       Saving       ");
+				writeEEPROM(addr, start);
+				delay(150);
+				loopNumSel = 0;
+			}
 		if (Left == 1)
-		{
-			lcd.setCursor(0,3);
-			lcd.print(" Exit Without Save");
-			delay(150);
-			loopNumSel = 0;
-		}
+			{
+				lcd.setCursor(0,3);
+				lcd.print(" Exit Without Save");
+				delay(150);
+				loopNumSel = 0;
+			}
 		delay(dmicro);
 	}
 	return;
 }
 
+/*void MenuYesNo(int addr, int start)
+{
+	int loopNumSel = 1;
+
+	delay(250);
+	lcd.setCursor(9, 2);
+	lcd.print(start);
+
+	while (loopNumSel == 1)
+	{
+		int Down = digitalRead(downButton);
+		int Up = digitalRead(upButton);
+		int Right = digitalRead(rightButton);
+		int Left = digitalRead(leftButton);
+
+		if (Up == 1)
+		{
+
+		}
+		if (Down == 1)
+		{
+
+		}
+		if (Right == 1)
+		{
+			writeEEPROM(addr, start);
+			lcd.setCursor(0, 3);
+			lcd.print("       Saving       ");
+			delay(150);
+			loopNumSel = 0;
+		}
+		if (Left == 1)
+		{
+			lcd.setCursor(0, 3);
+			lcd.print(" Exit Without Save");
+			delay(150);
+			loopNumSel = 0;
+		}
+		delay(200);
+	}
+	return;
+}*/
 void MenuTimeSet ()
 {
 	/*int loopTime = 1;
@@ -684,4 +813,11 @@ void MenuTimeSet ()
 	}
 	return;
 	*/
+}
+void AlarmAON4()
+{
+	Serial.println("Alarm: - turn lights ON");
+	digitalWrite(relayPins[0], LOW);
+	lcd.setCursor(0, 3);
+	lcd.print("+");
 }
