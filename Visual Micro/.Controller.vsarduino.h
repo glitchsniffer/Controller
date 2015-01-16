@@ -67,7 +67,6 @@ void AlarmAON4();
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\mega\pins_arduino.h" 
 #include "D:\Users\Robbie\My Documents\GitHub\Controller\Controller.ino"
-#include "D:\Users\Robbie\My Documents\GitHub\Controller\Alarms.c"
 #include "D:\Users\Robbie\My Documents\GitHub\Controller\Alarms.h"
 #include "D:\Users\Robbie\My Documents\GitHub\Controller\Alarms.ino"
 #include "D:\Users\Robbie\My Documents\GitHub\Controller\Menu_System.ino"

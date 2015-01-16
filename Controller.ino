@@ -31,7 +31,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 10;					//  Sets the build number for the current program
+int build = 11;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -161,7 +161,7 @@ void setup()
 {
 	//  SETUP THE SERIAL PORT
 	serialDebug = readEEPROM(5);		//	reads out user setting to turns serial debuggin 0 = ON or 1 = OFF
-	/*if (serialDebug == 0){ */Serial.begin(115200);// }  //  start the serial port if debugging is on
+	Serial.begin(115200);				//  start the serial port if debugging is on
 
 	//  READ THE VARIABLES OUT OF THE EEPROM
 		//  NON USER SETTINGS
@@ -233,28 +233,34 @@ void setup()
 	else{Serial.println("RTC has set the system time");}
 	
 	//  SETUP ALARMS
-	ReadDelay_ID = Alarm.timerRepeat(tempReadDelay,DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to ReadDelayID
+	// ReadDelay_ID = Alarm.timerRepeat(tempReadDelay,DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to ReadDelayID
 	AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
-	AlarmIDOff_0 = Alarm.alarmRepeat(AlarmHourOff_0, AlarmMinOff_0, 0, AlarmAOFF);
+	AlarmIDOff_0 = Alarm.alarmRepeat(AlarmHourOff_0, AlarmMinOff_0, 30, AlarmAOFF);
 	int rd;
-	Serial.print("Read Delay ID = ");
-	Serial.println(ReadDelay_ID);
+	Serial.println();
+	Serial.print("Read Read Delay ID = ");
+	Serial.print(ReadDelay_ID);
+	Serial.print(" : ");
 	rd = Alarm.read(ReadDelay_ID);
 	Serial.println(rd);
-	Serial.print("Alarm A On ID = ");
-	Serial.println(AlarmIDOn_0);
+	Serial.print("Read Alarm A On ID = ");
+	Serial.print(AlarmIDOn_0);
+	Serial.print(" : ");
 	rd = Alarm.read(AlarmIDOn_0);
 	Serial.println(rd);
-	Serial.print("Alarm A Off ID = ");
-	Serial.println(AlarmIDOff_0);
+	Serial.print("Read Alarm A Off ID = ");
+	Serial.print(AlarmIDOff_0);
 	rd = Alarm.read(AlarmIDOff_0);
+	Serial.print(" : ");
 	Serial.println(rd);
+	Serial.println();
 	time_t AlarmOn_0 = AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0);
 	time_t AlarmOff_0 = AlarmHMS(AlarmHourOff_0, AlarmMinOff_0, 0);
-	Serial.print("AlarmOn_0 = ");
+	Serial.print("Setting On_0 HMS= ");
 	Serial.println(AlarmOn_0);
-	Serial.print("AlarmOff_0 = ");
+	Serial.print("Setting Off_0 HMS = ");
 	Serial.println(AlarmOff_0);
+	Serial.println();
 
 	//  SETUP THE DS18B20 SENSORS
 	//  Check to see how many sensors are on the busses
@@ -264,21 +270,29 @@ void setup()
 		sensors[i] = new DallasTemperature(oneWire[i]);
 		sensors[i]->begin();
 		numberOfDevices[i] = sensors[i]->getDeviceCount();
-		Serial.print("Locating devices...");
+		
+		
+		/*Serial.print("Locating devices...");
 		Serial.print("Found ");
 		Serial.print(numberOfDevices[i], DEC);
 		Serial.print(" devices on port ");
 		Serial.println(ONE_WIRE_BUS[i],DEC);
+		*/
+		
 		for(int j=0;j<numberOfDevices[i]; j++)
 		{
 			// Search the wire for address
 			if(sensors[i]->getAddress(tempDeviceAddress[j], j))
 			{
+				
+				/*
 				Serial.print("Found device ");
 				Serial.print(j, DEC);
 				Serial.print(" with address: ");
 				printAddress(tempDeviceAddress[j]);
 				Serial.println("");
+				*/
+
 
 				// set the resolution to TEMPERATURE_PRECISION bit (Each Dallas/Maxim device is capable of several different resolutions)
 				sensors[i]->setResolution(tempDeviceAddress[j], TEMPERATURE_PRECISION);
@@ -310,6 +324,10 @@ void AlarmAON()
 	digitalWrite(relayPins[0], LOW);
 	lcd.setCursor(0,3);
 	lcd.print("+");
+	int trigger;
+	trigger = Alarm.getNextTrigger();
+	Serial.print("Next trigger after ALRM ON: ");
+	Serial.println(trigger);
 }
 
 void AlarmAOFF()
@@ -318,6 +336,10 @@ void AlarmAOFF()
 	digitalWrite(relayPins[0], HIGH);
 	lcd.setCursor(0,3);
 	lcd.print("-");
+	int trigger;
+	trigger = Alarm.getNextTrigger();
+	Serial.print("Next trigger after ALRM OFF: ");
+	Serial.println(trigger);
 }
 
 void RL_Toggle()
@@ -358,9 +380,7 @@ void START_SCREEN()
 	
 void LCD_Time_Display()
 {
-	Serial.print("Serial Debugging = ");
-	Serial.println(serialDebug);
-	if(serialDebug == 0){Serial.println(second());}
+	//Serial.println(second());
 	lcd.setCursor(0,0);
 	lcd.print("           ");
 	switch (timeFormat)
@@ -412,6 +432,7 @@ void Display_Date()
 void DS18B20_Read()
 {
 	int c;
+	serialDebug = 1;
 	//  Read the DS sensors found in void setup
 	for(int i=0;i<NUMBER_OF_BUS; i++)   // poll every bus
 	{
@@ -476,7 +497,8 @@ void DS18B20_Read()
 					Serial.println("F");}
  			}
 		}
-	Serial.println();
+	//Serial.println();
+	serialDebug = 0;
 }
 
 void printAddress(DeviceAddress deviceAddress)
@@ -496,32 +518,40 @@ void MenuButtonPress()
 
 void writeEEPROM(int address, byte data)
 {
+	serialDebug = 1;
 	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
 	Wire.write((int)(address >> 8));			//  writes the first byte of the pointer address to the device
 	Wire.write((int)(address & 0xFF));			//  writes the second byte of the pointer address to the device
 	Wire.write(data);							//  writes the byte data to the EEPROM at the address specified above
 	Wire.endTransmission();						//  stops the write communication on the I2C
 	delay(10);
-	Serial.print("Writing to address ");
-	Serial.print(address);
-	Serial.print(" - ");
-	Serial.println(data);
+	if (serialDebug == 0)
+	{
+		Serial.print("Writing to address ");
+		Serial.print(address);
+		Serial.print(" - ");
+		Serial.println(data);
+	}
+	serialDebug = 0;
 }
 
 byte readEEPROM(int address)
 {
+	serialDebug = 1;
 	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
 	Wire.write((int)(address >> 8));			//  writes the first byte of the pointer address to the device
 	Wire.write((int)(address & 0xFF));			//  writes the second byte of the pointer address to the device
 	Wire.endTransmission(); 					//  stops the write communication on the I2C
 	Wire.requestFrom(EEPROM_DEV_ADDR, 1);		//  gets 1 byte of data from the device
 	data = Wire.read();							//  sets the value read to data
-//	if (serialDebug = 0){
+	if (serialDebug == 0)
+	{
 		Serial.print("Reading from address ");
 		Serial.print(address);
 		Serial.print(" - ");
 		Serial.println(data);
-//	}
+	}
+	serialDebug = 0;
 	return data;								//  returns data to the previous call
 }
 
@@ -551,10 +581,10 @@ void factoryDefaultset()
 	writeEEPROM(100, 0);	//  writes alarm enable to off
 	writeEEPROM(101, 0);	//  writes the alarm type to 0
 	writeEEPROM(102, 0);	//  writes the alarm state to off
-	writeEEPROM(103, 0);	//  writes the alarm on hour
-	writeEEPROM(104, 0);	//  writes the alarm on minute
-	writeEEPROM(105, 0);	//  writes the alarm off hour
-	writeEEPROM(106, 0);	//  writes the alarm off minute
+	writeEEPROM(103, 0);	//  writes the alarm on hour 0
+	writeEEPROM(104, 0);	//  writes the alarm on minute 0
+ 	writeEEPROM(105, 0);	//  writes the alarm off hour 1
+	writeEEPROM(106, 0);	//  writes the alarm off minute 1
 
 	Serial.println("Factory Defaults Restored");
 }

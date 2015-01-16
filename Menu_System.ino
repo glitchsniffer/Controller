@@ -580,7 +580,25 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 			{
 				case 0:
 				{
-					delay(250);
+					int rdon;
+					rdon = Alarm.read(AlarmIDOn_0);
+					Serial.print("Read On Time from Alarmlib = ");
+					Serial.println(rdon);
+
+					int rdoff;
+					rdoff = Alarm.read(AlarmIDOff_0);
+					Serial.print("Read Off Time from Alarmlib = ");
+					Serial.println(rdoff);
+					Serial.println();
+
+					int trigger;
+					trigger = Alarm.getNextTrigger();
+					trigger = Alarm.getNextTrigger();
+					Serial.print("Next trigger before changing anything = ");
+					Serial.println(trigger);
+					Serial.println();
+
+
 					AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
 					AlarmMinOn_0 = readEEPROM(104);	//  reads out alarm setting for the mins off
 					AlarmHourOff_0 = readEEPROM(105); //  reads out alarm setting for the hour off
@@ -591,7 +609,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					lcd.setCursor(0, 0);
 					lcd.print("    Timer 1 Edit");
 					lcd.setCursor(0, 1);
-					lcd.print(" Set Timer 1 Hour ON");
+					lcd.print("Set Timer 1 Hour ON");
 					MenuNumSel(103, AlarmHourOn_0, 0, 24, 1, 220);	//  call the number selection menu
 					AlarmHourOn_0 = readEEPROM(103);
 
@@ -600,16 +618,18 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					lcd.setCursor(0, 0);
 					lcd.print("    Timer 1 Edit");
 					lcd.setCursor(0, 1);
-					lcd.print("  Set Timer 1 Min ON");
+					lcd.print(" Set Timer 1 Min ON");
 					MenuNumSel(104, AlarmMinOn_0, 0, 59, 1, 220);
+					AlarmMinOn_0 = readEEPROM(104);
 
 					//  set the LCD screen up for the Hour OFF edit
 					lcd.clear();
 					lcd.setCursor(0, 0);
 					lcd.print("    Timer 1 Edit");
 					lcd.setCursor(0, 1);
-					lcd.print(" Set Timer 1 Hour OFF");
+					lcd.print("Set Timer 1 Hour OFF");
 					MenuNumSel(105, AlarmHourOff_0, 0, 24, 1, 220);	//  call the number selection menu
+					AlarmHourOff_0 = readEEPROM(105);
 
 
 					//  set the LCD screen up for the Minute OFF edit
@@ -617,41 +637,65 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					lcd.setCursor(0, 0);
 					lcd.print("    Timer 1 Edit");
 					lcd.setCursor(0, 1);
-					lcd.print("  Set Timer 1 Min OFF");
+					lcd.print(" Set Timer 1 Min OFF");
 					MenuNumSel(106, AlarmMinOff_0, 0, 59, 1, 220);
+					AlarmMinOff_0 = readEEPROM(106);
 
-					//  read the new alarm times from the EEPROM
+/*					//  read the new alarm times from the EEPROM
 
 					AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
 					AlarmMinOn_0 = readEEPROM(104);	//  reads out alarm setting for the mins off
 					AlarmHourOff_0 = readEEPROM(105); //  reads out alarm setting for the hour off
 					AlarmMinOff_0 = readEEPROM(106);	//  reads out alarm setting for the mins off
-
+*/
 					//  write the alarms to the TimeAlarms library
 					time_t setAlarmTimeOn = AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0);
-					time_t setAlarmTimeOff = AlarmHMS(AlarmHourOff_0, AlarmMinOff_0, 0);
+					time_t setAlarmTimeOff = AlarmHMS(AlarmHourOff_0, AlarmMinOff_0, 30);
+					time_t currentTime = AlarmHMS(hour(), minute(), second() - 2);
 
-					Serial.print("setAlarmTime ON - ");
-					Serial.println(setAlarmTimeOn);
-					Alarm.disable(AlarmIDOn_0);
-					Alarm.write(AlarmIDOn_0, AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0));
-					Alarm.enable(AlarmIDOn_0);
 
-					Serial.print("setAlarmTime OFF - ");
-					Serial.println(setAlarmTimeOff);
+					//AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
+					//AlarmIDOff_0 = Alarm.alarmRepeat(AlarmHourOff_0, AlarmMinOff_0, 30, AlarmAOFF);
+
+
+					trigger = Alarm.getNextTrigger();
+					Serial.print("Next trigger Time Before writing = ");
+					Serial.println(trigger);
+					Serial.println();
+
+					Serial.print("My On: ");
+					Serial.print(setAlarmTimeOn);
+					Alarm.free(AlarmIDOn_0);
+					AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
+					
+					rdon = Alarm.read(AlarmIDOn_0);
+					Serial.print(" - Set On: ");
+					Serial.println(rdon);
+					Serial.println();
+
+					trigger = Alarm.getNextTrigger();
+					Serial.print("Next trigger After Freeing and Enabling= ");
+					Serial.println(trigger);
+					
+					trigger = Alarm.getNextTrigger();
+					Serial.print("Next trigger Time After On write = ");
+					Serial.println(trigger);
+					Serial.println();
+
+					Serial.println();
+					Serial.print("My Off: ");
+					Serial.print(setAlarmTimeOff);
 					Alarm.disable(AlarmIDOff_0);
 					Alarm.write(AlarmIDOff_0, setAlarmTimeOff);
 					Alarm.enable(AlarmIDOff_0);
 					
-					int rdon;
-					rdon = Alarm.read(AlarmIDOn_0);
-					Serial.print("Alarm A On Time = ");
-					Serial.println(rdon);
-
-					int rdoff;
 					rdoff = Alarm.read(AlarmIDOff_0);
-					Serial.print("Alarm A Off Time = ");
+					Serial.print(" - Set Off: ");
 					Serial.println(rdoff);
+
+					trigger = Alarm.getNextTrigger();
+					Serial.print("Next trigger Time After Off write = ");
+					Serial.println(trigger);
 				}
 					break;
 				case 1:
@@ -681,7 +725,7 @@ void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
 {
 	int loopNumSel = 1;
 	
-	delay(100);
+	delay(150);
 	lcd.setCursor(9,2);
 	lcd.print(start);
 	
