@@ -31,7 +31,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 11;					//  Sets the build number for the current program
+int build = 12;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -95,7 +95,7 @@ char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Cali
 		char* m2Items02[]={"", "24 Hour", "12 Hour", ""};
 		char* m2Items03[]={"", "Set BL Brightness", ""};
 		char* m2Items04[]={"", "Need Date/Time Here", ""};
-		char* m2Items05[]={"", "On", "Off", ""};
+		char* m2Items05[]={"", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "System"};
 		char* m2Items06[]={"", "Set Temp Read Delay", "" };
 		char* m2Items07[]={"", "Exit Erase EEPROM", "Erase EEPROM", "" };
 	char* m1Items1[]={"", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", ""};  //  setup menu item 2 for Timer Setup Min 0 Max 3
@@ -137,17 +137,32 @@ int RTC_Status=1;
 
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
-int AlarmEnable_0;
-int AlarmType_0;
-int AlarmState_0;
-int AlarmHourOn_0;
-int AlarmMinOn_0;
-int AlarmHourOff_0;
-int AlarmMinOff_0;
-//int AlarmOn0;
+
+byte AlarmEnable;			//  byte for storing all 8 alarm's enable flags as bits
+byte AlarmState;			//  byte for storing all 8 alarm's state flags as bits
+byte AlarmType[8];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
+byte AlarmRelay[8];			//  # of the relay this alarm will trigger
+byte AlarmHourOn[8];		//  hour time the alarm will come on at
+byte AlarmMinOn[8];			//	minute time the alarm will come on at
+byte AlarmHourOff[8];		//	hour time the alarm will go off at
+byte AlarmMinOff[8];		//  minute time the alarm will go off at
+
 AlarmID_t ReadDelay_ID;		//  delay between reading the temperature sensors
-AlarmID_t AlarmIDOn_0;	//  Alarm A's on time ID
-AlarmID_t AlarmIDOff_0;	//  Alarm A's off time ID
+AlarmID_t AlarmID[8];		//  alarm IDs for each alarm
+
+
+//  WILL BE ABLE TO GET RID OF THESE WHEN THE ALARM FUNCTION IS COMPLETE AND THE OLD IS DELETED FROM THE MENU SYSTEM
+
+		int AlarmEnable_0;
+		int AlarmType_0;
+		int AlarmState_0;
+		int AlarmHourOn_0;
+		int AlarmMinOn_0;
+		int AlarmHourOff_0;
+		int AlarmMinOff_0;
+
+		AlarmID_t AlarmIDOn_0;	//  Alarm A's on time ID
+		AlarmID_t AlarmIDOff_0;	//  Alarm A's off time ID
 
 
 //  INITIALIZE THE RELAYS
@@ -160,13 +175,14 @@ int relayCount = 8;		//  Set the number of relays
 void setup()
 {
 	//  SETUP THE SERIAL PORT
-	serialDebug = readEEPROM(5);		//	reads out user setting to turns serial debuggin 0 = ON or 1 = OFF
+	serialDebug = readEEPROM(5);		//	reads out user setting to turn serial debugging on for each type of debugging
 	Serial.begin(115200);				//  start the serial port if debugging is on
+	Serial.println();
 
 	//  READ THE VARIABLES OUT OF THE EEPROM
 		//  NON USER SETTINGS
+
 		e2Empty = readEEPROM(0);			//	reads the e2Empty out to determine if it needs to set defaults
-		Serial.println(e2Empty);
 		if (e2Empty == 0){factoryDefaultset();}
 		configID = readEEPROM(0);			//  reads the configID out
 
@@ -178,14 +194,63 @@ void setup()
 		backlightLevel = readEEPROM(24);	//	reads out the user setting to control the backlight level
 
 		//  ALARM SETTINGS
-		AlarmEnable_0 = readEEPROM(100);	//  reads out alarm setting for enable flag
-		AlarmType_0 = readEEPROM(101);		//  reads out alarm setting for type flag
-		AlarmState_0 = readEEPROM(102);		//  reads out alarm setting for current state flag
-		AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
-		AlarmMinOn_0 = readEEPROM(104);		//  reads out alarm setting for the mins off
-		AlarmHourOff_0 = readEEPROM(105);	//  reads out alarm setting for the hour off
-		AlarmMinOff_0 = readEEPROM(106);	//  reads out alarm setting for the mins off
-	
+
+		//  THESE CAN BE DELETED WHENT HE ALARMS FUNCTION IS COMPLETE
+
+				AlarmEnable_0 = readEEPROM(100);	//  reads out alarm setting for enable flag
+				AlarmType_0 = readEEPROM(101);		//  reads out alarm setting for type flag
+				AlarmState_0 = readEEPROM(102);		//  reads out alarm setting for current state flag
+				AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
+				AlarmMinOn_0 = readEEPROM(104);		//  reads out alarm setting for the mins off
+				AlarmHourOff_0 = readEEPROM(105);	//  reads out alarm setting for the hour off
+				AlarmMinOff_0 = readEEPROM(106);	//  reads out alarm setting for the mins off
+
+		AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
+		AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
+		if ((serialDebug & 4) == 4)
+		{
+			Serial.println();
+			Serial.println("ALARM EEPROM READING");
+			Serial.println("ID Type Rly HON MON HOFF MOFF");
+		}
+
+		for (int id = 0; id < 8; id++)		//  read each alarms values out of the EEPROM
+		{
+			if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop
+			AlarmType[id] = readEEPROM(102 + (id * 6));
+			AlarmRelay[id] = readEEPROM(103 + (id * 6));
+			AlarmHourOn[id] = readEEPROM(104 + (id * 6));
+			AlarmMinOn[id] = readEEPROM(105 + (id * 6));
+			AlarmHourOff[id] = readEEPROM(106 + (id * 6));
+			AlarmMinOff[id] = readEEPROM(107 + (id * 6));
+			if ((serialDebug & 4) == 4)	
+				{
+					Serial.print(id);
+					Serial.print("   ");
+					Serial.print(AlarmType[id]);
+					Serial.print("    ");
+					Serial.print(AlarmRelay[id]);
+					Serial.print("   ");
+					Serial.print(AlarmHourOn[id]);
+					Serial.print("   ");
+					Serial.print(AlarmMinOn[id]);
+					Serial.print("   ");
+					Serial.print(AlarmHourOff[id]);
+					Serial.print("   ");
+					Serial.println(AlarmMinOff[id]);
+				}
+		}
+		serialDebug = readEEPROM(5);		//	read out the serial debug againg in case it was disable during the alarm print
+
+		if ((serialDebug & 4) == 4)
+		{
+			Serial.print("Alarm Enable : ");
+			Serial.println(AlarmEnable);
+			Serial.print("Alarm State : ");
+			Serial.println(AlarmState);
+			Serial.println();
+		}
+
 	//  SETUP THE BUTTONS
 	pinMode(upButton, INPUT);		//  sets the UpButton to an input
 	pinMode(downButton, INPUT);		//  sets the DownButton to an input
@@ -227,40 +292,46 @@ void setup()
 	
 	//  SETUP THE RTC
 	setSyncProvider(RTC.get);		//  this function get the time from the RTC
-	if (timeStatus()!=timeSet)		//  checks to see if it can read the RTC
-		{RTC_Status = 0;
-		Serial.println("Unable to get the RTC");}
+	if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
+	{	RTC_Status = 0;
+		Serial.println("Unable to get the RTC");
+	}
 	else{Serial.println("RTC has set the system time");}
 	
 	//  SETUP ALARMS
-	// ReadDelay_ID = Alarm.timerRepeat(tempReadDelay,DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to ReadDelayID
+	ReadDelay_ID = Alarm.timerRepeat(tempReadDelay,DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to ReadDelayID
 	AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
 	AlarmIDOff_0 = Alarm.alarmRepeat(AlarmHourOff_0, AlarmMinOff_0, 30, AlarmAOFF);
-	int rd;
-	Serial.println();
-	Serial.print("Read Read Delay ID = ");
-	Serial.print(ReadDelay_ID);
-	Serial.print(" : ");
-	rd = Alarm.read(ReadDelay_ID);
-	Serial.println(rd);
-	Serial.print("Read Alarm A On ID = ");
-	Serial.print(AlarmIDOn_0);
-	Serial.print(" : ");
-	rd = Alarm.read(AlarmIDOn_0);
-	Serial.println(rd);
-	Serial.print("Read Alarm A Off ID = ");
-	Serial.print(AlarmIDOff_0);
-	rd = Alarm.read(AlarmIDOff_0);
-	Serial.print(" : ");
-	Serial.println(rd);
-	Serial.println();
+
 	time_t AlarmOn_0 = AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0);
 	time_t AlarmOff_0 = AlarmHMS(AlarmHourOff_0, AlarmMinOff_0, 0);
-	Serial.print("Setting On_0 HMS= ");
-	Serial.println(AlarmOn_0);
-	Serial.print("Setting Off_0 HMS = ");
-	Serial.println(AlarmOff_0);
-	Serial.println();
+
+	if ((serialDebug & 4) == 4)
+	{
+		int rd;
+		Serial.println();
+		Serial.print("Read Read Delay ID = ");
+		Serial.print(ReadDelay_ID);
+		Serial.print(" : ");
+		rd = Alarm.read(ReadDelay_ID);
+		Serial.println(rd);
+		Serial.print("Read Alarm A On ID = ");
+		Serial.print(AlarmIDOn_0);
+		Serial.print(" : ");
+		rd = Alarm.read(AlarmIDOn_0);
+		Serial.println(rd);
+		Serial.print("Read Alarm A Off ID = ");
+		Serial.print(AlarmIDOff_0);
+		rd = Alarm.read(AlarmIDOff_0);
+		Serial.print(" : ");
+		Serial.println(rd);
+		Serial.println();
+		Serial.print("Setting On_0 HMS= ");
+		Serial.println(AlarmOn_0);
+		Serial.print("Setting Off_0 HMS = ");
+		Serial.println(AlarmOff_0);
+		Serial.println();
+	}
 
 	//  SETUP THE DS18B20 SENSORS
 	//  Check to see how many sensors are on the busses
@@ -271,48 +342,57 @@ void setup()
 		sensors[i]->begin();
 		numberOfDevices[i] = sensors[i]->getDeviceCount();
 		
-		
-		/*Serial.print("Locating devices...");
-		Serial.print("Found ");
-		Serial.print(numberOfDevices[i], DEC);
-		Serial.print(" devices on port ");
-		Serial.println(ONE_WIRE_BUS[i],DEC);
-		*/
-		
+		if ((serialDebug & 1) == 1)
+		{
+			Serial.print("Locating devices...");
+			Serial.print("Found ");
+			Serial.print(numberOfDevices[i], DEC);
+			Serial.print(" devices on port ");
+			Serial.println(ONE_WIRE_BUS[i], DEC);
+		}
 		for(int j=0;j<numberOfDevices[i]; j++)
 		{
 			// Search the wire for address
 			if(sensors[i]->getAddress(tempDeviceAddress[j], j))
 			{
 				
-				/*
-				Serial.print("Found device ");
-				Serial.print(j, DEC);
-				Serial.print(" with address: ");
-				printAddress(tempDeviceAddress[j]);
-				Serial.println("");
-				*/
-
+				if ((serialDebug & 1) == 1)
+				{
+					Serial.print("Found device ");
+					Serial.print(j, DEC);
+					Serial.print(" with address: ");
+					printAddress(tempDeviceAddress[j]);
+					Serial.println("");
+				}
 
 				// set the resolution to TEMPERATURE_PRECISION bit (Each Dallas/Maxim device is capable of several different resolutions)
 				sensors[i]->setResolution(tempDeviceAddress[j], TEMPERATURE_PRECISION);
 			}
 			else{
-				Serial.print("Found ghost device at ");
-				Serial.print(j, DEC);
-				Serial.print(" but could not detect address. Check power and cabling");
+				if ((serialDebug & 1) == 1)
+				{
+					Serial.print("Found ghost device at ");
+					Serial.print(j, DEC);
+					Serial.print(" but could not detect address. Check power and cabling");
+				}
 			}
 		}
 		delay(200);
 	}
+	if ((serialDebug & 1) == 1){ Serial.println(); }
 	DS18B20_Read();
+	Serial.println("Starting Loop");
+	Serial.println();
 }
 
 void loop()
 {
-	if (menuMode == 1){Serial.println("Entering Menu");		//  calls the MenuTitle as long as menuMode = 1
+	if (menuMode == 1)
+	{
+		Serial.println("Entering Menu");		//  calls the MenuTitle as long as menuMode = 1
 		MenuTitle();
-		Serial.println("Exiting Menu");}
+		Serial.println("Exiting Menu");
+	}
 	if (RTC_Status==1){Display_Date();}						//  only calls Display_Date if the RTC has been set
 	if (RTC_Status==1){LCD_Time_Display();}					//  only calls LCD_Time_Display if the RTC has been set
 	Alarm.delay(1000);										//  uses the Alarm.delay to use the timer
@@ -324,10 +404,13 @@ void AlarmAON()
 	digitalWrite(relayPins[0], LOW);
 	lcd.setCursor(0,3);
 	lcd.print("+");
-	int trigger;
-	trigger = Alarm.getNextTrigger();
-	Serial.print("Next trigger after ALRM ON: ");
-	Serial.println(trigger);
+	if ((serialDebug & 4) == 4)
+	{
+		int trigger;
+		trigger = Alarm.getNextTrigger();
+		Serial.print("Next trigger after ALRM ON: ");
+		Serial.println(trigger);
+	}
 }
 
 void AlarmAOFF()
@@ -336,10 +419,13 @@ void AlarmAOFF()
 	digitalWrite(relayPins[0], HIGH);
 	lcd.setCursor(0,3);
 	lcd.print("-");
-	int trigger;
-	trigger = Alarm.getNextTrigger();
-	Serial.print("Next trigger after ALRM OFF: ");
-	Serial.println(trigger);
+	if ((serialDebug & 4) == 4)
+	{
+		int trigger;
+		trigger = Alarm.getNextTrigger();
+		Serial.print("Next trigger after ALRM OFF: ");
+		Serial.println(trigger);
+	}
 }
 
 void RL_Toggle()
@@ -380,7 +466,7 @@ void START_SCREEN()
 	
 void LCD_Time_Display()
 {
-	//Serial.println(second());
+	if ((serialDebug & 16) == 16){ Serial.println(second()); }
 	lcd.setCursor(0,0);
 	lcd.print("           ");
 	switch (timeFormat)
@@ -432,73 +518,80 @@ void Display_Date()
 void DS18B20_Read()
 {
 	int c;
-	serialDebug = 1;
 	//  Read the DS sensors found in void setup
-	for(int i=0;i<NUMBER_OF_BUS; i++)   // poll every bus
+	for (int i = 0; i < NUMBER_OF_BUS; i++)   // poll every bus
 	{
 		sensors[i]->begin();
 		numberOfDevices[i] = sensors[i]->getDeviceCount();
 		sensors[i]->requestTemperatures();
 		// print the device information
-		for(int j=0;j<numberOfDevices[i]; j++)    // poll devices connect to the bus
+		for (int j = 0; j < numberOfDevices[i]; j++)    // poll devices connect to the bus
 		{
 			sensors[i]->getAddress(tempDeviceAddress[j], j);
-			if (serialDebug == 0){
+			if ((serialDebug & 1) == 1)
+			{
 				printAddress(tempDeviceAddress[j]);      //print ID
 				Serial.print(";");
 			}
-			
+
 			float tempC = sensors[i]->getTempC(tempDeviceAddress[j]);
 			float tempF = sensors[i]->getTempF(tempDeviceAddress[j]);
 
-			if (serialDebug == 0){
-				Serial.print(j);
-				Serial.print(" - ");}
-			switch (tempPrecision)			
+			if ((serialDebug & 1) == 1)
 			{
-				case 0:
-					lcd.setCursor(13,j);	//  Set the lcd cursor depending on what sensor your are reading
-					lcd.print("S");
-					lcd.print(j+1);			//  print the sensor number
-					lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
-					
-					//  determine if padding is needed for temps higher than 3 digits
-					if (tempC >= 100 || tempF >= 100){lcd.setCursor(15,j);}
-					else{lcd.setCursor(16,j);}
-					break;
-				case 1:
-					lcd.setCursor(11,j);	//  Set the lcd cursor depending on what sensor your are reading
-					lcd.print("S");
-					lcd.print(j+1);			//  print the sensor number
-					lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
-					
-					//  determine if padding is needed for temps higher than 3 digits
-					if (tempC >= 100 || tempF >= 100){lcd.setCursor(13,j);}
-					else{lcd.setCursor(14,j);}
-					break;
+				Serial.print(j);
+				Serial.print(" - ");
 			}
-			
+			switch (tempPrecision)
+			{
+			case 0:
+				lcd.setCursor(13, j);	//  Set the lcd cursor depending on what sensor your are reading
+				lcd.print("S");
+				lcd.print(j + 1);			//  print the sensor number
+				lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
+
+				//  determine if padding is needed for temps higher than 3 digits
+				if (tempC >= 100 || tempF >= 100){ lcd.setCursor(15, j); }
+				else{ lcd.setCursor(16, j); }
+				break;
+			case 1:
+				lcd.setCursor(11, j);	//  Set the lcd cursor depending on what sensor your are reading
+				lcd.print("S");
+				lcd.print(j + 1);			//  print the sensor number
+				lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
+
+				//  determine if padding is needed for temps higher than 3 digits
+				if (tempC >= 100 || tempF >= 100){ lcd.setCursor(13, j); }
+				else{ lcd.setCursor(14, j); }
+				break;
+			}
+
 			//  print the temp to the LCD screen in Celsius or Fahrenheit depending on what the user set in TempType	
-			if(tempType == 0)
-			{	lcd.print(tempC,tempPrecision);
+			if (tempType == 0)
+			{
+				lcd.print(tempC, tempPrecision);
 				lcd.write(byte(1));
-				lcd.print("C");}
+				lcd.print("C");
+			}
 			else
-			{	lcd.print(tempF,tempPrecision);
+			{
+				lcd.print(tempF, tempPrecision);
 				lcd.write(byte(1));
-				lcd.print("F");}
-			
+				lcd.print("F");
+			}
+
 			//  send the temps to the serial port
 
-			if (serialDebug == 0){
-					Serial.print(tempC,tempPrecision);
-					Serial.print("C ");
-					Serial.print(tempF,tempPrecision);
-					Serial.println("F");}
- 			}
+			if ((serialDebug & 1) == 1)
+			{
+				Serial.print(tempC, tempPrecision);
+				Serial.print("C ");
+				Serial.print(tempF, tempPrecision);
+				Serial.println("F");
+			}
 		}
-	//Serial.println();
-	serialDebug = 0;
+		if ((serialDebug & 1) == 1){ Serial.println(); }
+	}
 }
 
 void printAddress(DeviceAddress deviceAddress)
@@ -518,40 +611,36 @@ void MenuButtonPress()
 
 void writeEEPROM(int address, byte data)
 {
-	serialDebug = 1;
 	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
 	Wire.write((int)(address >> 8));			//  writes the first byte of the pointer address to the device
 	Wire.write((int)(address & 0xFF));			//  writes the second byte of the pointer address to the device
 	Wire.write(data);							//  writes the byte data to the EEPROM at the address specified above
 	Wire.endTransmission();						//  stops the write communication on the I2C
 	delay(10);
-	if (serialDebug == 0)
+	if ((serialDebug & 8) == 8)
 	{
 		Serial.print("Writing to address ");
 		Serial.print(address);
 		Serial.print(" - ");
 		Serial.println(data);
 	}
-	serialDebug = 0;
 }
 
 byte readEEPROM(int address)
 {
-	serialDebug = 1;
 	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
 	Wire.write((int)(address >> 8));			//  writes the first byte of the pointer address to the device
 	Wire.write((int)(address & 0xFF));			//  writes the second byte of the pointer address to the device
 	Wire.endTransmission(); 					//  stops the write communication on the I2C
 	Wire.requestFrom(EEPROM_DEV_ADDR, 1);		//  gets 1 byte of data from the device
 	data = Wire.read();							//  sets the value read to data
-	if (serialDebug == 0)
+	if ((serialDebug & 8) == 8)
 	{
 		Serial.print("Reading from address ");
 		Serial.print(address);
 		Serial.print(" - ");
 		Serial.println(data);
 	}
-	serialDebug = 0;
 	return data;								//  returns data to the previous call
 }
 

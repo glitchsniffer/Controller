@@ -67,7 +67,7 @@ void MenuTitle()
 							break;
 						case 5:
 							lcd.print("  Serial Debugging");
-							miMax = 1;
+							miMax = 6;
 							break;
 						case 6:
 							lcd.print("  Temp Read Delay");
@@ -531,15 +531,107 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					lcd.setCursor(0,2);
 					switch (m2Start)
 					{
+						byte readee;
+
 						case 0:
 							writeEEPROM(5,0);
 							serialDebug = readEEPROM(5);
-							lcd.print("     Set to ON");
+							lcd.print("  All Debugging OFF");
 							break;
 						case 1:
-							writeEEPROM(5,1);
+							writeEEPROM(5,255);
 							serialDebug = readEEPROM(5);
-							lcd.print("     Set to OFF");
+							lcd.print("  ALL Debugging ON");
+							break;
+						case 2:
+							readee = readEEPROM(5);
+							Serial.println(readee);
+							if ((readee & 1) == 1)			//  see if the 1st bit flag is set.
+							{
+								readee = readee - 1;		//  if it is set, turn it off
+								Serial.println(readee);
+								lcd.print("Disabled Tmp Sns Dbg");
+							}
+							else
+							{
+								readee = readee + 1;		//  if it is not set, turn it on
+								Serial.println(readee);
+								lcd.print("Enabled Tmp Sns Dbg");
+							}
+							writeEEPROM(5, readee);
+							serialDebug = readEEPROM(5);
+							break;
+						case 3:
+							readee = readEEPROM(5);
+							Serial.println(readee);
+							if ((readee & 2) == 2)			//  see if the 2nd bit flag is set.
+							{
+								readee = readee - 2;		//  if it is set, turn it off
+								Serial.println(readee);
+								lcd.print("Disabled Menu Dbg");
+							}
+							else
+							{
+								readee = readee + 2;		//  if it is not set, turn it on
+								Serial.println(readee);
+								lcd.print("Enabled Menu Dbg");
+							}
+							writeEEPROM(5, readee);
+							serialDebug = readEEPROM(5);
+							break;
+						case 4:
+							readee = readEEPROM(5);
+							Serial.println(readee);
+							if ((readee & 4) == 4)			//  see if the 3rd bit flag is set.
+							{
+								readee = readee - 4;		//  if it is set, turn it off
+								Serial.println(readee);
+								lcd.print("Disabled Alarm Dbg");
+							}
+							else
+							{
+								readee = readee + 4;		//  if it is not set, turn it on
+								Serial.println(readee);
+								lcd.print("Enabled Alarm Dbg");
+							}
+							writeEEPROM(5, readee);
+							serialDebug = readEEPROM(5);
+							break;
+						case 5:
+							readee = readEEPROM(5);
+							Serial.println(readee);
+							if ((readee & 8) == 8)			//  see if the 4th bit flag is set.
+							{
+								readee = readee - 8;		//  if it is set, turn it off
+								Serial.println(readee);
+								lcd.print("Disabled EEPROM Dbg");
+							}
+							else
+							{
+								readee = readee + 8;		//  if it is not set, turn it on
+								Serial.println(readee);
+								lcd.print("Enabled EEPROM Dbg");
+							}
+							writeEEPROM(5, readee);
+							serialDebug = readEEPROM(5);
+							break;
+						case 6:
+							readee = readEEPROM(5);
+							Serial.println(readee);
+							if ((readee & 16) == 16)		//  see if the 5th bit flag is set.
+							{
+								readee = readee - 16;		//  if it is set, turn it off
+								Serial.println(readee);
+								lcd.print("Disabled System Dbg");
+							}
+							else
+							{
+								readee = readee + 16;		//  if it is not set, turn it on
+								Serial.println(readee);
+								lcd.print("Enabled System Dbg");
+							}
+							writeEEPROM(5, readee);
+							serialDebug = readEEPROM(5);
 							break;
 					}
 					break;
