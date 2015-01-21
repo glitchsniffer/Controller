@@ -17,6 +17,9 @@
 #define __avr__
 #define F_CPU 16000000L
 #define __cplusplus
+#define GCC_VERSION 40301
+#define ARDUINO_ARCH_AVR
+#define ARDUINO_AVR_MEGA2560
 #define __inline__
 #define __asm__(x)
 #define __extension__
@@ -26,48 +29,37 @@
 #define __asm__ 
 #define __volatile__
 
-#define __builtin_va_list
+typedef void *__builtin_va_list;
 #define __builtin_va_start
 #define __builtin_va_end
-#define __DOXYGEN__
+//#define __DOXYGEN__
 #define __attribute__(x)
 #define NOINLINE __attribute__((noinline))
 #define prog_void
 #define PGM_VOID_P int
+
+#define NEW_H
             
 typedef unsigned char byte;
 extern "C" void __cxa_pure_virtual() {;}
-
-//
-//
-void AlarmAON();
-void AlarmAOFF();
-void RL_Toggle();
-void START_SCREEN();
-void LCD_Time_Display();
-void Display_Date();
-void DS18B20_Read();
-void printAddress(DeviceAddress deviceAddress);
-void MenuButtonPress();
-void writeEEPROM(int address, byte data);
-byte readEEPROM(int address);
-void factoryDefaultset();
-void eraseEEPROM();
-void MenuTitle();
-void MenuLoop();
-void MenuUp();
-void MenuDown();
-void MenuSelect();
-void MenuBack();
-void MenuDo();
-void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro);
-void MenuTimeSet ();
-void AlarmAON4();
-
-#include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
-#include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\mega\pins_arduino.h" 
-#include "D:\Users\Robbie\My Documents\GitHub\Controller\Controller.ino"
-#include "D:\Users\Robbie\My Documents\GitHub\Controller\Alarms.h"
-#include "D:\Users\Robbie\My Documents\GitHub\Controller\Alarms.ino"
-#include "D:\Users\Robbie\My Documents\GitHub\Controller\Menu_System.ino"
+#include <arduino.h>
+#include <pins_arduino.h> 
+#undef F
+#define F(string_literal) ((const PROGMEM char *)(string_literal))
+#undef cli
+#define cli()
+#define pgm_read_byte(address_short)
+#define pgm_read_word(address_short)
+#define pgm_read_word2(address_short)
+#define digitalPinToPort(P)
+#define digitalPinToBitMask(P) 
+#define digitalPinToTimer(P)
+#define analogInPinToBit(P)
+#define portOutputRegister(P)
+#define portInputRegister(P)
+#define portModeRegister(P)
+#include <Controller.ino>
+#include <Alarms.h>
+#include <Alarms.ino>
+#include <Menu_System.ino>
 #endif

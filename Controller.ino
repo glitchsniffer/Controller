@@ -31,7 +31,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 12;					//  Sets the build number for the current program
+int build = 13;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -58,6 +58,7 @@ byte larrow[8] = {B00000,B00010,B00110,B01110,B00110,B00010,B00000,};  //  set t
 byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};  //  set the lcd char for the down arrow symbol
 byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};  //  set the lcd char for the timer bell symbol
 byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set the lcd char for the relay on symbol
+
 	
 
 //  DEFINE BUTTON PINS
@@ -99,10 +100,10 @@ char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Cali
 		char* m2Items06[]={"", "Set Temp Read Delay", "" };
 		char* m2Items07[]={"", "Exit Erase EEPROM", "Erase EEPROM", "" };
 	char* m1Items1[]={"", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", ""};  //  setup menu item 2 for Timer Setup Min 0 Max 3
-		char* m2Items10[]={"", "Edit Timer 1", "Exit", ""};
-		char* m2Items11[]={"", "Edit Timer 2", "Exit", ""};
-		char* m2Items12[]={"", "Edit Timer 3", "Exit", ""};
-		char* m2Items13[]={"", "Edit Timer 4", "Exit", ""};
+		char* m2Items10[]={"", "Edit", "Exit", ""};
+		char* m2Items11[]={"", "Edit", "Exit", ""};
+		char* m2Items12[]={"", "Edit", "Exit", ""};
+		char* m2Items13[]={"", "Edit", "Exit", ""};
 	char* m1Items2[]={"", "Temp Sens 1 Add", "Temp Sens 2 Add", "Temp Sens 3 Add", "Temp Sens 4 Add", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
 		char* m2Items20[]={"", "Set Sens 1 Address", "Exit", ""};
 		char* m2Items21[]={"", "Set Sens 2 Address", "Exit", ""};
@@ -148,7 +149,8 @@ byte AlarmHourOff[8];		//	hour time the alarm will go off at
 byte AlarmMinOff[8];		//  minute time the alarm will go off at
 
 AlarmID_t ReadDelay_ID;		//  delay between reading the temperature sensors
-AlarmID_t AlarmID[8];		//  alarm IDs for each alarm
+AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
+AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
 
 
 //  WILL BE ABLE TO GET RID OF THESE WHEN THE ALARM FUNCTION IS COMPLETE AND THE OLD IS DELETED FROM THE MENU SYSTEM
@@ -179,39 +181,55 @@ void setup()
 	Serial.begin(115200);				//  start the serial port if debugging is on
 	Serial.println();
 
-	//  READ THE VARIABLES OUT OF THE EEPROM
-		//  NON USER SETTINGS
+	Serial.println(ReadDelay_ID);
+	Serial.println(AlarmIDOn_0);
+	Serial.println(AlarmIDOff_0);
 
+	//  SETUP THE RTC
+	setSyncProvider(RTC.get);		//  this function get the time from the RTC
+	if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
+	{
+		RTC_Status = 0;
+		Serial.println("Unable to get the RTC");
+	}
+	else{ Serial.println("RTC has set the system time"); }
+
+	//  READ THE VARIABLES OUT OF THE EEPROM
+	
+		//  READ NON USER SETTINGS FROM EEPROM
 		e2Empty = readEEPROM(0);			//	reads the e2Empty out to determine if it needs to set defaults
 		if (e2Empty == 0){factoryDefaultset();}
 		configID = readEEPROM(0);			//  reads the configID out
 
-		//  USER SETTINGS
+		//  READ USER SETTINGS FROM EEPROM
 		tempType = readEEPROM(20);			//  reads out user setting to selects between 0 = Celsius or 1 = Fahrenheit
 		tempPrecision = readEEPROM(21);		//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
 		tempReadDelay = readEEPROM(22);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
 		timeFormat = readEEPROM(23);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
 		backlightLevel = readEEPROM(24);	//	reads out the user setting to control the backlight level
 
-		//  ALARM SETTINGS
+		//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
 
+		ReadDelay_ID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to ReadDelayID
+		
 		//  THESE CAN BE DELETED WHENT HE ALARMS FUNCTION IS COMPLETE
 
-				AlarmEnable_0 = readEEPROM(100);	//  reads out alarm setting for enable flag
-				AlarmType_0 = readEEPROM(101);		//  reads out alarm setting for type flag
-				AlarmState_0 = readEEPROM(102);		//  reads out alarm setting for current state flag
-				AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
-				AlarmMinOn_0 = readEEPROM(104);		//  reads out alarm setting for the mins off
-				AlarmHourOff_0 = readEEPROM(105);	//  reads out alarm setting for the hour off
-				AlarmMinOff_0 = readEEPROM(106);	//  reads out alarm setting for the mins off
+				AlarmEnable_0 = readEEPROM(200);	//  reads out alarm setting for enable flag
+				AlarmType_0 = readEEPROM(201);		//  reads out alarm setting for type flag
+				AlarmState_0 = readEEPROM(202);		//  reads out alarm setting for current state flag
+				AlarmHourOn_0 = readEEPROM(104);	//  reads out alarm setting for the hour on
+				AlarmMinOn_0 = readEEPROM(105);		//  reads out alarm setting for the mins off
+				AlarmHourOff_0 = readEEPROM(106);	//  reads out alarm setting for the hour off
+				AlarmMinOff_0 = readEEPROM(107);	//  reads out alarm setting for the mins off
 
 		AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
 		AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
+	
 		if ((serialDebug & 4) == 4)
 		{
 			Serial.println();
 			Serial.println("ALARM EEPROM READING");
-			Serial.println("ID Type Rly HON MON HOFF MOFF");
+			Serial.println("ID IDON IDOFF Type Rly   ON     OFF");
 		}
 
 		for (int id = 0; id < 8; id++)		//  read each alarms values out of the EEPROM
@@ -223,21 +241,39 @@ void setup()
 			AlarmMinOn[id] = readEEPROM(105 + (id * 6));
 			AlarmHourOff[id] = readEEPROM(106 + (id * 6));
 			AlarmMinOff[id] = readEEPROM(107 + (id * 6));
-			if ((serialDebug & 4) == 4)	
-				{
-					Serial.print(id);
-					Serial.print("   ");
-					Serial.print(AlarmType[id]);
-					Serial.print("    ");
-					Serial.print(AlarmRelay[id]);
-					Serial.print("   ");
-					Serial.print(AlarmHourOn[id]);
-					Serial.print("   ");
-					Serial.print(AlarmMinOn[id]);
-					Serial.print("   ");
-					Serial.print(AlarmHourOff[id]);
-					Serial.print("   ");
+			AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmAON);
+			AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmAOFF);
+
+			if ((serialDebug & 4) == 4)
+			{
+				Serial.print(id);
+				Serial.print("    ");
+				Serial.print(AlarmIDOn[id]);
+				if (AlarmIDOn[id] >= 10){ Serial.print("   "); }
+				else { Serial.print("    "); }
+				Serial.print(AlarmIDOff[id]);
+				if (AlarmIDOff[id] >= 10){ Serial.print("   "); }
+				else { Serial.print("    "); }
+				Serial.print(AlarmType[id]);
+				Serial.print("    ");
+				Serial.print(AlarmRelay[id]);
+				Serial.print("   ");
+
+				if (AlarmHourOn[id] < 10){ Serial.print(" "); }
+				Serial.print(AlarmHourOn[id]);
+				Serial.print(":");
+				if (AlarmMinOn[id] < 10){Serial.print("0");
+					Serial.print(AlarmMinOn[id]);}
+				else{ Serial.print(AlarmMinOn[id]); }
+				Serial.print("  ");
+				if (AlarmHourOff[id] < 10){ Serial.print(" "); }
+				Serial.print(AlarmHourOff[id]);
+				Serial.print(":");
+				if (AlarmMinOff[id] < 10){
+					Serial.print("0");
 					Serial.println(AlarmMinOff[id]);
+				}
+				else{ Serial.println(AlarmMinOff[id]); }
 				}
 		}
 		serialDebug = readEEPROM(5);		//	read out the serial debug againg in case it was disable during the alarm print
@@ -250,6 +286,45 @@ void setup()
 			Serial.println(AlarmState);
 			Serial.println();
 		}
+		
+	//  SETUP ALARMS
+
+	
+	// Can delete these after getting the alarm function setup
+		AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
+		AlarmIDOff_0 = Alarm.alarmRepeat(AlarmHourOff_0, AlarmMinOff_0, 30, AlarmAOFF);
+
+			if ((serialDebug & 4) == 4)
+			{
+				int rd;
+				Serial.println();
+				Serial.print("Read Read Delay ID = ");
+				Serial.print(ReadDelay_ID);
+				Serial.print(" : ");
+				rd = Alarm.read(ReadDelay_ID);
+				Serial.println(rd);
+				Serial.print("Read Alarm A On ID = ");
+				Serial.print(AlarmIDOn_0);
+				Serial.print(" : ");
+				rd = Alarm.read(AlarmIDOn_0);
+				Serial.println(rd);
+				Serial.print("Read Alarm A Off ID = ");
+				Serial.print(AlarmIDOff_0);
+				rd = Alarm.read(AlarmIDOff_0);
+				Serial.print(" : ");
+				Serial.println(rd);
+				Serial.println();
+				time_t AlarmOn_0 = AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0);
+				time_t AlarmOff_0 = AlarmHMS(AlarmHourOff_0, AlarmMinOff_0, 0);
+				Serial.print("Setting On_0 HMS= ");
+				Serial.println(AlarmOn_0);
+				Serial.print("Setting Off_0 HMS = ");
+				Serial.println(AlarmOff_0);
+				Serial.println();
+				rd = Alarm.count();
+				Serial.println(rd);
+				Serial.println();
+			}
 
 	//  SETUP THE BUTTONS
 	pinMode(upButton, INPUT);		//  sets the UpButton to an input
@@ -290,49 +365,6 @@ void setup()
 	lcd.write(byte(6));
 	lcd.write(byte(7));
 	
-	//  SETUP THE RTC
-	setSyncProvider(RTC.get);		//  this function get the time from the RTC
-	if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
-	{	RTC_Status = 0;
-		Serial.println("Unable to get the RTC");
-	}
-	else{Serial.println("RTC has set the system time");}
-	
-	//  SETUP ALARMS
-	ReadDelay_ID = Alarm.timerRepeat(tempReadDelay,DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to ReadDelayID
-	AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
-	AlarmIDOff_0 = Alarm.alarmRepeat(AlarmHourOff_0, AlarmMinOff_0, 30, AlarmAOFF);
-
-	time_t AlarmOn_0 = AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0);
-	time_t AlarmOff_0 = AlarmHMS(AlarmHourOff_0, AlarmMinOff_0, 0);
-
-	if ((serialDebug & 4) == 4)
-	{
-		int rd;
-		Serial.println();
-		Serial.print("Read Read Delay ID = ");
-		Serial.print(ReadDelay_ID);
-		Serial.print(" : ");
-		rd = Alarm.read(ReadDelay_ID);
-		Serial.println(rd);
-		Serial.print("Read Alarm A On ID = ");
-		Serial.print(AlarmIDOn_0);
-		Serial.print(" : ");
-		rd = Alarm.read(AlarmIDOn_0);
-		Serial.println(rd);
-		Serial.print("Read Alarm A Off ID = ");
-		Serial.print(AlarmIDOff_0);
-		rd = Alarm.read(AlarmIDOff_0);
-		Serial.print(" : ");
-		Serial.println(rd);
-		Serial.println();
-		Serial.print("Setting On_0 HMS= ");
-		Serial.println(AlarmOn_0);
-		Serial.print("Setting Off_0 HMS = ");
-		Serial.println(AlarmOff_0);
-		Serial.println();
-	}
-
 	//  SETUP THE DS18B20 SENSORS
 	//  Check to see how many sensors are on the busses
 	for(int i=0;i<NUMBER_OF_BUS; i++)   //search each bus one by one
@@ -667,14 +699,18 @@ void factoryDefaultset()
 	writeEEPROM(27, 75);	//  writes the flow sensor user level to 75 or 75%
 
 	//  Alarm Settings
-	writeEEPROM(100, 0);	//  writes alarm enable to off
-	writeEEPROM(101, 0);	//  writes the alarm type to 0
-	writeEEPROM(102, 0);	//  writes the alarm state to off
-	writeEEPROM(103, 0);	//  writes the alarm on hour 0
-	writeEEPROM(104, 0);	//  writes the alarm on minute 0
- 	writeEEPROM(105, 0);	//  writes the alarm off hour 1
-	writeEEPROM(106, 0);	//  writes the alarm off minute 1
+	writeEEPROM(100, 0);	//  writes alarms enable flag to off
+	writeEEPROM(101, 0);	//  writes the alarm state flag to 0 or Off
 
+	for (int i = 0; i < 8; i++)		//	loop through all 8 alarms
+	{
+		writeEEPROM(102 + (i * 6), 0);	//  writes the alarm type to 0, Day Lights
+		writeEEPROM(103 + (i * 6), 0);	//	writes the relay trigger to relay 1
+		writeEEPROM(104 + (i * 6), 12);	//  writes the alarm on hour 12
+		writeEEPROM(105 + (i * 6), 11);	//  writes the alarm on minute 1
+		writeEEPROM(106 + (i * 6), 15);	//  writes the alarm off hour 23
+		writeEEPROM(107 + (i * 6), 1);	//  writes the alarm off minute 11
+	}
 	Serial.println("Factory Defaults Restored");
 }
 

@@ -83,34 +83,16 @@ void MenuTitle()
 					switch (m2Sel)
 					{
 					case 0:
-					{		  
-							int t = 0;
-							lcd.print("    Set Timer 1");
-							lcd.setCursor(0, 1);
-							lcd.print("ON-");
-							lcd.print(AlarmHourOn_0);
-							lcd.print(":");
-							lcd.print(AlarmMinOn_0);
-							lcd.print("/");
-							lcd.print("OFF-");
-							lcd.print(AlarmHourOff_0);
-							lcd.print(":");
-							lcd.print(AlarmMinOff_0);
-	
-							miMax = 1;
-							break;
-						}
-						case 1:
-						lcd.print("    Set Timer 2");
-						miMax = 1;
+						AlarmSetDisplay(m2Sel);
 						break;
-						case 2:
-						lcd.print("    Set Timer 3");
-						miMax = 1;
+					case 1:
+						AlarmSetDisplay(m2Sel);
 						break;
-						case 3:
-						lcd.print("    Set Timer 4");
-						miMax = 1;
+					case 2:
+						AlarmSetDisplay(m2Sel);
+						break;
+					case 3:
+						AlarmSetDisplay(m2Sel);
 						break;
 					}
 					break;
@@ -192,7 +174,7 @@ void MenuTitle()
 	int mmax = 1;			//	sets mmax = 1 for use to only print 3 lines.
 	mPoint = mStart;		//	set the starting position of the pointer
 	mmax = mPoint+3;		//  sets the ending position of the pointer to only print 3 lines
-	lcd.setCursor(0,2);		//  moves the lcd cursor to line 3
+	lcd.setCursor(0, 2);	//  moves the lcd cursor to line 3
 	lcd.write(byte(2));		//	prints the right arrow to indicate the current menu selection
 	mCur = 1;				//	sets the lcd cursor to start on line 1
 
@@ -205,21 +187,21 @@ void MenuTitle()
 		switch (mLevel)
 		{
 			case 0:
-				lcd.print(m0Items[mPoint]);
+				lcd.print(m0Items[mPoint]);				//	prints 1st level menu items
 				break;
 			case 1:
 				switch (m1Sel)
 				{
-					case 0:
+					case 0:								//  prints 2nd level System Config items
 						lcd.print(m1Items0[mPoint]);
 						break;
-					case 1:
+					case 1:								//	prints 2nd level Timer Setup items
 						lcd.print(m1Items1[mPoint]);
 						break;
-					case 2:
+					case 2:								//	prints 2nd level Sensor Addr Config items
 						lcd.print(m1Items2[mPoint]);
 						break;
-					case 3:
+					case 3:								//	prints 2nd level Calibration items
 						lcd.print(m1Items3[mPoint]);
 						break;
 				}
@@ -227,7 +209,7 @@ void MenuTitle()
 			case 2:
 				switch (m1Sel)
 				{
-					case 0:
+					case 0:										//	prints 3rd level System Config Items
 						switch (m2Sel)
 						{
 							case 0:
@@ -256,7 +238,7 @@ void MenuTitle()
 								break;
 						}
 						break;
-					case 1:
+					case 1:										//	prints 3rd level Timer Setup Items
 						switch (m2Sel)
 						{
 							case 0:
@@ -273,7 +255,7 @@ void MenuTitle()
 								break;
 						}
 						break;
-					case 2:
+					case 2:										//	prints 3rd level Sensor Addr Config Items
 						switch (m2Sel)
 						{
 							case 0:
@@ -290,7 +272,7 @@ void MenuTitle()
 								break;
 						}
 						break;
-					case 3:
+					case 3:										//	prints 3rd level Calibration Items
 						switch (m2Sel)
 						{
 							case 0:
@@ -511,7 +493,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						case 0:
 //							int blBright = 0;
 							backlightLevel = readEEPROM(23);
-							MenuNumSel(23,backlightLevel,1,255,5,100);
+							MenuNumSel(23, backlightLevel, 1, 255, 5, 0, 0, 100);
 							backlightLevel = readEEPROM(23);
 							break;
 					}
@@ -642,7 +624,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 						case 0:
 						tempReadDelay = readEEPROM(22);
-						MenuNumSel(22,tempReadDelay,1,60,1,200);
+						MenuNumSel(22, tempReadDelay, 1, 60, 1, 0, 0, 200);
 						tempReadDelay = readEEPROM(22);
 						Alarm.write(ReadDelay_ID, tempReadDelay);
 						Alarm.disable(ReadDelay_ID);
@@ -651,6 +633,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					}
 					break;
 				case 7:
+					lcd.setCursor(0, 0);
 					lcd.print("    Erase EEPROM");
 					lcd.setCursor(0, 2);
 					switch (m2Start)
@@ -661,6 +644,10 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					case 1:
 						lcd.print("   Erasing EEPROM");
 						eraseEEPROM();
+						lcd.clear();
+						lcd.setCursor(0, 0);
+						lcd.print("    Erase EEPROM");
+						lcd.setCursor(0, 2);
 						lcd.print("   Erase Complete");
 						break;
 					}
@@ -670,125 +657,16 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 		case 1:		//  timer setup menu items
 			switch (m2Sel)
 			{
-				case 0:
-				{
-					int rdon;
-					rdon = Alarm.read(AlarmIDOn_0);
-					Serial.print("Read On Time from Alarmlib = ");
-					Serial.println(rdon);
-
-					int rdoff;
-					rdoff = Alarm.read(AlarmIDOff_0);
-					Serial.print("Read Off Time from Alarmlib = ");
-					Serial.println(rdoff);
-					Serial.println();
-
-					int trigger;
-					trigger = Alarm.getNextTrigger();
-					trigger = Alarm.getNextTrigger();
-					Serial.print("Next trigger before changing anything = ");
-					Serial.println(trigger);
-					Serial.println();
-
-
-					AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
-					AlarmMinOn_0 = readEEPROM(104);	//  reads out alarm setting for the mins off
-					AlarmHourOff_0 = readEEPROM(105); //  reads out alarm setting for the hour off
-					AlarmMinOff_0 = readEEPROM(106);	//  reads out alarm setting for the mins off
-
-					//  set the LCD screen up for the Hour ON edit
-					lcd.clear();
-					lcd.setCursor(0, 0);
-					lcd.print("    Timer 1 Edit");
-					lcd.setCursor(0, 1);
-					lcd.print("Set Timer 1 Hour ON");
-					MenuNumSel(103, AlarmHourOn_0, 0, 24, 1, 220);	//  call the number selection menu
-					AlarmHourOn_0 = readEEPROM(103);
-
-					//  set the LCD screen up for the Minute ON edit
-					lcd.clear();
-					lcd.setCursor(0, 0);
-					lcd.print("    Timer 1 Edit");
-					lcd.setCursor(0, 1);
-					lcd.print(" Set Timer 1 Min ON");
-					MenuNumSel(104, AlarmMinOn_0, 0, 59, 1, 220);
-					AlarmMinOn_0 = readEEPROM(104);
-
-					//  set the LCD screen up for the Hour OFF edit
-					lcd.clear();
-					lcd.setCursor(0, 0);
-					lcd.print("    Timer 1 Edit");
-					lcd.setCursor(0, 1);
-					lcd.print("Set Timer 1 Hour OFF");
-					MenuNumSel(105, AlarmHourOff_0, 0, 24, 1, 220);	//  call the number selection menu
-					AlarmHourOff_0 = readEEPROM(105);
-
-
-					//  set the LCD screen up for the Minute OFF edit
-					lcd.clear();
-					lcd.setCursor(0, 0);
-					lcd.print("    Timer 1 Edit");
-					lcd.setCursor(0, 1);
-					lcd.print(" Set Timer 1 Min OFF");
-					MenuNumSel(106, AlarmMinOff_0, 0, 59, 1, 220);
-					AlarmMinOff_0 = readEEPROM(106);
-
-/*					//  read the new alarm times from the EEPROM
-
-					AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
-					AlarmMinOn_0 = readEEPROM(104);	//  reads out alarm setting for the mins off
-					AlarmHourOff_0 = readEEPROM(105); //  reads out alarm setting for the hour off
-					AlarmMinOff_0 = readEEPROM(106);	//  reads out alarm setting for the mins off
-*/
-					//  write the alarms to the TimeAlarms library
-					time_t setAlarmTimeOn = AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0);
-					time_t setAlarmTimeOff = AlarmHMS(AlarmHourOff_0, AlarmMinOff_0, 30);
-					time_t currentTime = AlarmHMS(hour(), minute(), second() - 2);
-
-
-					//AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
-					//AlarmIDOff_0 = Alarm.alarmRepeat(AlarmHourOff_0, AlarmMinOff_0, 30, AlarmAOFF);
-
-
-					trigger = Alarm.getNextTrigger();
-					Serial.print("Next trigger Time Before writing = ");
-					Serial.println(trigger);
-					Serial.println();
-
-					Serial.print("My On: ");
-					Serial.print(setAlarmTimeOn);
-					Alarm.free(AlarmIDOn_0);
-					AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
-					
-					rdon = Alarm.read(AlarmIDOn_0);
-					Serial.print(" - Set On: ");
-					Serial.println(rdon);
-					Serial.println();
-
-					trigger = Alarm.getNextTrigger();
-					Serial.print("Next trigger After Freeing and Enabling= ");
-					Serial.println(trigger);
-					
-					trigger = Alarm.getNextTrigger();
-					Serial.print("Next trigger Time After On write = ");
-					Serial.println(trigger);
-					Serial.println();
-
-					Serial.println();
-					Serial.print("My Off: ");
-					Serial.print(setAlarmTimeOff);
-					Alarm.disable(AlarmIDOff_0);
-					Alarm.write(AlarmIDOff_0, setAlarmTimeOff);
-					Alarm.enable(AlarmIDOff_0);
-					
-					rdoff = Alarm.read(AlarmIDOff_0);
-					Serial.print(" - Set Off: ");
-					Serial.println(rdoff);
-
-					trigger = Alarm.getNextTrigger();
-					Serial.print("Next trigger Time After Off write = ");
-					Serial.println(trigger);
-				}
+				case 0:		//	Timer 1 editing
+					switch (m2Start)
+					{
+						case 0:
+							AlarmSet(0);
+							break;
+						case 1:
+							lcd.print("      Exiting");
+							break;
+					}
 					break;
 				case 1:
 					break;
@@ -812,13 +690,14 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 	MenuTitle();
 	return;
 }
-void MenuNumSel (int addr,int start,int min,int max,int step,int dmicro)
+void MenuNumSel(int addr, int start, int min, int max, int step, int curLine, int curRow, int dmicro)
 //  EEprom addr, # to start on, minimum number to select, maximum number to select, step size, speed to run through the selection
 {
 	int loopNumSel = 1;
 	
 	delay(150);
-	lcd.setCursor(9,2);
+	if (curLine == 0 && curRow == 0){ lcd.setCursor(9, 2); }
+	else{ lcd.setCursor(curRow, curLine); }
 	lcd.print(start);
 	
 	while (loopNumSel == 1)
@@ -949,11 +828,4 @@ void MenuTimeSet ()
 	}
 	return;
 	*/
-}
-void AlarmAON4()
-{
-	Serial.println("Alarm: - turn lights ON");
-	digitalWrite(relayPins[0], LOW);
-	lcd.setCursor(0, 3);
-	lcd.print("+");
 }
