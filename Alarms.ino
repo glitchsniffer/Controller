@@ -133,72 +133,78 @@ void AlarmSetDisplay(int id)
 	lcd.print(" Timer ");
 	lcd.print(id);
 	lcd.print(" is ");
+	//	check to see if the alarm is enabled or disabled
 	if ((AlarmEnable & (1 << id)) == (1 << id)){ lcd.print("Enabled"); }
 	else{ lcd.print("Disabled"); }
+	//	check the timeFormat and if it is 24 hour add 3 to the cursor postion
 	if (timeFormat == 0){ t = 3; }
 	lcd.setCursor(9 + t, 1);
 	lcd.print("On-");
 	switch (timeFormat)			//	use timeFormat to determine where to put the cursor if set for 12 hour time
 	{
-	case 0:
-		//	if 24 hour leave set the cursor to use 2 digits
-		if (AlarmHourOn[id] < 10){ lcd.setCursor(16, 1); }
-		lcd.print(AlarmHourOn[id]);
+		case 0:
+			//	if 24 hour leave set the cursor to use 2 digits
+			if (AlarmHourOn[id] < 10){ lcd.setCursor(16, 1); }
+			lcd.print(AlarmHourOn[id]);
 		break;
-	case 1:
-		//	if 12 hour and less than 10 set the cursor to account for # of hour digits
-		if (AlarmHourOn[id] < 10 || (AlarmHourOn[id] - 12) > 0){ lcd.setCursor(13, 1); }	//  Set cursor for single digits
-		else { lcd.setCursor(12, 1); }		//	set cursor for double digits
-			if (AlarmHourOn[id] >= 13)
-			{
-				lcd.print(AlarmHourOn[id] - 12);
-				lcd.setCursor(18, 1);
-				lcd.print("PM");
-			}
-			else if (AlarmHourOn[id] <= 12)
-			{
-				lcd.print(AlarmHourOn[id]);
-				lcd.setCursor(18, 1);
-				lcd.print("AM");
-			}
-			break;
+		case 1:
+			//	if 12 hour and less than 10 set the cursor to account for # of hour digits
+			if (AlarmHourOn[id] < 10 || (AlarmHourOn[id] - 12) > 0){ lcd.setCursor(13, 1); }	//  Set cursor for single digits
+			else { lcd.setCursor(12, 1); }		//	set cursor for double digits
+			lcd.setCursor(18, 1);				//	set cursor for the AM/PM postion
+				//  determine weather to display AM or PM
+				if (AlarmHourOn[id] >= 13)
+				{
+					lcd.print(AlarmHourOn[id] - 12);
+					lcd.print("PM");
+				}
+				else if (AlarmHourOn[id] <= 12)
+				{
+					lcd.print(AlarmHourOn[id]);
+					lcd.print("AM");
+				}
+		break;
 	}
-	lcd.setCursor(14 + t, 1);
+	lcd.setCursor(14 + t, 1);		//	set cursor back to te minutes position
 	lcd.print(":");
+	//	if the minutes is 2 digits pad a 0 to the single digit
 	if (AlarmMinOn[id] < 10){ lcd.print("0"); }
 	lcd.print(AlarmMinOn[id]);
 	lcd.setCursor(8 + t, 2);
 	lcd.print("Off-");
 	switch (timeFormat)			//	use timeFormat to determine where to put the cursor if set for 12 hour time
 	{
-	case 0:
-		//	if 24 hour leave set the cursor to use 2 digits
-		if (AlarmHourOff[id] < 10){ lcd.setCursor(12, 2); }
-		lcd.print(AlarmHourOff[id]);
-		break;
-	case 1:
-		//	if 12 hour and less than 10 set the cursor to account for # of hour digits
-		if (AlarmHourOff[id] < 10 || (AlarmHourOff[id] - 12) > 0){ lcd.setCursor(13, 2); }
-		else { lcd.setCursor(12, 2); }
-		if (AlarmHourOff[id] >= 13)
-		{
-			lcd.print(AlarmHourOff[id] - 12);
-			lcd.setCursor(18, 2);
-			lcd.print("PM");
-		}
-		else if (AlarmHourOff[id] <= 12)
-		{
+		case 0:
+			//	if 24 hour leave set the cursor to use 2 digits
+			if (AlarmHourOff[id] < 10){ lcd.setCursor(12, 2); }
 			lcd.print(AlarmHourOff[id]);
-			lcd.setCursor(18, 1);
-			lcd.print("AM");
-		}
+		break;
+		case 1:
+			//	if 12 hour and less than 10 set the cursor to account for # of hour digits
+			if (AlarmHourOff[id] < 10 || (AlarmHourOff[id] - 12) > 0){ lcd.setCursor(13, 2); }		//  Set cursor for single digits
+			else { lcd.setCursor(12, 2); }		//	set cursor for double digits
+			lcd.setCursor(18, 2);				//	set cursor for the AM/PM postion
+				//  determine weather to display AM or PM
+				if (AlarmHourOff[id] >= 13)
+				{
+					lcd.print(AlarmHourOff[id] - 12);
+
+					lcd.print("PM");
+				}
+				else if (AlarmHourOff[id] <= 12)
+				{
+					lcd.print(AlarmHourOff[id]);
+					lcd.setCursor(18, 1);
+					lcd.print("AM");
+				}
 		break;
 	}
-	lcd.setCursor(14 + t, 2);
+	lcd.setCursor(14 + t, 2);		//	set cursor back to te minutes position
 	lcd.print(":");
+	//	if the minutes is 2 digits pad a 0 to the single digit
 	if (AlarmMinOff[id] < 10){ lcd.print("0"); }
 	lcd.print(AlarmMinOff[id]);
-	lcd.setCursor(12, 3);
+	lcd.setCursor(13, 3);
 	lcd.print("Relay ");
 	lcd.print(AlarmRelay[id]);
 	miMax = 1;
