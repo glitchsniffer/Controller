@@ -1,43 +1,42 @@
 void AlarmSet(byte id)
 {
 	int rdon;
-	rdon = Alarm.read(AlarmIDOn_0);
+	rdon = Alarm.read(AlarmIDOn[id]);
 	Serial.print("Read On Time from Alarmlib = ");
 	Serial.println(rdon);
 
 	int rdoff;
-	rdoff = Alarm.read(AlarmIDOff_0);
+	rdoff = Alarm.read(AlarmIDOff[id]);
 	Serial.print("Read Off Time from Alarmlib = ");
 	Serial.println(rdoff);
 	Serial.println();
 
 	int trigger;
-	trigger = Alarm.getNextTrigger();
+	// trigger = Alarm.getNextTrigger();
 	trigger = Alarm.getNextTrigger();
 	Serial.print("Next trigger before changing anything = ");
 	Serial.println(trigger);
 	Serial.println();
 
-	AlarmEnable = readEEPROM(100);
-	AlarmState = readEEPROM(101);
-	
-	AlarmType[id] = readEEPROM(102 + (id * 6));
-	AlarmRelay[id] = readEEPROM(103 + (id * 6));
-	AlarmHourOn[id] = readEEPROM(104 + (id * 6));
-	AlarmMinOn[id] = readEEPROM(105 + (id * 6));
-	AlarmHourOff[id] = readEEPROM(106 + (id * 6));
-	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
-
 	//  set the LCD screen up for the Hour ON edit
 	lcd.clear();
-	lcd.setCursor(0, 0);
-	lcd.print(" Timer 1 is ");
-	if ((AlarmEnable & (1 << id)) == (1 << id)){Serial.print("Enabled");}
-	else{ Serial.print("Disabled"); }
+	lcd.setCursor(1, 0);
+	lcd.print(" Timer ");
+	lcd.print(id);
+	lcd.print(" is ");
+	//	check to see if the alarm is enabled or disabled
+	if ((AlarmEnable & (1 << id)) == (1 << id)){ lcd.print("Enabled"); }
+	else{ lcd.print("Disabled"); }
+	
+	//
+	//
+	//		Add the LCD time display function here
+	//
+	//
 
-
-	MenuNumSel(103, AlarmHourOn_0, 0, 23, 1, 0, 0, 220);	//  call the number selection menu
-	AlarmHourOn_0 = readEEPROM(104);
+	//  call the number selection menu to select the hour
+	MenuNumSel(104, AlarmHourOn[id], 0, 23, 1, 0, 0, 220);
+	AlarmHourOn[id] = readEEPROM(104);
 
 	//  set the LCD screen up for the Minute ON edit
 	lcd.clear();
@@ -129,83 +128,83 @@ void AlarmSetDisplay(int id)
 {
 	int t = 0;			//  time format modifier for 12 or 24 hour clocks
 
+	//	read all variables for the timer id from the EEPROM
+	AlarmEnable = readEEPROM(100);
+	AlarmState = readEEPROM(101);
+	AlarmType[id] = readEEPROM(102 + (id * 6));
+	AlarmRelay[id] = readEEPROM(103 + (id * 6));
+	AlarmHourOn[id] = readEEPROM(104 + (id * 6));
+	AlarmMinOn[id] = readEEPROM(105 + (id * 6));
+	AlarmHourOff[id] = readEEPROM(106 + (id * 6));
+	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
+
 	lcd.print(" Timer ");
 	lcd.print(id);
 	lcd.print(" is ");
 	//	check to see if the alarm is enabled or disabled
 	if ((AlarmEnable & (1 << id)) == (1 << id)){ lcd.print("Enabled"); }
 	else{ lcd.print("Disabled"); }
+
 	//	check the timeFormat and if it is 24 hour add 3 to the cursor postion
 	if (timeFormat == 0){ t = 3; }
+
+	// set cursor and print ON-
 	lcd.setCursor(9 + t, 1);
-	lcd.print("On-");
-	switch (timeFormat)			//	use timeFormat to determine where to put the cursor if set for 12 hour time
-	{
-		case 0:
-			//	if 24 hour leave set the cursor to use 2 digits
-			if (AlarmHourOn[id] < 10){ lcd.setCursor(16, 1); }
-			lcd.print(AlarmHourOn[id]);
-		break;
-		case 1:
-			//	if 12 hour and less than 10 set the cursor to account for # of hour digits
-			if (AlarmHourOn[id] < 10 || (AlarmHourOn[id] - 12) > 0){ lcd.setCursor(13, 1); }	//  Set cursor for single digits
-			else { lcd.setCursor(12, 1); }		//	set cursor for double digits
-				//  determine weather to display AM or PM
-				if (AlarmHourOn[id] >= 13)
-				{
-					lcd.print(AlarmHourOn[id] - 12);
-					lcd.setCursor(18, 1);				//	set cursor for the AM/PM postion
-					lcd.print("PM");
-				}
-				else if (AlarmHourOn[id] <= 12)
-				{
-					lcd.print(AlarmHourOn[id]);
-					lcd.setCursor(18, 1);				//	set cursor for the AM/PM postion
-					lcd.print("AM");
-				}
-		break;
-	}
-	lcd.setCursor(14 + t, 1);		//	set cursor back to te minutes position
-	lcd.print(":");
-	//	if the minutes is 2 digits pad a 0 to the single digit
-	if (AlarmMinOn[id] < 10){ lcd.print("0"); }
-	lcd.print(AlarmMinOn[id]);
+	lcd.print("On ");
+	//	print the time on the display using 24 hour or 12 hour
+	if (timeFormat == 0){ AlarmLCDTime(15, 1, AlarmHourOn[id], AlarmMinOn[id]); }		//	24 hour
+	else { AlarmLCDTime(12, 1, AlarmHourOn[id], AlarmMinOn[id]); }						//	12 hour
+	
+	//	Set cursor and print OFF-
 	lcd.setCursor(8 + t, 2);
-	lcd.print("Off-");
-	switch (timeFormat)			//	use timeFormat to determine where to put the cursor if set for 12 hour time
-	{
-		case 0:
-			//	if 24 hour leave set the cursor to use 2 digits
-			if (AlarmHourOff[id] < 10){ lcd.setCursor(12, 2); }
-			lcd.print(AlarmHourOff[id]);
-		break;
-		case 1:
-			//	if 12 hour and less than 10 set the cursor to account for # of hour digits
-			if (AlarmHourOff[id] < 10 || (AlarmHourOff[id] - 12) > 0){ lcd.setCursor(13, 2); }		//  Set cursor for single digits
-			else { lcd.setCursor(12, 2); }		//	set cursor for double digits
-				//  determine weather to display AM or PM
-				if (AlarmHourOff[id] >= 13)
-				{
-					lcd.print(AlarmHourOff[id] - 12);
-					lcd.setCursor(18, 2);				//	set cursor for the AM/PM postion
-					lcd.print("PM");
-				}
-				else if (AlarmHourOff[id] <= 12)
-				{
-					lcd.print(AlarmHourOff[id]);
-					lcd.setCursor(18, 2);				//	set cursor for the AM/PM postion
-					lcd.print("AM");
-				}
-		break;
-	}
-	lcd.setCursor(14 + t, 2);		//	set cursor back to te minutes position
-	lcd.print(":");
-	//	if the minutes is 2 digits pad a 0 to the single digit
-	if (AlarmMinOff[id] < 10){ lcd.print("0"); }
-	lcd.print(AlarmMinOff[id]);
+	lcd.print("Off ");
+	//	print the time on the display using 24 hour or 12 hour
+	if (timeFormat == 0){ AlarmLCDTime(15, 2, AlarmHourOff[id], AlarmMinOff[id]); }		//	24 hour
+	else { AlarmLCDTime(12, 2, AlarmHourOff[id], AlarmMinOff[id]); }					//	12 hour
+
 	//	set cursor and print the relay number that the alarm is set to trigger
 	lcd.setCursor(13, 3);
 	lcd.print("Relay ");
 	lcd.print(AlarmRelay[id]);
 	miMax = 1;
+}
+
+void AlarmLCDTime(int row, int line, int hour, int min)
+{
+	//  set the initial cursor position
+	lcd.setCursor(row, line);
+
+	switch (timeFormat)			//	use timeFormat to determine where to put the cursor if set for 12 hour time
+	{
+	case 0:
+		//	if 24 hour leave set the cursor to use 2 digits
+		if (hour < 10){ lcd.setCursor(row + 1, line); }	//  Set cursor for single digits
+		lcd.print(hour);
+		break;
+	case 1:
+		//	if 12 hour and less than 10 set the cursor to account for # of hour digits
+		if (hour < 10 || (hour - 12) > 0){ lcd.setCursor(row + 1, line); }	//  Set cursor for single digits
+		else { lcd.setCursor(row, line); }		//	set cursor for double digits
+		//  determine weather to display AM or PM
+		if (hour >= 13)
+		{
+			lcd.print(hour - 12);
+			lcd.setCursor(row + 6, line);				//	set cursor for the AM/PM postion
+			lcd.print("PM");
+		}
+		else if (hour <= 12)
+		{
+			lcd.print(hour);
+			lcd.setCursor(row + 6, line);				//	set cursor for the AM/PM postion
+			lcd.print("AM");
+		}
+		break;
+	}
+	lcd.setCursor(row + 2, line);		//	set cursor back to the minutes position
+	lcd.print(":");
+	//	if the minutes is 2 digits pad a 0 to the single digit
+	if (min < 10){ lcd.print("0"); }
+	lcd.print(min);
+
+
 }
