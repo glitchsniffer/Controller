@@ -493,7 +493,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						case 0:
 //							int blBright = 0;
 							backlightLevel = readEEPROM(23);
-							MenuNumSel(23, backlightLevel, 1, 255, 5, 0, 0, 100);
+							MenuNumSel(23, backlightLevel, 1, 255, 5, 9, 2, 250);
 							backlightLevel = readEEPROM(23);
 							break;
 					}
@@ -624,7 +624,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 						case 0:
 						tempReadDelay = readEEPROM(22);
-						MenuNumSel(22, tempReadDelay, 1, 60, 1, 0, 0, 200);
+						MenuNumSel(22, tempReadDelay, 1, 60, 1, 9, 2, 200);
 						tempReadDelay = readEEPROM(22);
 						Alarm.write(ReadDelay_ID, tempReadDelay);
 						Alarm.disable(ReadDelay_ID);
@@ -690,14 +690,13 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 	MenuTitle();
 	return;
 }
-void MenuNumSel(int addr, int start, int min, int max, int step, int curLine, int curRow, int dmicro)
+void MenuNumSel(int addr, int start, int min, int max, int step, int col, int row, int dmicro)
 //  EEprom addr, # to start on, minimum number to select, maximum number to select, step size, speed to run through the selection
 {
 	int loopNumSel = 1;
 	
 	delay(250);
-	if (curLine == 0 && curRow == 0){ lcd.setCursor(9, 2); }
-	else{ lcd.setCursor(curRow, curLine); }
+	lcd.setCursor(col, row);
 	lcd.print(start);
 	
 	while (loopNumSel == 1)
@@ -712,18 +711,38 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int curLine, in
 				if (start < max)
 					{start = start + step;}
 				else{ start = max - max; }
-			lcd.setCursor(9,2);
+				if (start >= 100){ lcd.setCursor(col - 2, row); }
+				else if (start >= 10){
+					lcd.setCursor(col - 1, row);
+					lcd.print(" ");
+					lcd.setCursor(col - 1, row);
+				}
+				else if (start <10)
+				{
+					lcd.setCursor(col, row);
+					lcd.print("  ");
+					lcd.setCursor(col, row);
+				}
 			lcd.print(start);
-			lcd.print("   ");
 			}
 		if (Down == 1)
 			{
 				if (start > min)
 					{start = start-step;}
 				else{start = min + max;}
-			lcd.setCursor(9,2);
+				if (start >= 100){ lcd.setCursor(col - 2, row); }
+				else if (start >= 10){
+					lcd.setCursor(col - 2, row);
+					lcd.print(" ");
+					//lcd.setCursor(col - 1, row);
+				}
+				else if (start <10)
+				{
+					lcd.setCursor(col-2, row);
+					lcd.print("  ");
+					//lcd.setCursor(col, row);
+				}
 			lcd.print(start);
-			lcd.print("   ");
 			}
 		if (Right == 1)
 			{
