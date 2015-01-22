@@ -313,7 +313,7 @@ void MenuTitle()
 			mPoint = m2Start;
 			break;
 	}
-	delay(250);
+	delay(150);
 	
 //  If it just entered the menu system it will call the MenuLoop function.  Otherwise it will use the return to fall
 //  back to the MenuLoop.  This prevents an endless loop with no return and keeps the stack from piling up.  When the
@@ -695,7 +695,7 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int curLine, in
 {
 	int loopNumSel = 1;
 	
-	delay(150);
+	delay(250);
 	if (curLine == 0 && curRow == 0){ lcd.setCursor(9, 2); }
 	else{ lcd.setCursor(curRow, curLine); }
 	lcd.print(start);

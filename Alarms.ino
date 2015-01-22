@@ -128,7 +128,6 @@ void AlarmSet(byte id)
 void AlarmSetDisplay(int id)
 {
 	int t = 0;			//  time format modifier for 12 or 24 hour clocks
-	int ampm;			//  am/pm flag
 
 	lcd.print(" Timer ");
 	lcd.print(id);
@@ -151,16 +150,17 @@ void AlarmSetDisplay(int id)
 			//	if 12 hour and less than 10 set the cursor to account for # of hour digits
 			if (AlarmHourOn[id] < 10 || (AlarmHourOn[id] - 12) > 0){ lcd.setCursor(13, 1); }	//  Set cursor for single digits
 			else { lcd.setCursor(12, 1); }		//	set cursor for double digits
-			lcd.setCursor(18, 1);				//	set cursor for the AM/PM postion
 				//  determine weather to display AM or PM
 				if (AlarmHourOn[id] >= 13)
 				{
 					lcd.print(AlarmHourOn[id] - 12);
+					lcd.setCursor(18, 1);				//	set cursor for the AM/PM postion
 					lcd.print("PM");
 				}
 				else if (AlarmHourOn[id] <= 12)
 				{
 					lcd.print(AlarmHourOn[id]);
+					lcd.setCursor(18, 1);				//	set cursor for the AM/PM postion
 					lcd.print("AM");
 				}
 		break;
@@ -183,18 +183,17 @@ void AlarmSetDisplay(int id)
 			//	if 12 hour and less than 10 set the cursor to account for # of hour digits
 			if (AlarmHourOff[id] < 10 || (AlarmHourOff[id] - 12) > 0){ lcd.setCursor(13, 2); }		//  Set cursor for single digits
 			else { lcd.setCursor(12, 2); }		//	set cursor for double digits
-			lcd.setCursor(18, 2);				//	set cursor for the AM/PM postion
 				//  determine weather to display AM or PM
 				if (AlarmHourOff[id] >= 13)
 				{
 					lcd.print(AlarmHourOff[id] - 12);
-
+					lcd.setCursor(18, 2);				//	set cursor for the AM/PM postion
 					lcd.print("PM");
 				}
 				else if (AlarmHourOff[id] <= 12)
 				{
 					lcd.print(AlarmHourOff[id]);
-					lcd.setCursor(18, 1);
+					lcd.setCursor(18, 2);				//	set cursor for the AM/PM postion
 					lcd.print("AM");
 				}
 		break;
@@ -204,6 +203,7 @@ void AlarmSetDisplay(int id)
 	//	if the minutes is 2 digits pad a 0 to the single digit
 	if (AlarmMinOff[id] < 10){ lcd.print("0"); }
 	lcd.print(AlarmMinOff[id]);
+	//	set cursor and print the relay number that the alarm is set to trigger
 	lcd.setCursor(13, 3);
 	lcd.print("Relay ");
 	lcd.print(AlarmRelay[id]);
