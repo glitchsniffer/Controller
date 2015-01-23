@@ -1,7 +1,7 @@
 void AlarmSet(byte id)
 {
-	int t = 0;
-	if (timeFormat == 0){ t = 3; }
+	int t = 0;		//	variable for adding the time format to the cursor
+	if (timeFormat == 0){ t = 1; }
 
 	int rdon;
 	rdon = Alarm.read(AlarmIDOn[id]);
@@ -22,67 +22,115 @@ void AlarmSet(byte id)
 	Serial.println();
 
 	//  set the LCD screen up for the Hour ON edit
+	//  ***********************************************
+
 	lcd.clear();
 	lcd.setCursor(1, 0);
 	lcd.print("Timer ");
 	lcd.print(id);
-	lcd.print(" is ");
-	//	check to see if the alarm is enabled or disabled
-	if ((AlarmEnable & (1 << id)) == (1 << id)){ lcd.print("Enabled"); }
-	else{ lcd.print("Disabled"); }
+	lcd.print(" - On Time");
 
 	lcd.setCursor(0, 2);
 	lcd.print("Set");
-	if (timeFormat == 0){ lcd.setCursor(7,2); }
-	else { lcd.setCursor(6, 2); }
+	lcd.setCursor(0, 3);
+	lcd.print("Hour");
+
+	lcd.setCursor((6 + t), 2);
 	lcd.write(byte(3));
 	lcd.write(byte(3));
 	
-	if (timeFormat == 0){ AlarmLCDTime(8, 1, AlarmHourOn[id], AlarmMinOn[id]); }
-	else { AlarmLCDTime(7, 1, AlarmHourOn[id], AlarmMinOn[id]); }
-	//
-	//
+	//  print the time using t as the timeFormat variable
+	AlarmLCDTime((6 + t), 1, AlarmHourOn[id], AlarmMinOn[id]);
 
 	//  call the number selection menu to select the hour
-	MenuNumSel(104, AlarmHourOn[id], 0, 23, 1, 7, 1, 220);
-	AlarmHourOn[id] = readEEPROM(104);
+	MenuNumSel((104 + (id * 6)), AlarmHourOn[id], 0, 23, 1, (6 + t), 1, 250);
+	AlarmHourOn[id] = readEEPROM(104 + (id * 6));
 
-	/*
+	//  set the LCD screen up for the Minute On edit
+	//  ***********************************************
+
+	lcd.clear();
+	lcd.setCursor(1, 0);
+	lcd.print("Timer ");
+	lcd.print(id);
+	lcd.print(" - On Time");
+
+	lcd.setCursor(0, 2);
+	lcd.print("Set");
+	lcd.setCursor(0, 3);
+	lcd.print("Minute");
+
+	lcd.setCursor((9 + t), 2);
+	lcd.write(byte(3));
+	lcd.write(byte(3));
+
+	//  print the time using t as the timeFormat variable
+	AlarmLCDTime((6 + t), 1, AlarmHourOn[id], AlarmMinOn[id]);
+
+	//  call the number selection menu to select the hour
+	MenuNumSel((105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 250);
+	AlarmMinOn[id] = readEEPROM(105 + (id * 6));
 
 	//  set the LCD screen up for the Hour OFF edit
-	lcd.clear();
-	lcd.setCursor(0, 0);
-	lcd.print("    Timer 1 Edit");
-	lcd.setCursor(0, 1);
-	lcd.print("Set Timer 1 Hour OFF");
-	MenuNumSel(105, AlarmHourOff_0, 0, 24, 1, 0, 0, 220);	//  call the number selection menu
-	AlarmHourOff_0 = readEEPROM(106);
+	//  ***********************************************
 
+	lcd.clear();
+	lcd.setCursor(1, 0);
+	lcd.print("Timer ");
+	lcd.print(id);
+	lcd.print(" - Off Time");
+
+	lcd.setCursor(0, 2);
+	lcd.print("Set");
+	lcd.setCursor(0, 3);
+	lcd.print("Hour");
+
+	lcd.setCursor((6 + t), 2);
+	lcd.write(byte(3));
+	lcd.write(byte(3));
+
+	//  print the time using t as the timeFormat variable
+	AlarmLCDTime((6 + t), 1, AlarmHourOff[id], AlarmMinOff[id]);
+
+	//  call the number selection menu to select the hour
+	MenuNumSel((106 + (id * 6)), AlarmHourOff[id], 0, 23, 1, (6 + t), 1, 250);
+	AlarmHourOff[id] = readEEPROM(106 + (id * 6));
 
 	//  set the LCD screen up for the Minute OFF edit
+	//  ***********************************************
+
 	lcd.clear();
-	lcd.setCursor(0, 0);
-	lcd.print("    Timer 1 Edit");
-	lcd.setCursor(0, 1);
-	lcd.print(" Set Timer 1 Min OFF");
-	MenuNumSel(106, AlarmMinOff_0, 0, 59, 1, 0, 0, 220);
-	AlarmMinOff_0 = readEEPROM(107);
+	lcd.setCursor(1, 0);
+	lcd.print("Timer ");
+	lcd.print(id);
+	lcd.print(" - Off Time");
 
-						//  read the new alarm times from the EEPROM
+	lcd.setCursor(0, 2);
+	lcd.print("Set");
+	lcd.setCursor(0, 3);
+	lcd.print("Minute");
 
-	AlarmHourOn_0 = readEEPROM(103);	//  reads out alarm setting for the hour on
-	AlarmMinOn_0 = readEEPROM(104);	//  reads out alarm setting for the mins off
-	AlarmHourOff_0 = readEEPROM(105); //  reads out alarm setting for the hour off
-	AlarmMinOff_0 = readEEPROM(106);	//  reads out alarm setting for the mins off
-	*/
+	lcd.setCursor((9 + t), 2);
+	lcd.write(byte(3));
+	lcd.write(byte(3));
+
+	//  print the time using t as the timeFormat variable
+	AlarmLCDTime((6 + t), 1, AlarmHourOff[id], AlarmMinOff[id]);
+
+	//  call the number selection menu to select the hour
+	MenuNumSel((107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 250);
+	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
+
 	//  write the alarms to the TimeAlarms library
-	time_t setAlarmTimeOn = AlarmHMS(AlarmHourOn_0, AlarmMinOn_0, 0);
-	time_t setAlarmTimeOff = AlarmHMS(AlarmHourOff_0, AlarmMinOff_0, 30);
+	//  ***********************************************
+
+	time_t setAlarmTimeOn = AlarmHMS(AlarmHourOn[id], AlarmMinOn[id], 0);
+	time_t setAlarmTimeOff = AlarmHMS(AlarmHourOff[id], AlarmMinOff[id], 30);
 	time_t currentTime = AlarmHMS(hour(), minute(), second() - 2);
 
 
-	//AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
-	//AlarmIDOff_0 = Alarm.alarmRepeat(AlarmHourOff_0, AlarmMinOff_0, 30, AlarmAOFF);
+	AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmAON);
+	AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmAOFF);
 
 
 	trigger = Alarm.getNextTrigger();
@@ -92,10 +140,10 @@ void AlarmSet(byte id)
 
 	Serial.print("My On: ");
 	Serial.print(setAlarmTimeOn);
-	Alarm.free(AlarmIDOn_0);
-	AlarmIDOn_0 = Alarm.alarmRepeat(AlarmHourOn_0, AlarmMinOn_0, 0, AlarmAON);
+	Alarm.free(AlarmIDOn[id]);
+	AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmAON);
 
-	rdon = Alarm.read(AlarmIDOn_0);
+	rdon = Alarm.read(AlarmIDOn[id]);
 	Serial.print(" - Set On: ");
 	Serial.println(rdon);
 	Serial.println();
@@ -112,11 +160,11 @@ void AlarmSet(byte id)
 	Serial.println();
 	Serial.print("My Off: ");
 	Serial.print(setAlarmTimeOff);
-	Alarm.disable(AlarmIDOff_0);
-	Alarm.write(AlarmIDOff_0, setAlarmTimeOff);
-	Alarm.enable(AlarmIDOff_0);
+	Alarm.disable(AlarmIDOff[id]);
+	Alarm.write(AlarmIDOff[id], setAlarmTimeOff);
+	Alarm.enable(AlarmIDOff[id]);
 
-	rdoff = Alarm.read(AlarmIDOff_0);
+	rdoff = Alarm.read(AlarmIDOff[id]);
 	Serial.print(" - Set Off: ");
 	Serial.println(rdoff);
 
@@ -204,7 +252,7 @@ void AlarmLCDTime(int col, int line, int hour, int min)
 	}
 	lcd.setCursor(col + 2, line);		//	set cursor back to the minutes position
 	lcd.print(":");
-	//	if the minutes is 2 digits pad a 0 to the single digit
+	//	if the minutes is 1 digit pad a 0 to the single digit
 	if (min < 10){ lcd.print("0"); }
 	lcd.print(min);
 

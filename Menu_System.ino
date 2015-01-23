@@ -691,14 +691,18 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 	return;
 }
 void MenuNumSel(int addr, int start, int min, int max, int step, int col, int row, int dmicro)
-//  EEprom addr, # to start on, minimum number to select, maximum number to select, step size, speed to run through the selection
+//  EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
+//  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
 {
 	int loopNumSel = 1;
 	
 	delay(250);
-	lcd.setCursor(col, row);
+
+	if (start >= 100){ lcd.setCursor(col - 1, row); }
+	else if (start >= 10){ lcd.setCursor(col, row); }
+	else if (start < 10){ lcd.setCursor(col + 1, row); }
 	lcd.print(start);
-	
+
 	while (loopNumSel == 1)
 	{
 		int Down = digitalRead(downButton);
@@ -711,17 +715,32 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int col, int ro
 				if (start < max)
 					{start = start + step;}
 				else{ start = max - max; }
-				if (start >= 100){ lcd.setCursor(col - 2, row); }
+				//  this is to get rid of leading digits when it rolls down a digit
+				if (start >= 100){ lcd.setCursor(col - 1, row); }
+				
 				else if (start >= 10){
 					lcd.setCursor(col - 1, row);
-					lcd.print(" ");
-					lcd.setCursor(col - 1, row);
+					if (max >= 100){ lcd.print(" "); }
+					lcd.setCursor(col, row);
 				}
-				else if (start <10)
+
+				else if (start < 10)
 				{
-					lcd.setCursor(col, row);
-					lcd.print("  ");
-					lcd.setCursor(col, row);
+					lcd.setCursor(col - 1, row);
+					if (max >= 100){ lcd.print("  "); }
+					else
+					{
+						lcd.setCursor(col, row);
+						if (max == 59)
+						{
+							lcd.print("0");	//  this will account for minutes and pad a 0
+						}
+						else if (max != 59)
+						{
+							lcd.print(" ");
+						}
+					}
+					lcd.setCursor(col + 1, row);
 				}
 			lcd.print(start);
 			}
@@ -730,19 +749,32 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int col, int ro
 				if (start > min)
 					{start = start-step;}
 				else{start = min + max;}
-				if (start >= 100){ lcd.setCursor(col - 2, row); }
+				//  this is to get rid of leading digits when it rolls down a digit
+				if (start >= 100){ lcd.setCursor(col - 1, row); }
 				else if (start >= 10){
-					lcd.setCursor(col - 2, row);
-					lcd.print(" ");
-					//lcd.setCursor(col - 1, row);
+					lcd.setCursor(col - 1, row);
+					if (max >= 100){ lcd.print(" "); }
+					lcd.setCursor(col, row);
 				}
-				else if (start <10)
+				else if (start < 10)
 				{
-					lcd.setCursor(col-2, row);
-					lcd.print("  ");
-					//lcd.setCursor(col, row);
+					lcd.setCursor(col - 1, row);
+					if (max >= 100){ lcd.print("  "); }
+					else
+					{
+						lcd.setCursor(col, row);
+						if (max == 59)
+						{
+							lcd.print("0");	//  this will account for minutes and pad a 0
+						}
+						else if (max != 59)
+						{
+							lcd.print(" ");
+						}
+					}
+					lcd.setCursor(col + 1, row);
 				}
-			lcd.print(start);
+				lcd.print(start);
 			}
 		if (Right == 1)
 			{
