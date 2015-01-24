@@ -27,7 +27,7 @@ void MenuTitle()
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
-					miMax = 3;
+					miMax = 7;
 					break;
 				case 2:
 					lcd.print(" Sensor Addr Config");
@@ -92,6 +92,18 @@ void MenuTitle()
 						AlarmSetDisplay(m2Sel);
 						break;
 					case 3:
+						AlarmSetDisplay(m2Sel);
+						break;
+					case 4:
+						AlarmSetDisplay(m2Sel);
+						break;
+					case 5:
+						AlarmSetDisplay(m2Sel);
+						break;
+					case 6:
+						AlarmSetDisplay(m2Sel);
+						break;
+					case 7:
 						AlarmSetDisplay(m2Sel);
 						break;
 					}
@@ -668,15 +680,82 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							break;
 					}
 					break;
-				case 1:
+				case 1:		//	Timer 2 editing
+					switch (m2Start)
+					{
+					case 0:
+						AlarmSet(1);
+						break;
+					case 1:
+						lcd.print("      Exiting");
+						break;
+					}
 					break;
-				case 2:
+				case 2:		//	Timer 3 editing
+					switch (m2Start)
+					{
+					case 0:
+						AlarmSet(2);
+						break;
+					case 1:
+						lcd.print("      Exiting");
+						break;
+					}
 					break;
-				case 3:
+				case 3:		//	Timer 4 editing
+					switch (m2Start)
+					{
+					case 0:
+						AlarmSet(3);
+						break;
+					case 1:
+						lcd.print("      Exiting");
+						break;
+					}
 					break;
-				case 4:
+				case 4:		//	Timer 5 editing
+					switch (m2Start)
+					{
+					case 0:
+						AlarmSet(4);
+						break;
+					case 1:
+						lcd.print("      Exiting");
+						break;
+					}
 					break;
-				case 5:
+				case 5:		//	Timer 6 editing
+					switch (m2Start)
+					{
+					case 0:
+						AlarmSet(5);
+						break;
+					case 1:
+						lcd.print("      Exiting");
+						break;
+					}
+					break;
+				case 6:		//	Timer 7 editing
+					switch (m2Start)
+					{
+					case 0:
+						AlarmSet(6);
+						break;
+					case 1:
+						lcd.print("      Exiting");
+						break;
+					}
+					break;
+				case 7:		//	Timer 8 editing
+					switch (m2Start)
+					{
+					case 0:
+						AlarmSet(7);
+						break;
+					case 1:
+						lcd.print("      Exiting");
+						break;
+					}
 					break;
 			}
 			break;
@@ -685,7 +764,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 		case 3:		//  calibration menu items
 			break;
 	}
-	delay(2000);
+	delay(1000);
 	mLevel = mLevel-2;
 	MenuTitle();
 	return;
@@ -693,6 +772,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 void MenuNumSel(int addr, int start, int min, int max, int step, int col, int row, int dmicro)
 //  EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
 //  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
+//  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours.
 {
 	int loopNumSel = 1;
 	
@@ -709,77 +789,83 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int col, int ro
 		int Up = digitalRead(upButton);
 		int Right = digitalRead(rightButton);
 		int Left = digitalRead(leftButton);
-		
-		if (Up == 1)
-			{
-				if (start < max)
-					{start = start + step;}
-				else{ start = max - max; }
-				//  this is to get rid of leading digits when it rolls down a digit
-				if (start >= 100){ lcd.setCursor(col - 1, row); }
-				
-				else if (start >= 10){
-					lcd.setCursor(col - 1, row);
-					if (max >= 100){ lcd.print(" "); }
-					lcd.setCursor(col, row);
-				}
 
-				else if (start < 10)
-				{
-					lcd.setCursor(col - 1, row);
-					if (max >= 100){ lcd.print("  "); }
-					else
-					{
-						lcd.setCursor(col, row);
-						if (max == 59)
-						{
-							lcd.print("0");	//  this will account for minutes and pad a 0
-						}
-						else if (max != 59)
-						{
-							lcd.print(" ");
-						}
-					}
-					lcd.setCursor(col + 1, row);
-				}
-			lcd.print(start);
-			}
-		if (Down == 1)
+		if (Up == 1)
+		{
+			if (start < max)
 			{
-				if (start > min)
-					{start = start-step;}
-				else{start = min + max;}
-				//  this is to get rid of leading digits when it rolls down a digit
-				if (start >= 100){ lcd.setCursor(col - 1, row); }
-				else if (start >= 10){
-					lcd.setCursor(col - 1, row);
-					if (max >= 100){ lcd.print(" "); }
-					lcd.setCursor(col, row);
-				}
-				else if (start < 10)
-				{
-					lcd.setCursor(col - 1, row);
-					if (max >= 100){ lcd.print("  "); }
-					else
-					{
-						lcd.setCursor(col, row);
-						if (max == 59)
-						{
-							lcd.print("0");	//  this will account for minutes and pad a 0
-						}
-						else if (max != 59)
-						{
-							lcd.print(" ");
-						}
-					}
-					lcd.setCursor(col + 1, row);
-				}
-				lcd.print(start);
+				start = start + step;
 			}
+			else{ start = max - max; }
+			//  this is to get rid of leading digits when it rolls down a digit
+			if (start >= 100){ lcd.setCursor(col - 1, row); }
+
+			else if (start >= 10){
+				lcd.setCursor(col - 1, row);
+				if (max >= 100){ lcd.print(" "); }
+				lcd.setCursor(col, row);
+			}
+
+			else if (start < 10)
+			{
+				lcd.setCursor(col - 1, row);
+				if (max >= 100){ lcd.print("  "); }
+				else
+				{
+					lcd.setCursor(col, row);
+					if (max == 59)
+					{
+						lcd.print("0");	//  this will account for minutes and pad a 0
+					}
+					else if (max != 59)
+					{
+						lcd.print(" ");
+					}
+				}
+				lcd.setCursor(col + 1, row);
+			}
+			lcd.print(start);
+		}
+		if (Down == 1)
+		{
+			if (start > min)
+			{
+				start = start - step;
+			}
+			else{ start = min + max; }
+			//  this is to get rid of leading digits when it rolls down a digit
+			if (start >= 100){ lcd.setCursor(col - 1, row); }
+			else if (start >= 10){
+				lcd.setCursor(col - 1, row);
+				if (max >= 100){ lcd.print(" "); }
+				lcd.setCursor(col, row);
+			}
+			else if (start < 10)
+			{
+				lcd.setCursor(col - 1, row);
+				if (max >= 100){ lcd.print("  "); }
+				else
+				{
+					lcd.setCursor(col, row);
+					if (max == 59)
+					{
+						lcd.print("0");	//  this will account for minutes and pad a 0
+					}
+					else if (max != 59)
+					{
+						lcd.print(" ");
+					}
+				}
+				lcd.setCursor(col + 1, row);
+			}
+			lcd.print(start);
+		}
 		if (Right == 1)
 			{
+				lcd.setCursor(0, 2);
+				lcd.print("                    ");
 				lcd.setCursor(0, 3);
-				lcd.print("       Saving       ");
+				lcd.print("      Saving        ");
 				writeEEPROM(addr, start);
 				delay(150);
 				loopNumSel = 0;
@@ -787,7 +873,7 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int col, int ro
 		if (Left == 1)
 			{
 				lcd.setCursor(0,3);
-				lcd.print(" Exit Without Save");
+				lcd.print("  Exit Without Save  ");
 				delay(150);
 				loopNumSel = 0;
 			}

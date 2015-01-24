@@ -128,29 +128,21 @@ void AlarmSet(byte id)
 	time_t setAlarmTimeOff = AlarmHMS(AlarmHourOff[id], AlarmMinOff[id], 30);
 	time_t currentTime = AlarmHMS(hour(), minute(), second() - 2);
 
-
-	AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmAON);
-	AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmAOFF);
-
-
 	trigger = Alarm.getNextTrigger();
 	Serial.print("Next trigger Time Before writing = ");
 	Serial.println(trigger);
 	Serial.println();
 
+	Serial.println();
 	Serial.print("My On: ");
 	Serial.print(setAlarmTimeOn);
 	Alarm.free(AlarmIDOn[id]);
-	AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmAON);
+	AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmON);
 
 	rdon = Alarm.read(AlarmIDOn[id]);
 	Serial.print(" - Set On: ");
 	Serial.println(rdon);
 	Serial.println();
-
-	trigger = Alarm.getNextTrigger();
-	Serial.print("Next trigger After Freeing and Enabling= ");
-	Serial.println(trigger);
 
 	trigger = Alarm.getNextTrigger();
 	Serial.print("Next trigger Time After On write = ");
@@ -160,9 +152,8 @@ void AlarmSet(byte id)
 	Serial.println();
 	Serial.print("My Off: ");
 	Serial.print(setAlarmTimeOff);
-	Alarm.disable(AlarmIDOff[id]);
-	Alarm.write(AlarmIDOff[id], setAlarmTimeOff);
-	Alarm.enable(AlarmIDOff[id]);
+	Alarm.free(AlarmIDOff[id]);
+	AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmOFF);
 
 	rdoff = Alarm.read(AlarmIDOff[id]);
 	Serial.print(" - Set Off: ");
