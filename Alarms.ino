@@ -1,14 +1,18 @@
 void AlarmSet(byte id)
 {
+	if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop
 	int t = 0;		//	variable for adding the time format to the cursor
 	int rd;
 	if (timeFormat == 0){ t = 1; }		//  variable for adding the timeFormat to the cursor
 
 	//	read and print the next trigger time for AlarmIDOn[id]
 	rd = Alarm.getNextTrigger();
-	Serial.print("Next trigger before changing anything = ");
-	Serial.println(rd);
-	Serial.println();
+	if ((serialDebug & 4) == 4)
+	{
+		Serial.print("Next trigger before changing anything = ");
+		Serial.println(rd);
+		Serial.println();
+	}
 
 	//  set the LCD screen up for the Hour ON edit
 	//  ***********************************************
@@ -123,9 +127,13 @@ void AlarmSet(byte id)
 	Alarm.free(AlarmIDOff[id]);
 	AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmOFF);
 
-	rd = Alarm.getNextTrigger();
-	Serial.print("Next trigger Time After write = ");
-	Serial.println(rd);
+	if ((serialDebug & 4) == 4)
+	{
+		rd = Alarm.getNextTrigger();
+		Serial.print("Next trigger Time After write = ");
+		Serial.println(rd);
+	}
+	serialDebug = readEEPROM(5);		//	read out the serial debug againg in case it was disable during the alarm print
 }
 
 void AlarmSetDisplay(int id)
@@ -133,15 +141,16 @@ void AlarmSetDisplay(int id)
 	int t = 0;			//  time format modifier for 12 or 24 hour clocks
 
 	//	read all variables for the timer id from the EEPROM
-	AlarmEnable = readEEPROM(100);
-	AlarmState = readEEPROM(101);
-	AlarmType[id] = readEEPROM(102 + (id * 6));
-	AlarmRelay[id] = readEEPROM(103 + (id * 6));
-	AlarmHourOn[id] = readEEPROM(104 + (id * 6));
-	AlarmMinOn[id] = readEEPROM(105 + (id * 6));
-	AlarmHourOff[id] = readEEPROM(106 + (id * 6));
-	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
-
+	if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop
+		AlarmEnable = readEEPROM(100);
+		AlarmState = readEEPROM(101);
+		AlarmType[id] = readEEPROM(102 + (id * 6));
+		AlarmRelay[id] = readEEPROM(103 + (id * 6));
+		AlarmHourOn[id] = readEEPROM(104 + (id * 6));
+		AlarmMinOn[id] = readEEPROM(105 + (id * 6));
+		AlarmHourOff[id] = readEEPROM(106 + (id * 6));
+		AlarmMinOff[id] = readEEPROM(107 + (id * 6));
+		
 	lcd.print(" Timer ");
 	lcd.print(id);
 	lcd.print(" is ");
@@ -171,6 +180,7 @@ void AlarmSetDisplay(int id)
 	lcd.print("Relay ");
 	lcd.print(AlarmRelay[id]);
 	miMax = 1;
+	serialDebug = readEEPROM(5);		//	read out the serial debug againg in case it was disable during the alarm print
 }
 
 void AlarmLCDTime(int col, int line, int hour, int min)

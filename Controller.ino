@@ -92,7 +92,7 @@ char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Cali
 		char* m2Items02[]={"", "24 Hour", "12 Hour", ""};
 		char* m2Items03[]={"", "Set BL Brightness", ""};
 		char* m2Items04[]={"", "Need Date/Time Here", ""};
-		char* m2Items05[]={"", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "System"};
+		char* m2Items05[]={"", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "", "System", ""};
 		char* m2Items06[]={"", "Set Temp Read Delay", "" };
 		char* m2Items07[]={"", "Exit Erase EEPROM", "Erase EEPROM", "" };
 		char* m1Items1[] = { "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
@@ -207,8 +207,7 @@ void setup()
 
 		for (int id = 0; id < 8; id++)		//  read each of the alarms values out of the EEPROM
 		{
-			if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop
-			
+			if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
 			AlarmType[id] = readEEPROM(102 + (id * 6));
 			AlarmRelay[id] = readEEPROM(103 + (id * 6));
 			AlarmHourOn[id] = readEEPROM(104 + (id * 6));
@@ -455,7 +454,7 @@ void START_SCREEN()
 	
 void LCD_Time_Display()
 {
-	if ((serialDebug & 16) == 16){ Serial.println(second()); }
+	if ((serialDebug & 32) == 32){ Serial.println(second()); }
 	lcd.setCursor(0,0);
 	lcd.print("           ");
 	switch (timeFormat)
