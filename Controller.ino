@@ -17,9 +17,6 @@ int eePointer = 0;			//  Sets the pointer location to 0 initially
 byte data = 0;				//  Sets the value of data to be written to 0 initially
 
 
-//  FACTORY DEFAULTS SETUP
-//  ***********************************************
-
 //  CONFIGURATION SETUP
 //  ***********************************************
 byte e2Empty;				//	initializes the byte e2Emtpy
@@ -31,7 +28,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 13;					//  Sets the build number for the current program
+int build = 14;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -47,8 +44,8 @@ int today = 0;					//  Sets the today to the current date to display on the RTC
 #define D5 5
 #define D6 6
 #define D7 7
-
 LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
+
 
 //  SETUP CUSTOM CHARACTERS
 byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};  //  set the lcd char for the degree symbol
@@ -59,7 +56,6 @@ byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};  //  set t
 byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};  //  set the lcd char for the timer bell symbol
 byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set the lcd char for the relay on symbol
 
-	
 
 //  DEFINE BUTTON PINS
 //  ***********************************************
@@ -120,6 +116,7 @@ char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Cali
 		char* m2Items33[]={"", "Calibrate Sensor 4", "Exit", ""};
 		char* m2Items34[]={"", "Calibrate Flow Sens", "Exit", ""};
 
+
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
 
@@ -157,20 +154,6 @@ AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
 AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
 
 
-//  WILL BE ABLE TO GET RID OF THESE WHEN THE ALARM FUNCTION IS COMPLETE AND THE OLD IS DELETED FROM THE MENU SYSTEM
-/*
-		int AlarmEnable_0;
-		int AlarmType_0;
-		int AlarmState_0;
-		int AlarmHourOn_0;
-		int AlarmMinOn_0;
-		int AlarmHourOff_0;
-		int AlarmMinOff_0;
-
-		AlarmID_t AlarmIDOn_0;	//  Alarm A's on time ID
-		AlarmID_t AlarmIDOff_0;	//  Alarm A's off time ID
-
-		*/
 //  INITIALIZE THE RELAYS
 //  ***********************************************
 
@@ -222,9 +205,10 @@ void setup()
 			Serial.println("ID IDON IDOFF Type Rly   ON     OFF");
 		}
 
-		for (int id = 0; id < 8; id++)		//  read each alarms values out of the EEPROM
+		for (int id = 0; id < 8; id++)		//  read each of the alarms values out of the EEPROM
 		{
 			if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop
+			
 			AlarmType[id] = readEEPROM(102 + (id * 6));
 			AlarmRelay[id] = readEEPROM(103 + (id * 6));
 			AlarmHourOn[id] = readEEPROM(104 + (id * 6));
@@ -273,9 +257,9 @@ void setup()
 			int rd;
 			Serial.println();
 			Serial.print("Alarm Enable : ");
-			Serial.println(AlarmEnable);
+			Serial.println(AlarmEnable, BIN);
 			Serial.print("Alarm State : ");
-			Serial.println(AlarmState);
+			Serial.println(AlarmState, BIN);
 			Serial.print("Num of Alarms : ");
 			rd = Alarm.count();
 			Serial.println(rd);

@@ -1,24 +1,13 @@
 void AlarmSet(byte id)
 {
 	int t = 0;		//	variable for adding the time format to the cursor
-	if (timeFormat == 0){ t = 1; }
+	int rd;
+	if (timeFormat == 0){ t = 1; }		//  variable for adding the timeFormat to the cursor
 
-	int rdon;
-	rdon = Alarm.read(AlarmIDOn[id]);
-	Serial.print("Read On Time from Alarmlib = ");
-	Serial.println(rdon);
-
-	int rdoff;
-	rdoff = Alarm.read(AlarmIDOff[id]);
-	Serial.print("Read Off Time from Alarmlib = ");
-	Serial.println(rdoff);
-	Serial.println();
-
-	int trigger;
-	// trigger = Alarm.getNextTrigger();
-	trigger = Alarm.getNextTrigger();
+	//	read and print the next trigger time for AlarmIDOn[id]
+	rd = Alarm.getNextTrigger();
 	Serial.print("Next trigger before changing anything = ");
-	Serial.println(trigger);
+	Serial.println(rd);
 	Serial.println();
 
 	//  set the LCD screen up for the Hour ON edit
@@ -36,8 +25,8 @@ void AlarmSet(byte id)
 	lcd.print("Hour");
 
 	lcd.setCursor((6 + t), 2);
-	lcd.write(byte(3));
-	lcd.write(byte(3));
+	lcd.write(byte(3));		//  print the up arrow
+	lcd.write(byte(3));		//  print the up arrow
 	
 	//  print the time using t as the timeFormat variable
 	AlarmLCDTime((6 + t), 1, AlarmHourOn[id], AlarmMinOn[id]);
@@ -61,14 +50,14 @@ void AlarmSet(byte id)
 	lcd.print("Minute");
 
 	lcd.setCursor((9 + t), 2);
-	lcd.write(byte(3));
-	lcd.write(byte(3));
+	lcd.write(byte(3));		//  print the up arrow
+	lcd.write(byte(3));		//  print the up arrow
 
 	//  print the time using t as the timeFormat variable
 	AlarmLCDTime((6 + t), 1, AlarmHourOn[id], AlarmMinOn[id]);
 
 	//  call the number selection menu to select the hour
-	MenuNumSel((105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 250);
+	MenuNumSel((105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 175);
 	AlarmMinOn[id] = readEEPROM(105 + (id * 6));
 
 	//  set the LCD screen up for the Hour OFF edit
@@ -86,8 +75,8 @@ void AlarmSet(byte id)
 	lcd.print("Hour");
 
 	lcd.setCursor((6 + t), 2);
-	lcd.write(byte(3));
-	lcd.write(byte(3));
+	lcd.write(byte(3));		//  print the up arrow
+	lcd.write(byte(3));		//  print the up arrow
 
 	//  print the time using t as the timeFormat variable
 	AlarmLCDTime((6 + t), 1, AlarmHourOff[id], AlarmMinOff[id]);
@@ -111,8 +100,8 @@ void AlarmSet(byte id)
 	lcd.print("Minute");
 
 	lcd.setCursor((9 + t), 2);
-	lcd.write(byte(3));
-	lcd.write(byte(3));
+	lcd.write(byte(3));		//  print the up arrow
+	lcd.write(byte(3));		//  print the up arrow
 
 	//  print the time using t as the timeFormat variable
 	AlarmLCDTime((6 + t), 1, AlarmHourOff[id], AlarmMinOff[id]);
@@ -124,45 +113,19 @@ void AlarmSet(byte id)
 	//  write the alarms to the TimeAlarms library
 	//  ***********************************************
 
-	time_t setAlarmTimeOn = AlarmHMS(AlarmHourOn[id], AlarmMinOn[id], 0);
-	time_t setAlarmTimeOff = AlarmHMS(AlarmHourOff[id], AlarmMinOff[id], 30);
-	time_t currentTime = AlarmHMS(hour(), minute(), second() - 2);
-
-	trigger = Alarm.getNextTrigger();
-	Serial.print("Next trigger Time Before writing = ");
-	Serial.println(trigger);
-	Serial.println();
-
-	Serial.println();
-	Serial.print("My On: ");
-	Serial.print(setAlarmTimeOn);
+	//	free and write the alarm ON time to the TimeAlarmLibrary
+	//	i found that you must free the alarm and rewrite it using the same alarm ID in order for the next trigger time to update
 	Alarm.free(AlarmIDOn[id]);
 	AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmON);
 
-	rdon = Alarm.read(AlarmIDOn[id]);
-	Serial.print(" - Set On: ");
-	Serial.println(rdon);
-	Serial.println();
-
-	trigger = Alarm.getNextTrigger();
-	Serial.print("Next trigger Time After On write = ");
-	Serial.println(trigger);
-	Serial.println();
-
-	Serial.println();
-	Serial.print("My Off: ");
-	Serial.print(setAlarmTimeOff);
+	//	free and write the alarm OFF Time to the TimeAlarmLibrary
+	//	i found that you must free the alarm and rewrite it using the same alarm ID in order for the next trigger time to update
 	Alarm.free(AlarmIDOff[id]);
 	AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmOFF);
 
-	rdoff = Alarm.read(AlarmIDOff[id]);
-	Serial.print(" - Set Off: ");
-	Serial.println(rdoff);
-
-	trigger = Alarm.getNextTrigger();
-	Serial.print("Next trigger Time After Off write = ");
-	Serial.println(trigger);
-
+	rd = Alarm.getNextTrigger();
+	Serial.print("Next trigger Time After write = ");
+	Serial.println(rd);
 }
 
 void AlarmSetDisplay(int id)

@@ -265,6 +265,18 @@ void MenuTitle()
 							case 3:
 								lcd.print(m2Items13[mPoint]);
 								break;
+							case 4:
+								lcd.print(m2Items13[mPoint]);
+								break;
+							case 5:
+								lcd.print(m2Items13[mPoint]);
+								break;
+							case 6:
+								lcd.print(m2Items13[mPoint]);
+								break;
+							case 7:
+								lcd.print(m2Items13[mPoint]);
+								break;
 						}
 						break;
 					case 2:										//	prints 3rd level Sensor Addr Config Items
@@ -778,11 +790,13 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int col, int ro
 	
 	delay(250);
 
+	//	set the cursor depending on the number of digits and print the starting number
 	if (start >= 100){ lcd.setCursor(col - 1, row); }
 	else if (start >= 10){ lcd.setCursor(col, row); }
 	else if (start < 10){ lcd.setCursor(col + 1, row); }
 	lcd.print(start);
 
+	//  Main loop for all of the buttons
 	while (loopNumSel == 1)
 	{
 		int Down = digitalRead(downButton);
@@ -792,11 +806,9 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int col, int ro
 
 		if (Up == 1)
 		{
-			if (start < max)
-			{
-				start = start + step;
-			}
-			else{ start = max - max; }
+			if (start < max){ start = start + step; }		//	add the step size to start to increment
+			else{ start = (min + (max - max)); }			//	reset to min if the max has been reached
+
 			//  this is to get rid of leading digits when it rolls down a digit
 			if (start >= 100){ lcd.setCursor(col - 1, row); }
 
@@ -828,11 +840,9 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int col, int ro
 		}
 		if (Down == 1)
 		{
-			if (start > min)
-			{
-				start = start - step;
-			}
-			else{ start = min + max; }
+			if (start > min){ start = start - step; }		//	add the step size to start to increment
+			else{ start = min + max; }						//	reset to min if the max has been reached
+
 			//  this is to get rid of leading digits when it rolls down a digit
 			if (start >= 100){ lcd.setCursor(col - 1, row); }
 			else if (start >= 10){
