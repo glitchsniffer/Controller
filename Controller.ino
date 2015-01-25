@@ -28,7 +28,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 14;					//  Sets the build number for the current program
+int build = 15;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -86,7 +86,7 @@ int miMax = 0;			//  current selected menu item for purposes of up and down move
 int mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
 
 char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Calibration",""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 3
-	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", "Erase EEPROM", ""};  //  setup menu item 1 for System Config Min 0 Max 6
+	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", "Erase EEPROM", "Restore Defaults"};  //  setup menu item 1 for System Config Min 0 Max 6
 		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
 		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
 		char* m2Items02[]={"", "24 Hour", "12 Hour", ""};
@@ -95,7 +95,8 @@ char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Cali
 		char* m2Items05[]={"", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "", "System", ""};
 		char* m2Items06[]={"", "Set Temp Read Delay", "" };
 		char* m2Items07[]={"", "Exit Erase EEPROM", "Erase EEPROM", "" };
-		char* m1Items1[] = { "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
+		char* m2Items08[]={"", "Exit", "Restore Defaults", "" };
+		char* m1Items1[] ={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Edit", "Exit", ""};
 		char* m2Items11[]={"", "Edit", "Exit", ""};
 		char* m2Items12[]={"", "Edit", "Exit", ""};
@@ -157,7 +158,7 @@ AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
 //  INITIALIZE THE RELAYS
 //  ***********************************************
 
-int relayPins[] = {23,24,25,26,27,28,29,30};		//  Initialize the relay pins
+int relayPins[] = {22,23,24,25,26,27,28,29};		//  Initialize the relay pins
 int relayCount = 8;		//  Set the number of relays
 
 
@@ -377,12 +378,17 @@ void loop()
 
 void AlarmON()
 {	
-	byte id;
+	int id;
 	id = Alarm.getTriggeredAlarmId();
-	id = ((AlarmIDOn[id]-1)/2);
-	Serial.print("Alarm ID = ");
-	Serial.println(id);
-	Serial.println("Alarm: - turn lights ON");
+	Serial.print(id);
+	id = ((id - 1) / 2);
+	Serial.print("Alarm: ");
+	Serial.print(id);
+	Serial.print(" - turned lights ON at ");
+	Serial.print(hour());
+	Serial.print(":");
+	Serial.println(minute());
+
 	digitalWrite(relayPins[id], LOW);
 	lcd.setCursor(id, 3);
 	lcd.print("+");
@@ -398,12 +404,17 @@ void AlarmON()
 
 void AlarmOFF()
 {
-	byte id;
+	int id;
 	id = Alarm.getTriggeredAlarmId();
-	id = ((AlarmIDOn[id] - 2) / 2);
-	Serial.print("Alarm ID = ");
-	Serial.println(id);
-	Serial.println("Alarm: - turn lights OFF");
+	Serial.print(id);
+	id = ((id - 2) / 2);
+	Serial.print("Alarm: ");
+	Serial.print(id);
+	Serial.print(" -turned lights OFF at");
+	Serial.print(hour());
+	Serial.print(":");
+	Serial.println(minute());
+
 	digitalWrite(relayPins[id], HIGH);
 	lcd.setCursor(id, 3);
 	lcd.print("-");
@@ -426,7 +437,7 @@ void RL_Toggle()
 	for (int relay = 0; relay < relayCount; relay++){		
 		digitalWrite(relayPins[relay], HIGH);
 		lcd.setCursor(relay,3);
-		lcd.print(" ");
+		lcd.print("-");
 		delay(100);}
 	for (int relay = 0; relay < relayCount; relay++){
 	digitalWrite(relayPins[relay], HIGH);
@@ -642,7 +653,7 @@ void factoryDefaultset()
 	writeEEPROM(2, 14);		//  writes the build year
 	writeEEPROM(3, 10);		//  writes the build month
 	writeEEPROM(4, 12);		//  writes the build day
-	writeEEPROM(5, 0);		//	writes the serialDebug value = 1 or OFF
+	writeEEPROM(5, 12);					//	writes the serialDebug value = 1 or OFF
 
 	//  User Settings
 	writeEEPROM(20, 1);		//  writes the tempType value = 1 or Fahrenheit
@@ -662,10 +673,10 @@ void factoryDefaultset()
 	{
 		writeEEPROM(102 + (i * 6), 0);	//  writes the alarm type to 0, Day Lights
 		writeEEPROM(103 + (i * 6), 0);	//	writes the relay trigger to relay 1
-		writeEEPROM(104 + (i * 6), 12);	//  writes the alarm on hour 12
-		writeEEPROM(105 + (i * 6), 11);	//  writes the alarm on minute 1
-		writeEEPROM(106 + (i * 6), 15);	//  writes the alarm off hour 23
-		writeEEPROM(107 + (i * 6), 1);	//  writes the alarm off minute 11
+		writeEEPROM(104 + (i * 6), 1);	//  writes the alarm on hour 12
+		writeEEPROM(105 + (i * 6), 25+i);	//  writes the alarm on minute 1
+		writeEEPROM(106 + (i * 6), 1);	//  writes the alarm off hour 23
+		writeEEPROM(107 + (i * 6), 25+i);	//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");
 }

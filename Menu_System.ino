@@ -23,7 +23,7 @@ void MenuTitle()
 			{
 				case 0:
 					lcd.print("   System Config");
-					miMax = 9;
+					miMax = 10;
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
@@ -75,6 +75,10 @@ void MenuTitle()
 							break;
 						case 7:
 							lcd.print("    Erase EEPROM");
+							miMax = 1;
+							break;
+						case 8:
+							lcd.print("  Restore Defaults");
 							miMax = 1;
 							break;
 					}
@@ -247,6 +251,9 @@ void MenuTitle()
 								break;
 							case 7:
 								lcd.print(m2Items07[mPoint]);
+								break;
+							case 8:
+								lcd.print(m2Items08[mPoint]);
 								break;
 						}
 						break;
@@ -677,6 +684,25 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						lcd.print("    Erase EEPROM");
 						lcd.setCursor(0, 2);
 						lcd.print("   Erase Complete");
+						break;
+					}
+					break;
+				case 8:
+					lcd.setCursor(0, 0);
+					lcd.print("  Restore Defaults");
+					lcd.setCursor(0, 2);
+					switch (m2Start)
+					{
+					case 0:
+						lcd.print("      Exiting");
+						break;
+					case 1:
+						lcd.print(" Restoring Defaults");
+						serialDebug = (serialDebug | 8);
+						factoryDefaultset();
+						lcd.clear();
+						lcd.setCursor(0, 2);
+						lcd.print(" Defaults Restored");
 						break;
 					}
 					break;
