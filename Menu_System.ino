@@ -539,7 +539,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 						case 0:
 							MenuTimeSet();
-							break;							
+							break;
 					}
 					break;
 				case 5:
@@ -811,10 +811,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 	MenuTitle();
 	return;
 }
-void MenuNumSel(int addr, int start, int min, int max, int step, int col, int row, int dmicro)
+int MenuNumSel(int addr, int start, int min, int max, int step, int col, int row, int dmicro)
 //  EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
 //  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
-//  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours.
+//  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours
+//	If you are only displaying 1 digit, you need to set the col to -1 because all displays in this function are set to the 10's digit
 {
 	int loopNumSel = 1;
 	
@@ -919,7 +920,7 @@ void MenuNumSel(int addr, int start, int min, int max, int step, int col, int ro
 			}
 		delay(dmicro);
 	}
-	return;
+	return start	;
 }
 
 /*void MenuYesNo(int addr, int start)

@@ -28,7 +28,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 15;					//  Sets the build number for the current program
+int build = 16;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -86,7 +86,7 @@ int miMax = 0;			//  current selected menu item for purposes of up and down move
 int mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
 
 char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Calibration",""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 3
-	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", "Erase EEPROM", "Restore Defaults"};  //  setup menu item 1 for System Config Min 0 Max 6
+	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", "Erase EEPROM", "Restore Defaults", "" };  //  setup menu item 1 for System Config Min 0 Max 6
 		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
 		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
 		char* m2Items02[]={"", "24 Hour", "12 Hour", ""};
@@ -203,7 +203,7 @@ void setup()
 		{
 			Serial.println();
 			Serial.println("********ALARM EEPROM READING********");
-			Serial.println("ID IDON IDOFF Type Rly   ON     OFF");
+			Serial.println("ID IDON IDOFF Enable Type Rly   ON     OFF");
 		}
 
 		for (int id = 0; id < 8; id++)		//  read each of the alarms values out of the EEPROM
@@ -228,6 +228,8 @@ void setup()
 				Serial.print(AlarmIDOff[id]);
 				if (AlarmIDOff[id] >= 10){ Serial.print("   "); }
 				else { Serial.print("    "); }
+				if ((AlarmEnable & (1 << id)) == (1 << id)){ Serial.print(" ON    "); }
+				else{ Serial.print(" OFF   "); }
 				Serial.print(AlarmType[id]);
 				Serial.print("    ");
 				Serial.print(AlarmRelay[id]);
@@ -250,7 +252,7 @@ void setup()
 				else{ Serial.println(AlarmMinOff[id]); }
 			}
 		}
-		serialDebug = readEEPROM(5);		//	read out the serial debug againg in case it was disable during the alarm print
+		serialDebug = readEEPROM(5);		//	read out the serial debug again in case it was disable during the alarm print
 
 		if ((serialDebug & 4) == 4)
 		{
@@ -380,11 +382,10 @@ void AlarmON()
 {	
 	int id;
 	id = Alarm.getTriggeredAlarmId();
-	Serial.print(id);
 	id = ((id - 1) / 2);
 	Serial.print("Alarm: ");
 	Serial.print(id);
-	Serial.print(" - turned lights ON at ");
+	Serial.print(" - Triggered ON at ");
 	Serial.print(hour());
 	Serial.print(":");
 	Serial.println(minute());
@@ -406,11 +407,10 @@ void AlarmOFF()
 {
 	int id;
 	id = Alarm.getTriggeredAlarmId();
-	Serial.print(id);
 	id = ((id - 2) / 2);
 	Serial.print("Alarm: ");
 	Serial.print(id);
-	Serial.print(" -turned lights OFF at");
+	Serial.print(" - Triggered OFF at ");
 	Serial.print(hour());
 	Serial.print(":");
 	Serial.println(minute());
@@ -424,6 +424,7 @@ void AlarmOFF()
 		trigger = Alarm.getNextTrigger();
 		Serial.print("Next trigger after ALRM OFF: ");
 		Serial.println(trigger);
+		Serial.println();
 	}
 }
 
@@ -666,17 +667,17 @@ void factoryDefaultset()
 	writeEEPROM(27, 75);	//  writes the flow sensor user level to 75 or 75%
 
 	//  Alarm Settings
-	writeEEPROM(100, 0);	//  writes alarms enable flag to off
+	writeEEPROM(100, 18);	//  writes alarms enable flag to off
 	writeEEPROM(101, 0);	//  writes the alarm state flag to 0 or Off
 
 	for (int i = 0; i < 8; i++)		//	loop through all 8 alarms
 	{
 		writeEEPROM(102 + (i * 6), 0);	//  writes the alarm type to 0, Day Lights
 		writeEEPROM(103 + (i * 6), 0);	//	writes the relay trigger to relay 1
-		writeEEPROM(104 + (i * 6), 1);	//  writes the alarm on hour 12
-		writeEEPROM(105 + (i * 6), 25+i);	//  writes the alarm on minute 1
-		writeEEPROM(106 + (i * 6), 1);	//  writes the alarm off hour 23
-		writeEEPROM(107 + (i * 6), 25+i);	//  writes the alarm off minute 11
+		writeEEPROM(104 + (i * 6), 20);	//  writes the alarm on hour 12
+		writeEEPROM(105 + (i * 6), 31+i);	//  writes the alarm on minute 1
+		writeEEPROM(106 + (i * 6), 20);	//  writes the alarm off hour 23
+		writeEEPROM(107 + (i * 6), 38+i);	//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");
 }
