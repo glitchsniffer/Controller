@@ -667,7 +667,7 @@ void factoryDefaultset()
 	writeEEPROM(27, 75);	//  writes the flow sensor user level to 75 or 75%
 
 	//  Alarm Settings
-	writeEEPROM(100, 18);	//  writes alarms enable flag to off
+	writeEEPROM(100, 255);	//  writes alarms enable flag to off
 	writeEEPROM(101, 0);	//  writes the alarm state flag to 0 or Off
 
 	for (int i = 0; i < 8; i++)		//	loop through all 8 alarms
