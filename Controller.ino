@@ -373,8 +373,13 @@ void loop()
 		MenuTitle();
 		Serial.println("Exiting Menu");
 	}
-	if (RTC_Status==1){Display_Date();}						//  only calls Display_Date if the RTC has been set
-	if (RTC_Status==1){LCD_Time_Display();}					//  only calls LCD_Time_Display if the RTC has been set
+	if (RTC_Status==1){LCDDisplayDate();}						//  only calls LCDDisplayDate if the RTC has been set
+	//if (RTC_Status==1){LCDDisplayTime();}					//  only calls LCDDisplayTime if the RTC has been set
+	
+	// Dont think this is necessary to be an if statement.
+	/*if ((RTC_Status == 1)&&(timeFormat == 0)){ LCDTimeDisplay(1, 0, hour(), minute(), second(), 0); }
+	else { LCDTimeDisplay(0, 0, hour(), minute(), second(), 2); }*/
+	LCDTimeDisplay(0, 0, hour(), minute(), second(), 2);
 	Alarm.delay(1000);										//  uses the Alarm.delay to use the timer
 }
 
@@ -464,42 +469,63 @@ void START_SCREEN()
 	lcd.clear();
 }
 	
-void LCD_Time_Display()
-{
-	if ((serialDebug & 32) == 32){ Serial.println(second()); }
-	lcd.setCursor(0,0);
-	lcd.print("           ");
-	switch (timeFormat)
+void LCDTimeDisplay(int col, int line, int hour, int min, int sec, int mod)
+{	//	sec will add a seconds column if there is not a 99 in it.  unless you are displaying an actual time in seconds, you should make this 99
+	//  also sec will determine the position on the AM/PM on the display.
+	//	mod can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
+
+	//  set the initial cursor position
+	lcd.setCursor(col, line);
+
+	switch (timeFormat)			//	use timeFormat to determine where to put the cursor if set for 12 hour time
 	{
-		case 0:
-			if(hour() >= 10){lcd.setCursor(1,0);}
-				else{lcd.setCursor(1,0);
-				lcd.print('0');}
-			lcd.print(hour());
-			break;
-		case 1:
-			if(hourFormat12() >=10){lcd.setCursor(0,0);}
-				else{lcd.setCursor(1,0);}
-			lcd.print(hourFormat12());
-			break;
+	case 0:
+		//	if 24 hour leave set the cursor to use 2 digits
+		if (hour < 10){ lcd.setCursor(col + 1, line); }	//  Set cursor for single digits
+		lcd.print(hour);
+		break;
+	case 1:
+		//	if 12 hour and less than 10 set the cursor to account for # of hour digits
+		if (hour == 0){ hour = 12; }			//	if hour is midnight, add 12 to the display of the hour to make it 12 AM
+		else if (hour < 10 || ((hour - 12) > 0)){ lcd.setCursor(col + 1, line); }	//  Set cursor for single digits
+		else { lcd.setCursor(col, line); }		//	set cursor for double digits
+
+		//  determine weather to display AM or PM
+		if (hour >= 13)
+		{
+			lcd.print(hour - 12);
+			lcd.setCursor((col + 6 + mod), line);				//	set cursor for the AM/PM postion with the modifier
+			lcd.print("PM");
+		}
+		else if (hour <= 12)
+		{
+			lcd.print(hour);
+			lcd.setCursor((col + 6 + mod), line);				//	set cursor for the AM/PM postion with the modifier
+			lcd.print("AM");
+		}
+		break;
 	}
-		
+	lcd.setCursor(col + 2, line);		//	set cursor back to the minutes position
 	lcd.print(":");
 
-	if(minute()<10){lcd.print('0');
-	lcd.print(minute());}
-	else{lcd.print(minute());}
-	lcd.print(":");
-	
-	if(second()<10){lcd.print('0');
-	lcd.print(second());}
-	else{lcd.print(second());}
+	//	if the minutes is 1 digit pad a 0 to the single digit
+	if (min < 10){ lcd.print("0"); }
+	lcd.print(min);
 
-	if(isAM()==1 && timeFormat==1){lcd.print("AM");}
-	if(isAM()==0 && timeFormat==1){lcd.print("PM");}
+	//	if sec == 99 then dont print seconds.  else print the seconds out.
+	if (sec < 99)
+	{
+		lcd.print(":");
+		if (second() < 10)			//	if the seconds is 1 digit pad a 0 to the single digit
+		{
+			lcd.print("0");
+			lcd.print(second());
+		}
+		else { lcd.print(second()); }
+	}
 }
 
-void Display_Date()
+void LCDDisplayDate()
 {
 	if(day()==today){return;}		//	if the day hasn't changed, dont refresh it	
 	else{
