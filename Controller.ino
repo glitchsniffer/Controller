@@ -373,13 +373,8 @@ void loop()
 		MenuTitle();
 		Serial.println("Exiting Menu");
 	}
-	if (RTC_Status==1){LCDDisplayDate();}						//  only calls LCDDisplayDate if the RTC has been set
-	//if (RTC_Status==1){LCDDisplayTime();}					//  only calls LCDDisplayTime if the RTC has been set
-	
-	// Dont think this is necessary to be an if statement.
-	/*if ((RTC_Status == 1)&&(timeFormat == 0)){ LCDTimeDisplay(1, 0, hour(), minute(), second(), 0); }
-	else { LCDTimeDisplay(0, 0, hour(), minute(), second(), 2); }*/
-	LCDTimeDisplay(0, 0, hour(), minute(), second(), 2);
+	if (RTC_Status == 1){ LCDDateDisplay(); }						//  only calls LCDDateDisplay if the RTC has been set
+	LCDTimeDisplay(0, 0, hour(), minute(), second(), 0);
 	Alarm.delay(1000);										//  uses the Alarm.delay to use the timer
 }
 
@@ -490,6 +485,7 @@ void LCDTimeDisplay(int col, int line, int hour, int min, int sec, int mod)
 		else if (hour < 10 || ((hour - 12) > 0)){ lcd.setCursor(col + 1, line); }	//  Set cursor for single digits
 		else { lcd.setCursor(col, line); }		//	set cursor for double digits
 
+		if (sec != 99){ mod = mod + 2; }
 		//  determine weather to display AM or PM
 		if (hour >= 13)
 		{
@@ -525,7 +521,7 @@ void LCDTimeDisplay(int col, int line, int hour, int min, int sec, int mod)
 	}
 }
 
-void LCDDisplayDate()
+void LCDDateDisplay()
 {
 	if(day()==today){return;}		//	if the day hasn't changed, dont refresh it	
 	else{
