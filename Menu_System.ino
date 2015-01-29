@@ -913,6 +913,8 @@ int MenuNumSel(int addr, int start, int min, int max, int step, int col, int row
 			}
 		if (Left == 1)
 			{
+				lcd.setCursor(0, 2);
+				lcd.print("                    ");
 				lcd.setCursor(0,3);
 				lcd.print("  Exit Without Save  ");
 				delay(150);

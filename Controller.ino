@@ -28,7 +28,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 16;					//  Sets the build number for the current program
+int build = 17;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD

@@ -2,17 +2,21 @@ void AlarmSet(byte id)
 {
 	if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop
 	int t = 0;		//	variable for adding the time format to the cursor
-	int rd;
+	int rd;			//  variable for reading out variables from the EEPROM
 
 	if (timeFormat == 0){ t = 1; }		//  variable for adding the timeFormat to the cursor
 
 	//	read and print the next trigger time for AlarmIDOn[id]
 	rd = Alarm.getNextTrigger();
+
 	if ((serialDebug & 4) == 4)
 	{
+		Serial.println();
+		Serial.print("Setting Alarm ID: ");
+		Serial.println(id);
+		Serial.println("*****************************************");
 		Serial.print("Next trigger before changing anything = ");
 		Serial.println(rd);
-		Serial.println();
 	}
 
 	//  CHANGE THE HOUR ON TIME
@@ -119,7 +123,7 @@ void AlarmSet(byte id)
 	MenuNumSel((107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 250);
 	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
 
-	//  write the alarms to the TimeAlarms library
+	//  WRITE THE ALARMS TO THE TIMEALARMS LIBRARY
 	//  ***********************************************
 
 	//	free and write the alarm ON time to the TimeAlarmLibrary
@@ -164,13 +168,44 @@ void AlarmSet(byte id)
 	//  call the number selection menu to select the relay
 	MenuNumSel((103 + (id * 6)), AlarmRelay[id], 0, 7, 1, 8, 1, 250);
 	AlarmRelay[id] = readEEPROM(103 + (id * 6));
+	
+	if ((serialDebug & 4) == 4)
+	{
+		Serial.print("Relay set for ");
+		Serial.println(AlarmRelay[id]);
+	}
 
-	Serial.print("Alarm: ");
-	Serial.print(id);
-	Serial.print(" - ");
-	Serial.print("Relay set for ");
-	Serial.println(AlarmRelay[id]);
-	Serial.println();
+	//	SET THE TYPE OF RELAY FOR THIS ALARM
+	//  ***********************************************
+
+	//  set the LCD screen up for the enable/disable setting
+	lcd.clear();
+	lcd.setCursor(0, 0);
+	lcd.print("Timer ");
+	lcd.print(id);
+	lcd.print(" - Relay Type");
+
+	lcd.setCursor(0, 2);
+	lcd.print("0=Day");
+	lcd.setCursor(10, 2);
+	lcd.print("2=CO2");
+	lcd.setCursor(0, 3);
+	lcd.print("1=Night");
+	lcd.setCursor(10, 3);
+	lcd.print("3=Other");
+
+	lcd.setCursor(9, 2);
+	lcd.write(byte(3));		//  print the up arrow
+
+	//	call the numselmenu to select the type of the relay  1-4
+	MenuNumSel((102 + (id * 6)), AlarmType[id], 0, 3, 1, 8, 1, 250);
+	AlarmType[id] = readEEPROM(102 + (id * 6));
+
+	if ((serialDebug & 4) == 4)
+	{
+		Serial.print("Type set for: ");
+		Serial.println(AlarmType[id]);
+	}
 
 	//	SET THE ENABLE/DISABLE FLAG FOR THIS ALARM
 	//  ***********************************************
@@ -178,9 +213,12 @@ void AlarmSet(byte id)
 	//  set the LCD screen up for the enable/disable setting
 	lcd.clear();
 	lcd.setCursor(1, 0);
-	lcd.print("Timer ");
+	lcd.print(" Timer ");
 	lcd.print(id);
-	lcd.print(" - Enabled");
+	lcd.print(" is ");
+	//	check to see if the alarm is enabled or disabled
+	if ((AlarmEnable & (1 << id)) == (1 << id)){ lcd.print("Enabled"); }
+	else{ lcd.print("Disabled"); }
 	
 	lcd.setCursor(0, 2);
 	lcd.print("Enable");
@@ -190,13 +228,14 @@ void AlarmSet(byte id)
 	lcd.setCursor(9, 2);
 	lcd.write(byte(3));		//  print the up arrow
 
-
 	//  call the number selection menu to select enabled or disabled
-	Serial.print("Alarm: ");
-	Serial.println(id);
-	Serial.print("AlarmEnable: ");
-	Serial.print(AlarmEnable, BIN);
-	Serial.println(" - Original");
+	if ((serialDebug & 4) == 4)
+	{
+		Serial.print("AlarmEnable: ");
+		Serial.print(AlarmEnable, BIN);
+		Serial.println(" - Original");
+	}
+
 	int start;
 	if ((AlarmEnable & (1 << id)) == (1 << id)){ start = 1; }		//	Check to see if if the timer is enable or disabled
 	else{ start = 0; }
@@ -206,26 +245,27 @@ void AlarmSet(byte id)
 	int bit;
 	bit = 1 << id;
 
+	if ((serialDebug & 4) == 4){ Serial.print("AlarmEnable: "); }
+
 	if (start == rd)
 	{
-		Serial.print("AlarmEnable: ");
+		if ((serialDebug & 4) == 4)
+		{
 		Serial.print(AlarmEnable, BIN);
 		Serial.println(" - Unchanged");
-		Serial.println();
+		}
 	}
 	else
 	{
-		Serial.print("AlarmEnable: ");
 		AlarmEnable = AlarmEnable ^ bit;
-		Serial.print(AlarmEnable, BIN);
-		Serial.println(" - New");
 		writeEEPROM(100, AlarmEnable);
-		Serial.println();
-	}
-	Serial.println();
-	
+		if ((serialDebug & 4) == 4)
+		{
+			Serial.print(AlarmEnable, BIN);
+			Serial.println(" - New");
+		}
+	}	
 	serialDebug = readEEPROM(5);		//	read out the serial debug againg in case it was disable during the alarm print
-
 }
 
 void AlarmSetDisplay(int id)
