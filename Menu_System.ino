@@ -840,30 +840,29 @@ int MenuNumSel(int addr, int start, int min, int max, int step, int col, int row
 			if (start < max){ start = start + step; }		//	add the step size to start to increment
 			else{ start = (min + (max - max)); }			//	reset to min if the max has been reached
 
-			//  this is to get rid of leading digits when it rolls down a digit
+			//  gets rid of leading digits for the below cases
+
+			//  3 digits
 			if (start >= 100){ lcd.setCursor(col - 1, row); }
 
-			else if (start >= 10){
+			//  2 digits and it is >=10
+			else if (start >= 10)
+			{
 				lcd.setCursor(col - 1, row);
 				if (max >= 100){ lcd.print(" "); }
 				lcd.setCursor(col, row);
 			}
 
+			//	1 digit
 			else if (start < 10)
 			{
 				lcd.setCursor(col - 1, row);
-				if (max >= 100){ lcd.print("  "); }
+				if (max >= 100){ lcd.print("  "); }			//	pads 2 digits
 				else
 				{
 					lcd.setCursor(col, row);
-					if (max == 59)
-					{
-						lcd.print("0");	//  this will account for minutes and pad a 0
-					}
-					else if (max != 59)
-					{
-						lcd.print(" ");
-					}
+					if (max == 59){ lcd.print("0"); }		//  this will account for minutes and pad a 0
+					else if (max != 59){ lcd.print(" "); }	//  if normal digits will pad a space
 				}
 				lcd.setCursor(col + 1, row);
 			}

@@ -202,7 +202,7 @@ void setup()
 		if ((serialDebug & 4) == 4)
 		{
 			Serial.println();
-			Serial.println("********ALARM EEPROM READING********");
+			Serial.println("***********ALARM EEPROM READING***********");
 			Serial.println("ID IDON IDOFF Enable Type Rly   ON     OFF");
 		}
 
