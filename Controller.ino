@@ -28,7 +28,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 17;					//  Sets the build number for the current program
+int build = 18;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -374,7 +374,11 @@ void loop()
 		Serial.println("Exiting Menu");
 	}
 	if (RTC_Status == 1){ LCDDateDisplay(); }						//  only calls LCDDateDisplay if the RTC has been set
-	LCDTimeDisplay(0, 0, hour(), minute(), second(), 0);
+	
+	//	adjusts for 12 or 24 hour spacing on the LCD screen
+	if (timeFormat == 0){ LCDTimeDisplay(1, 0, hour(), minute(), second(), 0); }
+	else { LCDTimeDisplay(0, 0, hour(), minute(), second(), 0); }
+	
 	Alarm.delay(1000);										//  uses the Alarm.delay to use the timer
 }
 
@@ -477,6 +481,7 @@ void LCDTimeDisplay(int col, int line, int hour, int min, int sec, int mod)
 	case 0:
 		//	if 24 hour leave set the cursor to use 2 digits
 		if (hour < 10){ lcd.setCursor(col + 1, line); }	//  Set cursor for single digits
+		else { lcd.setCursor(col, line); }
 		lcd.print(hour);
 		break;
 	case 1:

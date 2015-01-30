@@ -818,14 +818,26 @@ int MenuNumSel(int addr, int start, int min, int max, int step, int col, int row
 //	If you are only displaying 1 digit, you need to set the col to -1 because all displays in this function are set to the 10's digit
 {
 	int loopNumSel = 1;
-	
+	int apm = 0;			//	variable for storing whether or not am or pm has rolled over.
+
 	delay(250);
 
 	//	set the cursor depending on the number of digits and print the starting number
-	if (start >= 100){ lcd.setCursor(col - 1, row); }
-	else if (start >= 10){ lcd.setCursor(col, row); }
-	else if (start < 10){ lcd.setCursor(col + 1, row); }
-	lcd.print(start);
+
+	if ((start == 0) && (max == 23) && (timeFormat == 1))
+	{
+		lcd.setCursor(col, row);
+		start = start + 12;
+		lcd.print(start);
+		start = 0;
+	}
+	else
+	{
+		if (start >= 100){ lcd.setCursor(col - 1, row); }
+		else if (start >= 10){ lcd.setCursor(col, row); }
+		else if (start < 10){ lcd.setCursor(col + 1, row); }
+		lcd.print(start);
+	}
 
 	//  Main loop for all of the buttons
 	while (loopNumSel == 1)
@@ -835,71 +847,107 @@ int MenuNumSel(int addr, int start, int min, int max, int step, int col, int row
 		int Right = digitalRead(rightButton);
 		int Left = digitalRead(leftButton);
 
-		if (Up == 1)
+		//  gets rid of leading digits for the below cases
+
+		//  3 digits
+		if (start >= 100){ lcd.setCursor(col - 1, row); }
+
+		//  2 digits and it is >=10
+		else if (start >= 10)
 		{
-			if (start < max){ start = start + step; }		//	add the step size to start to increment
-			else{ start = (min + (max - max)); }			//	reset to min if the max has been reached
-
-			//  gets rid of leading digits for the below cases
-
-			//  3 digits
-			if (start >= 100){ lcd.setCursor(col - 1, row); }
-
-			//  2 digits and it is >=10
-			else if (start >= 10)
-			{
-				lcd.setCursor(col - 1, row);
-				if (max >= 100){ lcd.print(" "); }
-				lcd.setCursor(col, row);
-			}
-
-			//	1 digit
-			else if (start < 10)
-			{
-				lcd.setCursor(col - 1, row);
-				if (max >= 100){ lcd.print("  "); }			//	pads 2 digits
-				else
-				{
-					lcd.setCursor(col, row);
-					if (max == 59){ lcd.print("0"); }		//  this will account for minutes and pad a 0
-					else if (max != 59){ lcd.print(" "); }	//  if normal digits will pad a space
-				}
-				lcd.setCursor(col + 1, row);
-			}
-			lcd.print(start);
+			lcd.setCursor(col - 1, row);
+			if (max >= 100){ lcd.print(" "); }
+			lcd.setCursor(col, row);
 		}
-		if (Down == 1)
-		{
-			if (start > min){ start = start - step; }		//	add the step size to start to increment
-			else{ start = min + max; }						//	reset to min if the max has been reached
 
-			//  this is to get rid of leading digits when it rolls down a digit
-			if (start >= 100){ lcd.setCursor(col - 1, row); }
-			else if (start >= 10){
-				lcd.setCursor(col - 1, row);
-				if (max >= 100){ lcd.print(" "); }
-				lcd.setCursor(col, row);
-			}
-			else if (start < 10)
+		//	1 digit
+		else if (start < 10)
+		{
+			lcd.setCursor(col - 1, row);
+			if (max >= 100){ lcd.print("  "); }			//	pads 2 digits
+			else
 			{
-				lcd.setCursor(col - 1, row);
-				if (max >= 100){ lcd.print("  "); }
-				else
+				lcd.setCursor(col, row);
+				if (max == 59){ lcd.print("0"); }		//  this will account for minutes and pad a 0
+				else if (max != 59){ lcd.print(" "); }	//  if normal digits will pad a space
+			}
+			lcd.setCursor(col + 1, row);
+		}
+		//	max == 23, timeFormat == 1 and other if otption
+		if (max == 23)
+		{
+			if (timeFormat == 1)
+			{
+				if (start == 0)					//	if start is 12 am add 12 to print a 12
 				{
-					lcd.setCursor(col, row);
-					if (max == 59)
-					{
-						lcd.print("0");	//  this will account for minutes and pad a 0
-					}
-					else if (max != 59)
+					start = start + 12;
+					lcd.setCursor(col, row);	//	start thinks its a 1 so we have to adjust the cursor to the left 1 digit
+					lcd.print(start);
+					start = 0;
+					apm = 0;
+				}
+				else if (start == 12)			//	needed to print PM for noon and not subtract 12
+				{
+					apm = 1;
+					lcd.print(start);
+				}
+				else if ((start >= 13) && (start != 0))		//	subtract 12 from anything higher than noon
+				{
+					start = start - 12;
+					apm = 1;
+					if (start >= 10){ lcd.print(start);	}
+					else if (start <= 9)
 					{
 						lcd.print(" ");
+						lcd.setCursor(col + 1, row);
+						lcd.print(start);
+					}
+					start = start + 12;
+				}
+				else if (start <= 11)						//	<=11 need to account for a single digit while also setting to AM
+				{
+					apm = 0;
+					if (start >= 10){ lcd.print(start); }
+					else if (start <= 9)
+					{
+						lcd.print(" ");
+						lcd.setCursor(col + 1, row);
+						lcd.print(start);
 					}
 				}
-				lcd.setCursor(col + 1, row);
 			}
-			lcd.print(start);
+			//	adds the AM/PM printing to the display
+			if (timeFormat == 1)
+			{
+				switch (apm)
+				{
+				case 0:
+					lcd.setCursor(col + 6, row);
+					lcd.print("AM");
+					break;
+				case 1:
+					lcd.setCursor(col + 6, row);
+					lcd.print("PM");
+					break;
+				}
+			}
+			else { lcd.print(start); }			//	print start if timeFormat == 24 hour
 		}
+		else { lcd.print(start); }				//	print start if not time
+		
+		//	Directional button code
+		
+		if (Up == 1)
+			{
+				if (start < max){ start = start + step; }		//	add the step size to start to increment
+				else{ start = (min + (max - max)); }			//	reset to min if the max has been reached
+
+			}
+		if (Down == 1)
+			{
+				if (start > min){ start = start - step; }		//	add the step size to start to increment
+				else{ start = min + max; }						//	reset to min if the max has been reached
+			}
 		if (Right == 1)
 			{
 				lcd.setCursor(0, 2);
