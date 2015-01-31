@@ -23,7 +23,7 @@ void MenuTitle()
 			{
 				case 0:
 					lcd.print("   System Config");
-					miMax = 10;
+					miMax = 8;
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
@@ -527,7 +527,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						case 0:
 //							int blBright = 0;
 							backlightLevel = readEEPROM(23);
-							MenuNumSel(23, backlightLevel, 1, 255, 5, 9, 2, 250);
+							MenuNumSel(0, 23, backlightLevel, 1, 255, 5, 9, 2, 250);
 							backlightLevel = readEEPROM(23);
 							break;
 					}
@@ -659,7 +659,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 						case 0:
 						tempReadDelay = readEEPROM(22);
-						MenuNumSel(22, tempReadDelay, 1, 60, 1, 9, 2, 200);
+						MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
 						tempReadDelay = readEEPROM(22);
 						Alarm.write(ReadDelay_ID, tempReadDelay);
 						Alarm.disable(ReadDelay_ID);
@@ -811,10 +811,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 	MenuTitle();
 	return;
 }
-int MenuNumSel(int addr, int start, int min, int max, int step, int col, int row, int dmicro)
-//  EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
+int MenuNumSel(int type, int addr, int start, int min, int max, int step, int col, int row, int dmicro)
+//  type of display, EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
 //  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
 //  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours
+//  types are 0=normal numbers, 1=time, 2=yes/no, 3=enable/disable.  Add 128 to any number to disable writing to eeprom
 //	If you are only displaying 1 digit, you need to set the col to -1 because all displays in this function are set to the 10's digit
 {
 	int loopNumSel = 1;
@@ -873,8 +874,8 @@ int MenuNumSel(int addr, int start, int min, int max, int step, int col, int row
 			}
 			lcd.setCursor(col + 1, row);
 		}
-		//	max == 23, timeFormat == 1 and other if otption
-		if (max == 23)
+		//	Time type selection, timeFormat == 1 and other if otption
+		if ((type & 1) == 1)
 		{
 			if (timeFormat == 1)
 			{
@@ -933,6 +934,52 @@ int MenuNumSel(int addr, int start, int min, int max, int step, int col, int row
 			}
 			else { lcd.print(start); }			//	print start if timeFormat == 24 hour
 		}
+		
+		//	Yes/No type selection
+		else if ((type & 2) == 2)
+		{
+			switch (start)
+			{
+			case 0:
+				lcd.setCursor(col, row + 1);
+				lcd.write(byte(3));
+				lcd.write(byte(3));
+				lcd.write(byte(3));
+				lcd.setCursor(col, row);
+				lcd.print("No ");
+				break;
+			case 1:
+				lcd.setCursor(col, row + 1);
+				lcd.write(byte(3));
+				lcd.write(byte(3));
+				lcd.write(byte(3));
+				lcd.setCursor(col, row);
+				lcd.print("Yes");
+				break;
+			}
+		}
+
+		//	Enable/Disable type selection
+		else if ((type & 4) == 4)
+		{
+			switch (start)
+			{
+			case 0:
+				lcd.setCursor(col + 1, row + 1);
+				lcd.write(byte(3));
+				lcd.write(byte(3));
+				lcd.setCursor(col- 1, row);
+				lcd.print("Disable");
+				break;
+			case 1:
+				lcd.setCursor(col + 1, row + 1);
+				lcd.write(byte(3));
+				lcd.write(byte(3));
+				lcd.setCursor(col - 1, row);
+				lcd.print("Enable ");
+				break;
+			}
+		}
 		else { lcd.print(start); }				//	print start if not time
 		
 		//	Directional button code
@@ -950,26 +997,32 @@ int MenuNumSel(int addr, int start, int min, int max, int step, int col, int row
 			}
 		if (Right == 1)
 			{
+			if ((type & 64) != 64)									//	doesnt display saving if the 7th bit of type is set
+			{
 				lcd.setCursor(0, 2);
 				lcd.print("                    ");
 				lcd.setCursor(0, 3);
 				lcd.print("      Saving        ");
-				writeEEPROM(addr, start);
+			}
+			if ((type & 128) != 128){ writeEEPROM(addr, start); }	//	doesnt write to EEPROM if the 8th bit of type is set
 				delay(150);
 				loopNumSel = 0;
 			}
 		if (Left == 1)
 			{
+			if ((type & 64) != 64)									//	doesnt display saving if the 7th bit of type is set
+			{
 				lcd.setCursor(0, 2);
 				lcd.print("                    ");
-				lcd.setCursor(0,3);
+				lcd.setCursor(0, 3);
 				lcd.print("  Exit Without Save  ");
+			}
 				delay(150);
 				loopNumSel = 0;
 			}
 		delay(dmicro);
 	}
-	return start	;
+	return start;
 }
 
 /*void MenuYesNo(int addr, int start)

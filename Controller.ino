@@ -28,7 +28,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 18;					//  Sets the build number for the current program
+int build = 19;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -479,7 +479,7 @@ void LCDTimeDisplay(int col, int line, int hour, int min, int sec, int mod)
 	switch (timeFormat)			//	use timeFormat to determine where to put the cursor if set for 12 hour time
 	{
 	case 0:
-		//	if 24 hour leave set the cursor to use 2 digits
+		//	if 24 hour set the cursor to use 2 digits
 		if (hour < 10){ lcd.setCursor(col + 1, line); }	//  Set cursor for single digits
 		else { lcd.setCursor(col, line); }
 		lcd.print(hour);
@@ -487,7 +487,7 @@ void LCDTimeDisplay(int col, int line, int hour, int min, int sec, int mod)
 	case 1:
 		//	if 12 hour and less than 10 set the cursor to account for # of hour digits
 		if (hour == 0){ hour = 12; }			//	if hour is midnight, add 12 to the display of the hour to make it 12 AM
-		else if (hour < 10 || ((hour - 12) > 0)){ lcd.setCursor(col + 1, line); }	//  Set cursor for single digits
+		else if (hour < 10 || (((hour - 12) > 0) && ((hour - 12) < 9))){ lcd.setCursor(col + 1, line); }	//  Set cursor for single digits
 		else { lcd.setCursor(col, line); }		//	set cursor for double digits
 
 		if (sec != 99){ mod = mod + 2; }
