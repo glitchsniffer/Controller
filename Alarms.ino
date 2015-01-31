@@ -242,7 +242,7 @@ void AlarmSet(byte id)
 
 	rd = MenuNumSel(4, 255, start, 0, 1, 1, 8, 1, 250);	//	Call the function to edit the variable
 
-	int bit;
+	byte bit;
 	bit = 1 << id;
 
 	if ((serialDebug & 4) == 4){ Serial.print("AlarmEnable: "); }

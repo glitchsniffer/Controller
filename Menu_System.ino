@@ -368,7 +368,7 @@ void MenuLoop()
 		if (Right == 1){MenuSelect();}
 		if (Left == 1){MenuBack();}
 		
-	delay(100);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
+	delay(200);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
 	}
 	Serial.println("Exiting Menu loop");	//	prints this message when it exits the menu loop
 //	reset all pointers to 0 in preparation for the next time the menu is run
@@ -379,8 +379,7 @@ void MenuLoop()
 	mRet = 0;
 	lcd.clear();			//  clear the screen
 	today = 0;				//  set today to 0 so that the date function gets called
-	lcd.setCursor(0,3);		//	starting position of the relays.
-	lcd.print("--------");	//  set the initial display for the relays
+	RelayStatusDisplay(0, 3);
 	DS18B20_Read();			//  read the temp sensors so that the display has them
 }
 
@@ -538,7 +537,6 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 						case 0:
-							MenuTimeSet();
 							break;
 					}
 					break;
@@ -1023,89 +1021,4 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 		delay(dmicro);
 	}
 	return start;
-}
-
-/*void MenuYesNo(int addr, int start)
-{
-	int loopNumSel = 1;
-
-	delay(250);
-	lcd.setCursor(9, 2);
-	lcd.print(start);
-
-	while (loopNumSel == 1)
-	{
-		int Down = digitalRead(downButton);
-		int Up = digitalRead(upButton);
-		int Right = digitalRead(rightButton);
-		int Left = digitalRead(leftButton);
-
-		if (Up == 1)
-		{
-
-		}
-		if (Down == 1)
-		{
-
-		}
-		if (Right == 1)
-		{
-			writeEEPROM(addr, start);
-			lcd.setCursor(0, 3);
-			lcd.print("       Saving       ");
-			delay(150);
-			loopNumSel = 0;
-		}
-		if (Left == 1)
-		{
-			lcd.setCursor(0, 3);
-			lcd.print(" Exit Without Save");
-			delay(150);
-			loopNumSel = 0;
-		}
-		delay(200);
-	}
-	return;
-}*/
-void MenuTimeSet ()
-{
-	/*int loopTime = 1;
-	
-	delay(250);
-	lcd.setCursor(0,1);
-	lcd.print("");
-	
-	while (loopTime == 1)
-	{
-		int Down = digitalRead(downButton);
-		int Up = digitalRead(upButton);
-		int Right = digitalRead(rightButton);
-		int Left = digitalRead(leftButton);
-		
-		if (Up == 1)
-		{if (start < max)
-			{
-				start = start + step;
-			}
-			else{ start == max; }
-			lcd.setCursor(9, 2);
-			lcd.print(start);
-			lcd.print("   ");
-		}
-		if (Down == 1)
-		{
-
-		}
-		if (Right == 1)
-		{
-
-		}
-		if (Left == 1)
-		{
-
-		}
-		delay(150);
-	}
-	return;
-	*/
 }

@@ -28,7 +28,7 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 int version = 0;				//  Sets the version number for the current program
-int build = 19;					//  Sets the build number for the current program
+int build = 20;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -302,8 +302,8 @@ void setup()
 	
 	START_SCREEN();		//  call the start up screen function
 	
-	lcd.setCursor(0,3);
-	lcd.print("--------");	//  set the initial display for the relays
+	RelayStatusDisplay(0, 3);		//	call the relay status display function
+	RelayState();					//	Turn on the relays according to the AlarmState byte
 	
 	lcd.setCursor(0,2);
 	lcd.write(byte(2));
@@ -363,6 +363,7 @@ void setup()
 	DS18B20_Read();
 	Serial.println("Starting Loop");
 	Serial.println();
+	//RL_Toggle();		//**********NICE SPOT TO TEST RELAYS**************
 }
 
 void loop()
@@ -394,15 +395,24 @@ void AlarmON()
 	Serial.print(":");
 	Serial.println(minute());
 
+	//	turn on the appropriate relay and write the status to the display
 	digitalWrite(relayPins[id], LOW);
 	lcd.setCursor(id, 3);
 	lcd.print("+");
+
+	//  write the state bit to the EEPROM
+	byte bit = 1 << id;						//	sets bit for the correct id's bit position
+	AlarmState = AlarmState ^ bit;			//	toggles the bit position
+	writeEEPROM(101, AlarmState);
+
 	if ((serialDebug & 4) == 4)
 	{
 		int trigger;
 		trigger = Alarm.getNextTrigger();
 		Serial.print("Next trigger after ALRM ON: ");
 		Serial.println(trigger);
+		Serial.print("Alarm State: ");
+		Serial.println(AlarmState, BIN);
 		Serial.println();
 	}
 }
@@ -419,15 +429,24 @@ void AlarmOFF()
 	Serial.print(":");
 	Serial.println(minute());
 
+	//	turn on the appropriate relay and write the status to the display
 	digitalWrite(relayPins[id], HIGH);
 	lcd.setCursor(id, 3);
 	lcd.print("-");
+
+	//  write the state bit to the EEPROM
+	byte bit = 1 << id;						//	sets bit for the correct id's bit position
+	AlarmState = AlarmState ^ bit;			//	toggles the bit position
+	writeEEPROM(101, AlarmState);
+
 	if ((serialDebug & 4) == 4)
 	{
 		int trigger;
 		trigger = Alarm.getNextTrigger();
 		Serial.print("Next trigger after ALRM OFF: ");
 		Serial.println(trigger);
+		Serial.print("Alarm State: ");
+		Serial.println(AlarmState, BIN);
 		Serial.println();
 	}
 }
@@ -436,17 +455,49 @@ void RL_Toggle()
 {
 	for (int relay = 0; relay < relayCount; relay++){
 		digitalWrite(relayPins[relay], LOW);
-		lcd.setCursor(relay,3);
-		lcd.print("+");
-		delay(100);}
+		//  write the state bit to the EEPROM
+		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
+		AlarmState = AlarmState ^ bit;			//	toggles the bit position
+		writeEEPROM(101, AlarmState);
+		RelayStatusDisplay(0, 3);
+		delay(500);}
 	for (int relay = 0; relay < relayCount; relay++){		
 		digitalWrite(relayPins[relay], HIGH);
-		lcd.setCursor(relay,3);
-		lcd.print("-");
-		delay(100);}
+		//	write the state bit to the EEPROM
+		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
+		AlarmState = AlarmState ^ bit;			//	toggles the bit position
+		writeEEPROM(101, AlarmState);
+		RelayStatusDisplay(0, 3);
+		delay(500);}
 	for (int relay = 0; relay < relayCount; relay++){
 	digitalWrite(relayPins[relay], HIGH);
 	delay(100);}
+	RelayState();					//	Turn on the relays according to the AlarmState byte
+}
+void RelayState()
+{
+	for (int i = 0; i < 8; i++)
+	{
+		if ((AlarmState & (1 << i)) == (1 << i))
+		{
+			digitalWrite(relayPins[i], LOW);
+			delay(200);
+		}
+	}
+}
+
+void RelayStatusDisplay(int col, int row)
+{
+	lcd.setCursor(col, row);
+	lcd.print("--------");
+	for (int i = 0; i < 8; i++)
+	{
+		if ((AlarmState & (1 << i)) == (1 << i))
+		{
+			lcd.setCursor(col + i, row);
+			lcd.print("+");
+		}
+	}
 }
 
 void START_SCREEN()
@@ -700,11 +751,11 @@ void factoryDefaultset()
 	for (int i = 0; i < 8; i++)		//	loop through all 8 alarms
 	{
 		writeEEPROM(102 + (i * 6), 0);	//  writes the alarm type to 0, Day Lights
-		writeEEPROM(103 + (i * 6), 0);	//	writes the relay trigger to relay 1
-		writeEEPROM(104 + (i * 6), 20);	//  writes the alarm on hour 12
-		writeEEPROM(105 + (i * 6), 31+i);	//  writes the alarm on minute 1
-		writeEEPROM(106 + (i * 6), 20);	//  writes the alarm off hour 23
-		writeEEPROM(107 + (i * 6), 38+i);	//  writes the alarm off minute 11
+		writeEEPROM(103 + (i * 6), i);	//	writes the relay trigger to relay to match the id
+		writeEEPROM(104 + (i * 6), 0);	//  writes the alarm on hour 12
+		writeEEPROM(105 + (i * 6), 29+i);	//  writes the alarm on minute 1
+		writeEEPROM(106 + (i * 6), 0);	//  writes the alarm off hour 23
+		writeEEPROM(107 + (i * 6), 31+i);	//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");
 }
