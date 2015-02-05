@@ -27,6 +27,7 @@ byte tempPrecision;			//	initializes the byte tempPrecision
 byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
+byte secondsDisplay;		//	initializes the byte secondsDisplay
 int version = 0;				//  Sets the version number for the current program
 int build = 20;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
@@ -191,7 +192,8 @@ void setup()
 		tempPrecision = readEEPROM(21);		//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
 		tempReadDelay = readEEPROM(22);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
 		timeFormat = readEEPROM(23);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
-		backlightLevel = readEEPROM(24);	//	reads out the user setting to control the backlight level
+		secondsDisplay = readEEPROM(24);	//	reads out user setting to display seconds 0 = No and 1 = Yes
+		backlightLevel = readEEPROM(25);	//	reads out the user setting to control the backlight level
 
 		//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
 
@@ -519,61 +521,73 @@ void START_SCREEN()
 	lcd.clear();
 }
 	
-void LCDTimeDisplay(int col, int line, int hour, int min, int sec, int mod)
-{	//	sec will add a seconds column if there is not a 99 in it.  unless you are displaying an actual time in seconds, you should make this 99
-	//  also sec will determine the position on the AM/PM on the display.
-	//	mod can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
+void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
+{	//	mod can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
+
+	//	add seconds to the display of AMPM
+	Serial.print("secondsDisplay = ");
+	Serial.print(secondsDisplay);
+	Serial.print(":");
+	Serial.println(timeFormat);
 
 	//  set the initial cursor position
-	lcd.setCursor(col, line);
-
-	switch (timeFormat)			//	use timeFormat to determine where to put the cursor if set for 12 hour time
+	if (sec != 99)
+	{
+		col = col + 1;
+	}
+	//	use timeFormat to determine where to put the cursor for the hour if set for 12 hour time and print the hour and AM/PM
+	switch (timeFormat)
 	{
 	case 0:
 		//	if 24 hour set the cursor to use 2 digits
-		if (hour < 10){ lcd.setCursor(col + 1, line); }	//  Set cursor for single digits
-		else { lcd.setCursor(col, line); }
+		if (hour <= 9){ lcd.setCursor(col + 1, row); }	//  set cursor for single digits
+		else { lcd.setCursor(col, row); }				//	set cursor for double digits
 		lcd.print(hour);
 		break;
-	case 1:
-		//	if 12 hour and less than 10 set the cursor to account for # of hour digits
-		if (hour == 0){ hour = 12; }			//	if hour is midnight, add 12 to the display of the hour to make it 12 AM
-		else if (hour < 10 || (((hour - 12) > 0) && ((hour - 12) < 9))){ lcd.setCursor(col + 1, line); }	//  Set cursor for single digits
-		else { lcd.setCursor(col, line); }		//	set cursor for double digits
+	case 1:		//	if 12 hour set the cursor to account for # of hour digits
+		//  convert hour to 12 hour time
+		if (hour == 0){ hour = 12; }					//	if hour is midnight, add 12 to the display of the hour to make it 12 AM
+		else if (hour >= 13) { hour = hour - 12; }		//	if hour is 1pm or greater convert to 12 hour
 
-		if (sec != 99){ mod = mod + 2; }
-		//  determine weather to display AM or PM
-		if (hour >= 13)
-		{
-			lcd.print(hour - 12);
-			lcd.setCursor((col + 6 + mod), line);				//	set cursor for the AM/PM postion with the modifier
-			lcd.print("PM");
-		}
-		else if (hour <= 12)
-		{
-			lcd.print(hour);
-			lcd.setCursor((col + 6 + mod), line);				//	set cursor for the AM/PM postion with the modifier
-			lcd.print("AM");
-		}
+		//	set cursor for single digits
+		if (hour <= 9){ lcd.setCursor(col + 1, row); }
+		else { lcd.setCursor(col, row); }
+
+		//	print the hour
+		lcd.print(hour);
 		break;
 	}
-	lcd.setCursor(col + 2, line);		//	set cursor back to the minutes position
+
+	//	print the minutes
+	lcd.setCursor(col + 2, row);		//	set cursor back to the minutes position
 	lcd.print(":");
 
 	//	if the minutes is 1 digit pad a 0 to the single digit
-	if (min < 10){ lcd.print("0"); }
+	if (min <= 9){ lcd.print("0"); }
 	lcd.print(min);
 
-	//	if sec == 99 then dont print seconds.  else print the seconds out.
-	if (sec < 99)
+	//	if secondsDisplay is on then print seconds.
+	if (secondsDisplay == 1)
 	{
 		lcd.print(":");
-		if (second() < 10)			//	if the seconds is 1 digit pad a 0 to the single digit
+		if (second() <= 9)			//	if the seconds is 1 digit pad a 0 to the single digit
 		{
 			lcd.print("0");
 			lcd.print(second());
 		}
 		else { lcd.print(second()); }
+	}
+	//  determine weather to display AM or PM
+	if (timeFormat == 1)
+	{
+		if (hour >= 13)
+		{
+			lcd.print("PM");
+		}
+		else if (hour <= 12)
+		{
+			lcd.print("AM");
+		}
 	}
 }
 
@@ -739,10 +753,11 @@ void factoryDefaultset()
 	writeEEPROM(21, 1);		//	writes the tempPrecision value = 0 or No Decimal
 	writeEEPROM(22, 10);	//	writes the tempReadDelay value = 10 or 10 Seconds
 	writeEEPROM(23, 1);		//	writes the timeFormat value =  1 or 12 hour
-	writeEEPROM(24, 100);	//	writes the backlightLevel value = 100 or half
-	writeEEPROM(25, 30);	//  writes the backlightTimeout to be 30 seconds
-	writeEEPROM(26, 0);		//	writes the flow sensor 100% value to 0
-	writeEEPROM(27, 75);	//  writes the flow sensor user level to 75 or 75%
+	writeEEPROM(24, 1);		//	writes the secondsDisplay value to 1 or Display seconds
+	writeEEPROM(25, 100);	//	writes the backlightLevel value = 100 or half
+	writeEEPROM(26, 30);	//  writes the backlightTimeout to be 30 seconds
+	writeEEPROM(27, 0);		//	writes the flow sensor 100% value to 0
+	writeEEPROM(28, 75);	//  writes the flow sensor user level to 75 or 75%
 
 	//  Alarm Settings
 	writeEEPROM(100, 255);	//  writes alarms enable flag to off

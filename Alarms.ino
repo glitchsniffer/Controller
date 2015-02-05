@@ -274,7 +274,7 @@ void AlarmSetDisplay(int id)
 
 	//	read all variables for the timer id from the EEPROM
 	if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop
-		//AlarmEnable = readEEPROM(100);
+		AlarmEnable = readEEPROM(100);
 		AlarmState = readEEPROM(101);
 		AlarmType[id] = readEEPROM(102 + (id * 6));
 		AlarmRelay[id] = readEEPROM(103 + (id * 6));

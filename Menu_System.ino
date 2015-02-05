@@ -525,9 +525,9 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 						case 0:
 //							int blBright = 0;
-							backlightLevel = readEEPROM(23);
-							MenuNumSel(0, 23, backlightLevel, 1, 255, 5, 9, 2, 250);
-							backlightLevel = readEEPROM(23);
+							backlightLevel = readEEPROM(25);
+							MenuNumSel(0, 25, backlightLevel, 1, 255, 5, 9, 2, 250);
+							backlightLevel = readEEPROM(25);
 							break;
 					}
 					break;
