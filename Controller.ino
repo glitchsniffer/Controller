@@ -87,17 +87,18 @@ int miMax = 0;			//  current selected menu item for purposes of up and down move
 int mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
 
 char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Calibration",""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 3
-	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", "Erase EEPROM", "Restore Defaults", "" };  //  setup menu item 1 for System Config Min 0 Max 6
+	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", "Erase EEPROM", "Restore Defaults", "Seconds Display" };  //  setup menu item 1 for System Config Min 0 Max 6
 		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
 		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
 		char* m2Items02[]={"", "24 Hour", "12 Hour", ""};
 		char* m2Items03[]={"", "Set BL Brightness", ""};
 		char* m2Items04[]={"", "Need Date/Time Here", ""};
 		char* m2Items05[]={"", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "", "System", ""};
-		char* m2Items06[]={"", "Set Temp Read Delay", "" };
-		char* m2Items07[]={"", "Exit Erase EEPROM", "Erase EEPROM", "" };
-		char* m2Items08[]={"", "Exit", "Restore Defaults", "" };
-		char* m1Items1[] ={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
+		char* m2Items06[]={"", "Set Temp Read Delay", ""};
+		char* m2Items07[]={"", "Exit Erase EEPROM", "Erase EEPROM", ""};
+		char* m2Items08[]={"", "Exit", "Restore Defaults", ""};
+		char* m2Items09[]={"", "Do Not Display Sec", "Display Seconds", ""};
+		char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Edit", "Exit", ""};
 		char* m2Items11[]={"", "Edit", "Exit", ""};
 		char* m2Items12[]={"", "Edit", "Exit", ""};
@@ -535,8 +536,7 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	//	use timeFormat to determine where to put the cursor for the hour if set for 12 hour time and print the hour and AM/PM
 	switch (timeFormat)
 	{
-	case 0:
-		//	if 24 hour set the cursor to use 2 digits
+	case 0:		//	if 24 hour set the cursor to use 2 digits
 		if (hour <= 9){ lcd.setCursor(col + 1, row); }	//  set cursor for single digits
 		else { lcd.setCursor(col, row); }				//	set cursor for double digits
 		lcd.print(hour);

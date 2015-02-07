@@ -23,7 +23,7 @@ void MenuTitle()
 			{
 				case 0:
 					lcd.print("   System Config");
-					miMax = 8;
+					miMax = 9;
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
@@ -79,6 +79,10 @@ void MenuTitle()
 							break;
 						case 8:
 							lcd.print("  Restore Defaults");
+							miMax = 1;
+							break;
+						case 9:
+							lcd.print("  Display Seconds");
 							miMax = 1;
 							break;
 					}
@@ -254,6 +258,9 @@ void MenuTitle()
 								break;
 							case 8:
 								lcd.print(m2Items08[mPoint]);
+								break;
+							case 9:
+								lcd.print(m2Items09[mPoint]);
 								break;
 						}
 						break;
@@ -701,6 +708,23 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						lcd.clear();
 						lcd.setCursor(0, 2);
 						lcd.print(" Defaults Restored");
+						break;
+					}
+				case 9:
+					lcd.setCursor(0, 0);
+					lcd.print("  Display Seconds");
+					lcd.setCursor(0, 2);
+					switch (m2Start)
+					{
+					case 0:
+						writeEEPROM(24, 0);
+						secondsDisplay = readEEPROM(24);
+						lcd.print(" Display Seconds Off");
+						break;
+					case 1:
+						writeEEPROM(24, 1);
+						secondsDisplay = readEEPROM(24);
+						lcd.print(" Display Seconds On");
 						break;
 					}
 					break;
