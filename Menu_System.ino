@@ -859,7 +859,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 //  type of display, EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
 //  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
 //  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours
-//  types are 0=normal numbers, 1=time, 2=yes/no, 3=enable/disable.  Add 128 to any number to disable writing to eeprom
+//  types are 0=normal numbers, 1=time, 2=yes/no, 4=enable/disable 8=+/-.  Add 128 to any number to disable writing to eeprom
 //	If you are only displaying 1 digit, you need to set the col to -1 because all displays in this function are set to the 10's digit
 {
 	int loopNumSel = 1;
@@ -1021,6 +1021,26 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 				lcd.write(byte(3));
 				lcd.setCursor(col - 1, row);
 				lcd.print("Enable ");
+				break;
+			}
+		}
+
+		//	+/- type selection
+		else if ((type & 8) == 8)
+		{
+			switch (start)
+			{
+			case 0:
+				lcd.setCursor(col - 1, row + 2);	//	set the cursor for the bottom row to print a ^ under the number
+				lcd.write(byte(3));
+				lcd.setCursor(col - 1, row);
+				lcd.print("-");
+				break;
+			case 1:
+				lcd.setCursor(col - 1, row + 2);	//	set the cursor for the bottom row to print a ^ under the number
+				lcd.write(byte(3));
+				lcd.setCursor(col - 1, row);
+				lcd.print("+");
 				break;
 			}
 		}
