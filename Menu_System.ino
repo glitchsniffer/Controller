@@ -16,80 +16,72 @@ void MenuTitle()
 	{
 		case 0:
 			lcd.print("     Main Menu");
-			miMax = 3;
+			miMax = 4;
 			break;
 		case 1:
 			switch (m1Sel)
 			{
 				case 0:
-					lcd.print("   System Config");
-					miMax = 9;
+					lcd.print("     User Setup");
+					miMax = 6;
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
 					miMax = 7;
 					break;
 				case 2:
-					lcd.print(" Sensor Addr Config");
+					lcd.print(" Sensor Addr Setup");
 					miMax = 3;
 					break;
 				case 3:
 					lcd.print("    Calibration");
 					miMax = 4;
 					break;
+				case 4:
+					lcd.print("    System Setup");
+					miMax = 2;
+					break;
 			}
 			break;
 		case 2:
 			switch (m1Sel)
 			{
-				case 0:
-					switch (m2Sel)
-					{
-						case 0:
-							lcd.print("     Temp Type");
-							miMax = 1;
-							break;
-						case 1:
-							lcd.print("   Temp Precision");
-							miMax = 1;
-							break;
-						case 2:
-							lcd.print("    Time Format");
-							miMax = 1;
-							break;
-						case 3:
-							lcd.print("  B Light Brightness");
-							miMax = 0;
-							break;
-						case 4:
-							lcd.print("   Set Date/Time");
-							miMax = 1;
-							break;
-						case 5:
-							lcd.print("  Serial Debugging");
-							miMax = 7;
-							break;
-						case 6:
-							lcd.print("  Temp Read Delay");
-							miMax = 0;
-							break;
-						case 7:
-							lcd.print("    Erase EEPROM");
-							miMax = 1;
-							break;
-						case 8:
-							lcd.print("  Restore Defaults");
-							miMax = 1;
-							break;
-						case 9:
-							lcd.print("  Display Seconds");
-							miMax = 1;
-							break;
-					}
-					break;
-				case 1:
-					switch (m2Sel)
-					{
+			case 0:
+				switch (m2Sel)
+				{
+					case 0:
+						lcd.print("     Temp Type");
+						miMax = 1;
+						break;
+					case 1:
+						lcd.print("   Temp Precision");
+						miMax = 1;
+						break;
+					case 2:
+						lcd.print("  Temp Read Delay");
+						miMax = 0;
+						break;
+					case 3:
+						lcd.print("  B Light Brightness");
+						miMax = 0;
+						break;
+					case 4:
+						lcd.print("    Time Format");
+						miMax = 1;
+						break;
+					case 5:
+						lcd.print("  Display Seconds");
+						miMax = 1;
+						break;
+					case 6:
+						lcd.print("   Set Date/Time");
+						miMax = 1;
+						break;
+				}
+				break;
+			case 1:
+				switch (m2Sel)
+				{
 					case 0:
 						AlarmSetDisplay(m2Sel);
 						break;
@@ -114,54 +106,71 @@ void MenuTitle()
 					case 7:
 						AlarmSetDisplay(m2Sel);
 						break;
-					}
-					break;
-				case 2:
-					switch (m2Sel)
-					{
-						case 0:
+				}
+				break;
+			case 2:
+				switch (m2Sel)
+				{
+					case 0:
 						lcd.print("  Temp Sens 1 Addr");
 						miMax = 1;
 						break;
-						case 1:
+					case 1:
 						lcd.print("  Temp Sens 2 Addr");
 						miMax = 1;
 						break;
-						case 2:
+					case 2:
 						lcd.print("  Temp Sens 3 Addr");
 						miMax = 1;
 						break;
-						case 3:
+					case 3:
 						lcd.print("  Temp Sens 4 Addr");
 						miMax = 1;
 						break;
-					}
-					break;
-				case 3:
-					switch (m2Sel)
+				}
+				break;
+			case 3:
+				switch (m2Sel)
 					{
-						case 0:
+					case 0:
 						lcd.print(" Temp Sens 1 Calib");
 						miMax = 1;
 						break;
-						case 1:
+					case 1:
 						lcd.print(" Temp Sens 2 Calib");
 						miMax = 1;
 						break;
-						case 2:
+					case 2:
 						lcd.print(" Temp Sens 3 Calib");
 						miMax = 1;
 						break;
-						case 3:
+					case 3:
 						lcd.print(" Temp Sens 4 Calib");
 						miMax = 1;
 						break;
-						case 4:
+					case 4:
 						lcd.print(" Flow Sensor Calib");
 						miMax = 1;
 						break;
 					}
 					break;
+			case 4:
+				switch (m2Sel)
+				{
+					case 0:
+						lcd.print("  Serial Debugging");
+						miMax = 7;
+						break;
+					case 1:
+						lcd.print("    Erase EEPROM");
+						miMax = 1;
+						break;
+					case 2:
+						lcd.print("  Restore Defaults");
+						miMax = 1;
+						break;
+				}
+				break;
 			}
 			break;
 	}
@@ -224,6 +233,8 @@ void MenuTitle()
 					case 3:								//	prints 2nd level Calibration items
 						lcd.print(m1Items3[mPoint]);
 						break;
+					case 4:								//	prints 2nd level System config items
+						lcd.print(m1Items4[mPoint]);
 				}
 				break;
 			case 2:
@@ -252,15 +263,6 @@ void MenuTitle()
 								break;
 							case 6:
 								lcd.print(m2Items06[mPoint]);
-								break;
-							case 7:
-								lcd.print(m2Items07[mPoint]);
-								break;
-							case 8:
-								lcd.print(m2Items08[mPoint]);
-								break;
-							case 9:
-								lcd.print(m2Items09[mPoint]);
 								break;
 						}
 						break;
@@ -330,6 +332,19 @@ void MenuTitle()
 								break;
 						}
 						break;
+					case 4:
+						switch (m2Sel)
+						{
+							case 0:
+								lcd.print(m2Items40[mPoint]);
+								break;
+							case 1:
+								lcd.print(m2Items41[mPoint]);
+								break;
+							case 2:
+								lcd.print(m2Items42[mPoint]);
+								break;
+						}
 				break;
 				}
 			default:
@@ -509,6 +524,34 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					}
 					break;
 				case 2:
+					lcd.print("  Temp Read Delay");
+					lcd.setCursor(0, 2);
+					switch (m2Start)
+					{
+					case 0:
+						tempReadDelay = readEEPROM(22);
+						MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
+						tempReadDelay = readEEPROM(22);
+						Alarm.write(ReadDelay_ID, tempReadDelay);
+						Alarm.disable(ReadDelay_ID);
+						Alarm.enable(ReadDelay_ID);
+						break;
+					}
+					break;
+				case 3:
+					lcd.print("Backlight Brightness");
+					lcd.setCursor(0, 2);
+					switch (m2Start)
+					{
+					case 0:
+						//							int blBright = 0;
+						backlightLevel = readEEPROM(25);
+						MenuNumSel(0, 25, backlightLevel, 1, 255, 5, 9, 2, 250);
+						backlightLevel = readEEPROM(25);
+						break;
+					}
+					break;
+				case 4:
 					lcd.print("   Time Format");
 					lcd.setCursor(0,2);
 					switch (m2Start)
@@ -525,192 +568,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							break;
 					}
 					break;
-				case 3:
-					lcd.print("Backlight Brightness");
-					lcd.setCursor(0,2);
-					switch (m2Start)
-					{
-						case 0:
-//							int blBright = 0;
-							backlightLevel = readEEPROM(25);
-							MenuNumSel(0, 25, backlightLevel, 1, 255, 5, 9, 2, 250);
-							backlightLevel = readEEPROM(25);
-							break;
-					}
-					break;
-				case 4:
-					lcd.print(" Set Date and Time");
-					lcd.setCursor(0,2);
-					switch (m2Start)
-					{
-						case 0:
-							break;
-					}
-					break;
 				case 5:
-					lcd.print("  Serial Debugging");
-					lcd.setCursor(0,2);
-					switch (m2Start)
-					{
-						byte readee;
-
-						case 0:
-							writeEEPROM(5,0);
-							serialDebug = readEEPROM(5);
-							lcd.print("  All Debugging OFF");
-							break;
-						case 1:
-							writeEEPROM(5,255);
-							serialDebug = readEEPROM(5);
-							lcd.print("  ALL Debugging ON");
-							break;
-						case 2:
-							readee = readEEPROM(5);
-							if ((readee & 1) == 1)			//  see if the 1st bit flag is set.
-							{
-								readee = readee - 1;		//  if it is set, turn it off
-								lcd.print("Disabled Tmp Sns Dbg");
-							}
-							else
-							{
-								readee = readee + 1;		//  if it is not set, turn it on
-								lcd.print("Enabled Tmp Sns Dbg");
-							}
-							writeEEPROM(5, readee);
-							serialDebug = readEEPROM(5);
-							break;
-						case 3:
-							readee = readEEPROM(5);
-							if ((readee & 2) == 2)			//  see if the 2nd bit flag is set.
-							{
-								readee = readee - 2;		//  if it is set, turn it off
-								lcd.print("Disabled Menu Dbg");
-							}
-							else
-							{
-								readee = readee + 2;		//  if it is not set, turn it on
-								lcd.print("Enabled Menu Dbg");
-							}
-							writeEEPROM(5, readee);
-							serialDebug = readEEPROM(5);
-							break;
-						case 4:
-							readee = readEEPROM(5);
-							if ((readee & 4) == 4)			//  see if the 3rd bit flag is set.
-							{
-								readee = readee - 4;		//  if it is set, turn it off
-								lcd.print("Disabled Alarm Dbg");
-							}
-							else
-							{
-								readee = readee + 4;		//  if it is not set, turn it on
-							
-								lcd.print("Enabled Alarm Dbg");
-							}
-							writeEEPROM(5, readee);
-							serialDebug = readEEPROM(5);
-							break;
-						case 5:
-							readee = readEEPROM(5);
-							if ((readee & 8) == 8)			//  see if the 4th bit flag is set.
-							{
-								readee = readee - 8;		//  if it is set, turn it off
-								lcd.print("Disabled EEPROM Dbg");
-							}
-							else
-							{
-								readee = readee + 8;		//  if it is not set, turn it on
-								lcd.print("Enabled EEPROM Dbg");
-							}
-							writeEEPROM(5, readee);
-							serialDebug = readEEPROM(5);
-							break;
-						case 6:
-							readee = readEEPROM(5);
-							if ((readee & 16) == 16)			//  see if the 4th bit flag is set.
-							{
-								readee = readee - 16;		//  if it is set, turn it off
-								lcd.print("Disabled EEPROM Dbg");
-							}
-							else
-							{
-								readee = readee + 16;		//  if it is not set, turn it on
-								lcd.print("Enabled EEPROM Dbg");
-							}
-							writeEEPROM(5, readee);
-							serialDebug = readEEPROM(5);
-							break;
-						case 7:
-							readee = readEEPROM(5);
-							if ((readee & 16) == 16)		//  see if the 5th bit flag is set.
-							{
-								readee = readee - 16;		//  if it is set, turn it off
-								lcd.print("Disabled System Dbg");
-							}
-							else
-							{
-								readee = readee + 16;		//  if it is not set, turn it on
-								lcd.print("Enabled System Dbg");
-							}
-							writeEEPROM(5, readee);
-							serialDebug = readEEPROM(5);
-							break;
-					}
-					break;
-				case 6:
-					lcd.print("  Temp Read Delay");
-					lcd.setCursor(0,2);
-					switch (m2Start)
-					{
-						case 0:
-						tempReadDelay = readEEPROM(22);
-						MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
-						tempReadDelay = readEEPROM(22);
-						Alarm.write(ReadDelay_ID, tempReadDelay);
-						Alarm.disable(ReadDelay_ID);
-						Alarm.enable(ReadDelay_ID);
-						break;
-					}
-					break;
-				case 7:
-					lcd.setCursor(0, 0);
-					lcd.print("    Erase EEPROM");
-					lcd.setCursor(0, 2);
-					switch (m2Start)
-					{
-					case 0:
-						lcd.print("      Exiting");
-						break;
-					case 1:
-						lcd.print("   Erasing EEPROM");
-						eraseEEPROM();
-						lcd.clear();
-						lcd.setCursor(0, 0);
-						lcd.print("    Erase EEPROM");
-						lcd.setCursor(0, 2);
-						lcd.print("   Erase Complete");
-						break;
-					}
-					break;
-				case 8:
-					lcd.setCursor(0, 0);
-					lcd.print("  Restore Defaults");
-					lcd.setCursor(0, 2);
-					switch (m2Start)
-					{
-					case 0:
-						lcd.print("      Exiting");
-						break;
-					case 1:
-						lcd.print(" Restoring Defaults");
-						serialDebug = (serialDebug | 8);
-						factoryDefaultset();
-						lcd.clear();
-						lcd.setCursor(0, 2);
-						lcd.print(" Defaults Restored");
-						break;
-					}
-				case 9:
 					lcd.setCursor(0, 0);
 					lcd.print("  Display Seconds");
 					lcd.setCursor(0, 2);
@@ -726,6 +584,15 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						secondsDisplay = readEEPROM(24);
 						lcd.print(" Display Seconds On");
 						break;
+					}
+					break;
+				case 6:
+					lcd.print(" Set Date and Time");
+					lcd.setCursor(0,2);
+					switch (m2Start)
+					{
+						case 0:
+							break;
 					}
 					break;
 			}
@@ -826,6 +693,161 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 		case 2:		//  sensor addressing menu items
 			break;
 		case 3:		//  calibration menu items
+			break;
+		case 4:
+			switch (m2Sel)
+			{
+			case 0:
+				lcd.print("  Serial Debugging");
+				lcd.setCursor(0, 2);
+				switch (m2Start)
+				{
+					byte readee;
+
+				case 0:
+					writeEEPROM(5, 0);
+					serialDebug = readEEPROM(5);
+					lcd.print("  All Debugging OFF");
+					break;
+				case 1:
+					writeEEPROM(5, 255);
+					serialDebug = readEEPROM(5);
+					lcd.print("  ALL Debugging ON");
+					break;
+				case 2:
+					readee = readEEPROM(5);
+					if ((readee & 1) == 1)			//  see if the 1st bit flag is set.
+					{
+						readee = readee - 1;		//  if it is set, turn it off
+						lcd.print("Disabled Tmp Sns Dbg");
+					}
+					else
+					{
+						readee = readee + 1;		//  if it is not set, turn it on
+						lcd.print("Enabled Tmp Sns Dbg");
+					}
+					writeEEPROM(5, readee);
+					serialDebug = readEEPROM(5);
+					break;
+				case 3:
+					readee = readEEPROM(5);
+					if ((readee & 2) == 2)			//  see if the 2nd bit flag is set.
+					{
+						readee = readee - 2;		//  if it is set, turn it off
+						lcd.print("Disabled Menu Dbg");
+					}
+					else
+					{
+						readee = readee + 2;		//  if it is not set, turn it on
+						lcd.print("Enabled Menu Dbg");
+					}
+					writeEEPROM(5, readee);
+					serialDebug = readEEPROM(5);
+					break;
+				case 4:
+					readee = readEEPROM(5);
+					if ((readee & 4) == 4)			//  see if the 3rd bit flag is set.
+					{
+						readee = readee - 4;		//  if it is set, turn it off
+						lcd.print("Disabled Alarm Dbg");
+					}
+					else
+					{
+						readee = readee + 4;		//  if it is not set, turn it on
+
+						lcd.print("Enabled Alarm Dbg");
+					}
+					writeEEPROM(5, readee);
+					serialDebug = readEEPROM(5);
+					break;
+				case 5:
+					readee = readEEPROM(5);
+					if ((readee & 8) == 8)			//  see if the 4th bit flag is set.
+					{
+						readee = readee - 8;		//  if it is set, turn it off
+						lcd.print("Disabled EEPROM Dbg");
+					}
+					else
+					{
+						readee = readee + 8;		//  if it is not set, turn it on
+						lcd.print("Enabled EEPROM Dbg");
+					}
+					writeEEPROM(5, readee);
+					serialDebug = readEEPROM(5);
+					break;
+				case 6:
+					readee = readEEPROM(5);
+					if ((readee & 16) == 16)			//  see if the 4th bit flag is set.
+					{
+						readee = readee - 16;		//  if it is set, turn it off
+						lcd.print("Disabled EEPROM Dbg");
+					}
+					else
+					{
+						readee = readee + 16;		//  if it is not set, turn it on
+						lcd.print("Enabled EEPROM Dbg");
+					}
+					writeEEPROM(5, readee);
+					serialDebug = readEEPROM(5);
+					break;
+				case 7:
+					readee = readEEPROM(5);
+					if ((readee & 16) == 16)		//  see if the 5th bit flag is set.
+					{
+						readee = readee - 16;		//  if it is set, turn it off
+						lcd.print("Disabled System Dbg");
+					}
+					else
+					{
+						readee = readee + 16;		//  if it is not set, turn it on
+						lcd.print("Enabled System Dbg");
+					}
+					writeEEPROM(5, readee);
+					serialDebug = readEEPROM(5);
+					break;
+				}
+				break;
+
+			case 1:
+				lcd.setCursor(0, 0);
+				lcd.print("    Erase EEPROM");
+				lcd.setCursor(0, 2);
+				switch (m2Start)
+				{
+				case 0:
+					lcd.print("      Exiting");
+					break;
+				case 1:
+					lcd.print("   Erasing EEPROM");
+					eraseEEPROM();
+					lcd.clear();
+					lcd.setCursor(0, 0);
+					lcd.print("    Erase EEPROM");
+					lcd.setCursor(0, 2);
+					lcd.print("   Erase Complete");
+					break;
+				}
+				break;
+			case 2:
+				lcd.setCursor(0, 0);
+				lcd.print("  Restore Defaults");
+				lcd.setCursor(0, 2);
+				switch (m2Start)
+				{
+				case 0:
+					lcd.print("      Exiting");
+					break;
+				case 1:
+					lcd.print(" Restoring Defaults");
+					serialDebug = (serialDebug | 8);
+					factoryDefaultset();
+					lcd.clear();
+					lcd.setCursor(0, 2);
+					lcd.print(" Defaults Restored");
+					break;
+				}
+				break;
+			}
 			break;
 	}
 	delay(1000);

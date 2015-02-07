@@ -29,7 +29,7 @@ byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 int version = 0;				//  Sets the version number for the current program
-int build = 20;					//  Sets the build number for the current program
+int build = 21;					//  Sets the build number for the current program
 int today = 0;					//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -83,22 +83,20 @@ int m0Start = 0;		//	starting cursor position for mLevel0
 int m1Start = 0;		//	starting cursor position for mLevel1
 int m2Start = 0;		//  starting cursor position for mLevel2
 int m3Start = 0;		//  starting cursor position for mLevel3
+//int m4Start = 0;		//  starting cursor position for mLevel4
 int miMax = 0;			//  current selected menu item for purposes of up and down movement
 int mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
 
-char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Calibration",""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 3
-	char* m1Items0[]={"", "Temp Type", "Temp Precision", "Time Format", "B Light Brightness", "Set Date/Time", "Serial Debugging", "Temp Read Delay", "Erase EEPROM", "Restore Defaults", "Seconds Display" };  //  setup menu item 1 for System Config Min 0 Max 6
+char* m0Items[]={"", "User Setup", "Timers Setup", "Sensor Addr Setup","Calibration","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
+char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "" };  //  setup menu item 1 for System Config Min 0 Max 6
 		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
 		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
-		char* m2Items02[]={"", "24 Hour", "12 Hour", ""};
-		char* m2Items03[]={"", "Set BL Brightness", ""};
-		char* m2Items04[]={"", "Need Date/Time Here", ""};
-		char* m2Items05[]={"", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "", "System", ""};
-		char* m2Items06[]={"", "Set Temp Read Delay", ""};
-		char* m2Items07[]={"", "Exit Erase EEPROM", "Erase EEPROM", ""};
-		char* m2Items08[]={"", "Exit", "Restore Defaults", ""};
-		char* m2Items09[]={"", "Do Not Display Sec", "Display Seconds", ""};
-		char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
+		char* m2Items02[] = { "", "Set Temp Read Delay", "" };
+		char* m2Items03[] = { "", "Set BL Brightness", "" };
+		char* m2Items04[]={"", "24 Hour", "12 Hour", ""};
+		char* m2Items05[] = { "", "Do Not Display Sec", "Display Seconds", "" };
+		char* m2Items06[]={"", "Need Date/Time Here", ""};
+	char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Edit", "Exit", ""};
 		char* m2Items11[]={"", "Edit", "Exit", ""};
 		char* m2Items12[]={"", "Edit", "Exit", ""};
@@ -112,12 +110,16 @@ char* m0Items[]={"", "System Config", "Timers Setup", "Sensor Addr Config","Cali
 		char* m2Items21[]={"", "Set Sens 2 Address", "Exit", ""};
 		char* m2Items22[]={"", "Set Sens 3 Address", "Exit", ""};
 		char* m2Items23[]={"", "Set Sens 4 Address", "Exit", ""};
-	char* m1Items3[]={"", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Timer Setup Min 0 Max 4
+	char* m1Items3[]={"", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Sensor Calibration Min 0 Max 4
 		char* m2Items30[]={"", "Calibrate Sensor 1", "Exit", ""};
 		char* m2Items31[]={"", "Calibrate Sensor 2", "Exit", ""};
 		char* m2Items32[]={"", "Calibrate Sensor 3", "Exit", ""};
 		char* m2Items33[]={"", "Calibrate Sensor 4", "Exit", ""};
 		char* m2Items34[]={"", "Calibrate Flow Sens", "Exit", ""};
+	char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults" };	//	setup menu item 4 for System Setup
+		char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "", "System", "" };
+		char* m2Items41[] = { "", "Exit Erase EEPROM", "Erase EEPROM", "" };
+		char* m2Items42[] = { "", "Exit", "Restore Defaults", "" };
 
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
