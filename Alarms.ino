@@ -244,27 +244,40 @@ void AlarmSet(byte id)
 
 	byte bit;
 	bit = 1 << id;
+	
+	//	enable or disable the alarms in the timeAlarms lib
+	if (rd == 0)
+	{
+		Alarm.disable(AlarmIDOn[id]);
+		Alarm.disable(AlarmIDOff[id]);
+	}
+	else if (rd == 1)
+	{
+		Alarm.enable(AlarmIDOn[id]);
+		Alarm.enable(AlarmIDOff[id]);
+	}
 
+	//	print the status to the serial port
 	if ((serialDebug & 4) == 4){ Serial.print("AlarmEnable: "); }
 
-	if (start == rd)
-	{
-		if ((serialDebug & 4) == 4)
+		if (start == rd)
 		{
-		Serial.print(AlarmEnable, BIN);
-		Serial.println(" - Unchanged");
+			if ((serialDebug & 4) == 4)
+			{
+				Serial.print(AlarmEnable, BIN);
+				Serial.println(" - Unchanged");
+			}
 		}
-	}
-	else
-	{
-		AlarmEnable = AlarmEnable ^ bit;
-		writeEEPROM(100, AlarmEnable);
-		if ((serialDebug & 4) == 4)
+		else
 		{
-			Serial.print(AlarmEnable, BIN);
-			Serial.println(" - New");
+			AlarmEnable = AlarmEnable ^ bit;
+			writeEEPROM(100, AlarmEnable);
+			if ((serialDebug & 4) == 4)
+			{
+				Serial.print(AlarmEnable, BIN);
+				Serial.println(" - New");
+			}
 		}
-	}	
 	serialDebug = readEEPROM(5);		//	read out the serial debug againg in case it was disable during the alarm print
 }
 
