@@ -568,25 +568,23 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	//	if secondsDisplay is on then print seconds.
 	if (secondsDisplay == 1)
 	{
-		lcd.print(":");
-		if (second() <= 9)			//	if the seconds is 1 digit pad a 0 to the single digit
+		if (sec != 99)
 		{
-			lcd.print("0");
-			lcd.print(second());
+			lcd.print(":");
+			if (second() <= 9)			//	if the seconds is 1 digit pad a 0 to the single digit
+			{
+				lcd.print("0");
+				lcd.print(second());
+			}
+			else { lcd.print(second()); }
 		}
-		else { lcd.print(second()); }
+		else if (sec == 99){ lcd.print(" "); }
 	}
 	//  determine weather to display AM or PM
 	if (timeFormat == 1)
 	{
-		if (hour >= 13)
-		{
-			lcd.print("PM");
-		}
-		else if (hour <= 12)
-		{
-			lcd.print("AM");
-		}
+			if (hour >= 13){ lcd.print("PM"); }
+			else if (hour <= 12){ lcd.print("AM"); }
 	}
 }
 
