@@ -527,7 +527,7 @@ void START_SCREEN()
 void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	//	col needs to account for HH:MM:SS:XM for a total of 11 digits
 {	//	mod can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
-
+	
 	//	add seconds to the display of AMPM
 
 	//  set the initial cursor position
@@ -535,6 +535,8 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	{
 		col = col + 1;
 	}
+
+	int realhour = hour;
 	//	use timeFormat to determine where to put the cursor for the hour if set for 12 hour time and print the hour and AM/PM
 	switch (timeFormat)
 	{
@@ -583,8 +585,8 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	//  determine weather to display AM or PM
 	if (timeFormat == 1)
 	{
-			if (hour >= 13){ lcd.print("PM"); }
-			else if (hour <= 12){ lcd.print("AM"); }
+			if (realhour >= 13){ lcd.print("PM"); }
+			else if (realhour <= 12){ lcd.print("AM"); }
 	}
 }
 

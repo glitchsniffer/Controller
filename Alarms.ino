@@ -172,7 +172,7 @@ void AlarmSet(byte id)
 	if ((serialDebug & 4) == 4)
 	{
 		Serial.print("Relay set for ");
-		Serial.println(AlarmRelay[id]);
+		Serial.println(AlarmRelay[id], BIN);
 	}
 
 	//	SET THE TYPE OF RELAY FOR THIS ALARM
