@@ -522,16 +522,13 @@ void START_SCREEN()
 }
 	
 void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
+	//	col needs to account for HH:MM:SS:XM for a total of 11 digits
 {	//	mod can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
 
 	//	add seconds to the display of AMPM
-	Serial.print("secondsDisplay = ");
-	Serial.print(secondsDisplay);
-	Serial.print(":");
-	Serial.println(timeFormat);
 
 	//  set the initial cursor position
-	if (sec != 99)
+	if (secondsDisplay == 0)
 	{
 		col = col + 1;
 	}
@@ -549,10 +546,10 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 		if (hour == 0){ hour = 12; }					//	if hour is midnight, add 12 to the display of the hour to make it 12 AM
 		else if (hour >= 13) { hour = hour - 12; }		//	if hour is 1pm or greater convert to 12 hour
 
-		//	set cursor for single digits
-		if (hour <= 9){ lcd.setCursor(col + 1, row); }
-		else { lcd.setCursor(col, row); }
-
+		//	set the cursor to print the hour digits
+		lcd.setCursor(col, row);
+		if (hour <= 9){ lcd.print(" ");	}		//	add a leading space for the hour if <= 9
+		
 		//	print the hour
 		lcd.print(hour);
 		break;
