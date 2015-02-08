@@ -862,7 +862,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 //  types are 0=normal numbers, 1=time, 2=yes/no, 4=enable/disable 8=+/-.  Add 128 to any number to disable writing to eeprom
 //	If you are only displaying 1 digit, you need to set the col to -1 because all displays in this function are set to the 10's digit
 {
-	int loopNumSel = 1;
+	int loopNumSel = 1;		//	variable to stay in the loop
 	int apm = 0;			//	variable for storing whether or not am or pm has rolled over.
 
 	delay(250);
@@ -875,6 +875,15 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 		start = start + 12;
 		lcd.print(start);
 		start = 0;
+	}
+	else if ((type & 8) == 8)				//	if +/- do not print start
+	{
+		lcd.setCursor(col - 2, row + 2);	//	set the cursor for the bottom row to print a ^ under the number
+		lcd.print(" ");
+		lcd.write(byte(3));
+		lcd.setCursor(col - 1, row);
+		if (start == 0){ lcd.print("-");}
+		else { lcd.print("+"); }
 	}
 	else
 	{
@@ -894,8 +903,11 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 
 		//  gets rid of leading digits for the below cases
 
+		//	if +/- do not print any leading digits
+		if ((type & 8) == 8){ lcd.setCursor(col + 1, row); }
+
 		//  3 digits
-		if (start >= 100){ lcd.setCursor(col - 1, row); }
+		else if (start >= 100){ lcd.setCursor(col - 1, row); }
 
 		//  2 digits and it is >=10
 		else if (start >= 10)
@@ -918,6 +930,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 			}
 			lcd.setCursor(col + 1, row);
 		}
+
 		//	Time type selection, timeFormat == 1 and other if otption
 		if ((type & 1) == 1)
 		{
@@ -1012,7 +1025,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 				lcd.setCursor(col + 1, row + 1);
 				lcd.write(byte(3));
 				lcd.write(byte(3));
-				lcd.setCursor(col- 1, row);
+				lcd.setCursor(col - 1, row);
 				lcd.print("Disable");
 				break;
 			case 1:
@@ -1031,13 +1044,15 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 			switch (start)
 			{
 			case 0:
-				lcd.setCursor(col - 1, row + 2);	//	set the cursor for the bottom row to print a ^ under the number
+				lcd.setCursor(col - 2, row + 2);	//	set the cursor for the bottom row to print a ^ under the number
+				lcd.print(" ");
 				lcd.write(byte(3));
 				lcd.setCursor(col - 1, row);
 				lcd.print("-");
 				break;
 			case 1:
-				lcd.setCursor(col - 1, row + 2);	//	set the cursor for the bottom row to print a ^ under the number
+				lcd.setCursor(col - 2, row + 2);	//	set the cursor for the bottom row to print a ^ under the number
+				lcd.print(" ");
 				lcd.write(byte(3));
 				lcd.setCursor(col - 1, row);
 				lcd.print("+");

@@ -29,7 +29,7 @@ byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 int version = 0;			//  Sets the version number for the current program
-int build = 22;				//  Sets the build number for the current program
+int build = 23;				//  Sets the build number for the current program
 int today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -208,7 +208,7 @@ void setup()
 		{
 			Serial.println();
 			Serial.println("***********ALARM EEPROM READING***********");
-			Serial.println("ID IDON IDOFF Enable Type Rly   ON     OFF");
+			Serial.println("ID ON OFF  En  Type   ON    OFF    Relay");
 		}
 
 		for (int id = 0; id < 8; id++)		//  read each of the alarms values out of the EEPROM
@@ -226,18 +226,16 @@ void setup()
 			if ((serialDebug & 4) == 4)
 			{
 				Serial.print(id);
-				Serial.print("    ");
+				Serial.print("  ");
 				Serial.print(AlarmIDOn[id]);
-				if (AlarmIDOn[id] >= 10){ Serial.print("   "); }
-				else { Serial.print("    "); }
+				if (AlarmIDOn[id] >= 10){ Serial.print("  "); }
+				else { Serial.print("   "); }
 				Serial.print(AlarmIDOff[id]);
-				if (AlarmIDOff[id] >= 10){ Serial.print("   "); }
-				else { Serial.print("    "); }
-				if ((AlarmEnable & (1 << id)) == (1 << id)){ Serial.print(" ON    "); }
-				else{ Serial.print(" OFF   "); }
+				if (AlarmIDOff[id] >= 10){ Serial.print(" "); }
+				else { Serial.print("  "); }
+				if ((AlarmEnable & (1 << id)) == (1 << id)){ Serial.print(" ON   "); }
+				else{ Serial.print(" OFF  "); }
 				Serial.print(AlarmType[id]);
-				Serial.print("    ");
-				Serial.print(AlarmRelay[id]);
 				Serial.print("   ");
 
 				if (AlarmHourOn[id] < 10){ Serial.print(" "); }
@@ -252,9 +250,11 @@ void setup()
 				Serial.print(":");
 				if (AlarmMinOff[id] < 10){
 					Serial.print("0");
-					Serial.println(AlarmMinOff[id]);
+					Serial.print(AlarmMinOff[id]);
 				}
-				else{ Serial.println(AlarmMinOff[id]); }
+				else{ Serial.print(AlarmMinOff[id]); }
+				Serial.print("  ");
+				Serial.println(AlarmRelay[id], BIN);
 			}
 		}
 		serialDebug = readEEPROM(5);		//	read out the serial debug again in case it was disable during the alarm print
@@ -585,8 +585,8 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	//  determine weather to display AM or PM
 	if (timeFormat == 1)
 	{
-			if (realhour >= 13){ lcd.print("PM"); }
-			else if (realhour <= 12){ lcd.print("AM"); }
+			if (realhour >= 12){ lcd.print("PM"); }
+			else if (realhour <= 11){ lcd.print("AM"); }
 	}
 }
 
@@ -764,12 +764,13 @@ void factoryDefaultset()
 
 	for (int i = 0; i < 8; i++)		//	loop through all 8 alarms
 	{
-		writeEEPROM(102 + (i * 6), 0);	//  writes the alarm type to 0, Day Lights
-		writeEEPROM(103 + (i * 6), i);	//	writes the relay trigger to relay to match the id
-		writeEEPROM(104 + (i * 6), 0);	//  writes the alarm on hour 12
-		writeEEPROM(105 + (i * 6), 29+i);	//  writes the alarm on minute 1
-		writeEEPROM(106 + (i * 6), 0);	//  writes the alarm off hour 23
-		writeEEPROM(107 + (i * 6), 31+i);	//  writes the alarm off minute 11
+		writeEEPROM(102 + (i * 6), 0);			//  writes the alarm type to 0, Day Lights
+		int bit = 1 << i;
+		writeEEPROM(103 + (i * 6), (0 ^ bit));	//	writes the relay trigger to relay to match the id
+		writeEEPROM(104 + (i * 6), 0);			//  writes the alarm on hour 12
+		writeEEPROM(105 + (i * 6), 29+i);		//  writes the alarm on minute 1
+		writeEEPROM(106 + (i * 6), 0);			//  writes the alarm off hour 23
+		writeEEPROM(107 + (i * 6), 31+i);		//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");
 }
