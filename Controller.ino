@@ -29,7 +29,7 @@ byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 int version = 0;			//  Sets the version number for the current program
-int build = 25;				//  Sets the build number for the current program
+int build = 26;				//  Sets the build number for the current program
 int today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -603,8 +603,9 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	//  determine weather to display AM or PM
 	if (timeFormat == 1)
 	{
-			if (realhour >= 12){ lcd.print("PM"); }
-			else if (realhour <= 11){ lcd.print("AM"); }
+		if ((sec == 99) && (mod != 0)){ lcd.setCursor(col + 4 + mod, row); }
+		if (realhour >= 12){ lcd.print("PM"); }
+		else if (realhour <= 11){ lcd.print("AM"); }
 	}
 }
 

@@ -227,6 +227,8 @@ void MenuTitle()
 						break;
 					case 1:								//	prints 2nd level Timer Setup items
 						lcd.print(m1Items1[mPoint]);
+						LCDTimeDisplay(13, 1, AlarmHourOn[mPoint-2], AlarmMinOn[mPoint-2], 99, 1);			//	prints the alarms on time
+						LCDTimeDisplay(13, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 99, 1);	//	prints the alarms off time
 						break;
 					case 2:								//	prints 2nd level Sensor Addr Config items
 						lcd.print(m1Items2[mPoint]);
