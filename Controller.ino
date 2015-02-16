@@ -29,7 +29,7 @@ byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 int version = 0;			//  Sets the version number for the current program
-int build = 24;				//  Sets the build number for the current program
+int build = 25;				//  Sets the build number for the current program
 int today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -85,6 +85,8 @@ int m2Start = 0;		//  starting cursor position for mLevel2
 int m3Start = 0;		//  starting cursor position for mLevel3
 int miMax = 0;			//  current selected menu item for purposes of up and down movement
 int mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
+int menuTimeout;		//	variable to count for a menu system timeout
+int to = 0;				//	generic variable to determine if the menu system needs to time out
 
 char* m0Items[]={"", "User Setup", "Timers Setup", "Sensor Addr Setup","Calibration","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
 char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "" };  //  setup menu item 1 for System Config Min 0 Max 6
@@ -462,7 +464,7 @@ void RelayToggleALL()
 }
 void RelayToggle(int state, int onoff)
 {
-	Serial.print("state = ");
+	Serial.print("Before state = ");
 	Serial.print(state, BIN);
 	Serial.print(" : RelayState = ");
 	Serial.println(RelayState, BIN);
@@ -471,8 +473,6 @@ void RelayToggle(int state, int onoff)
 	{
 		byte rl;
 		rl = (state & (1 << i));		//	isolate a single relay to see if its bit is set to 1 or 0
-		Serial.print("rl = ");
-		Serial.print(rl, BIN);
 		lcd.setCursor(i, 3);			//	set the cursor position to the current relay to print a + or -
 		
 		//	switch to turn on or off the relay
@@ -501,13 +501,11 @@ void RelayToggle(int state, int onoff)
 			}
 			break;
 		}
-		Serial.print(" - RelayState = ");
-		Serial.println(RelayState, BIN);
 		delay(200);
 	}
-	Serial.print("state = ");
+	Serial.print("After state = ");
 	Serial.print(state, BIN);
-	Serial.print(" - RelayState = ");
+	Serial.print(" : RelayState = ");
 	Serial.println(RelayState, BIN);
 
 	writeEEPROM(150, RelayState);

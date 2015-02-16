@@ -3,6 +3,7 @@
 //  ***********************************************
 void MenuTitle()
 {
+	menuTimeout = 0;
 	if (mLevel == 3)		//	menu printing is not necessary if its the final level so it just calls the do function
 		{MenuDo();
 		return;}
@@ -390,6 +391,9 @@ void MenuLoop()
 		if (Right == 1){MenuSelect();}
 		if (Left == 1){MenuBack();}
 		
+		menuTimeout++;
+		if (menuTimeout == 50){ menuMode = 0; }		//	this will exit the menu system after approx 30 seconds after a button has not been pushed
+		
 	delay(200);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
 	}
 	Serial.println("Exiting Menu loop");	//	prints this message when it exits the menu loop
@@ -530,7 +534,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 					case 0:
 						tempReadDelay = readEEPROM(22);
-						MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
+						to = MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
+						if (to = 32767){ return; }
 						tempReadDelay = readEEPROM(22);
 						Alarm.write(ReadDelay_ID, tempReadDelay);
 						Alarm.disable(ReadDelay_ID);
@@ -546,7 +551,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					case 0:
 						//							int blBright = 0;
 						backlightLevel = readEEPROM(25);
-						MenuNumSel(0, 25, backlightLevel, 1, 255, 5, 9, 2, 250);
+						to = MenuNumSel(0, 25, backlightLevel, 1, 255, 5, 9, 2, 250);
+						if (to = 32767){ return; }
 						backlightLevel = readEEPROM(25);
 						break;
 					}
@@ -1065,40 +1071,53 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 		
 		if (Up == 1)
 			{
+				menuTimeout = 0;
 				if (start < max){ start = start + step; }		//	add the step size to start to increment
 				else{ start = (min + (max - max)); }			//	reset to min if the max has been reached
 
 			}
 		if (Down == 1)
 			{
+				menuTimeout = 0;
 				if (start > min){ start = start - step; }		//	add the step size to start to increment
 				else{ start = min + max; }						//	reset to min if the max has been reached
 			}
 		if (Right == 1)
 			{
-			if ((type & 64) != 64)									//	doesnt display saving if the 7th bit of type is set
-			{
-				lcd.setCursor(0, 2);
-				lcd.print("                    ");
-				lcd.setCursor(0, 3);
-				lcd.print("      Saving        ");
-			}
-			if ((type & 128) != 128){ writeEEPROM(addr, start); }	//	doesnt write to EEPROM if the 8th bit of type is set
-				delay(50);
-				loopNumSel = 0;
+				menuTimeout = 0;
+				if ((type & 64) != 64)									//	doesnt display saving if the 7th bit of type is set
+				{
+					lcd.setCursor(0, 2);
+					lcd.print("                    ");
+					lcd.setCursor(0, 3);
+					lcd.print("      Saving        ");
+				}
+				if ((type & 128) != 128){ writeEEPROM(addr, start); }	//	doesnt write to EEPROM if the 8th bit of type is set
+					delay(50);
+					loopNumSel = 0;
 			}
 		if (Left == 1)
 			{
-			if ((type & 64) != 64)									//	doesnt display saving if the 7th bit of type is set
-			{
-				lcd.setCursor(0, 2);
-				lcd.print("                    ");
-				lcd.setCursor(0, 3);
-				lcd.print("  Exit Without Save  ");
+				menuTimeout = 0;
+				if ((type & 64) != 64)									//	doesnt display saving if the 7th bit of type is set
+				{
+					lcd.setCursor(0, 2);
+					lcd.print("                    ");
+					lcd.setCursor(0, 3);
+					lcd.print("  Exit Without Save  ");
+				}
+					delay(50);
+					loopNumSel = 0;
 			}
-				delay(50);
-				loopNumSel = 0;
-			}
+		menuTimeout++;
+		if (menuTimeout == 50)		//	this will exit the menu system after approx 10 seconds after a button has not been pushed
+		{
+			loopNumSel = 0;
+			menuMode = 0;
+			menuTimeout = 0;
+			start = 32767;
+		}
+
 		delay(dmicro);
 	}
 	return start;

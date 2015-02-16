@@ -43,7 +43,8 @@ void AlarmSet(byte id)
 	LCDTimeDisplay((6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 99, 0);
 
 	//  call the number selection menu to select the hour
-	MenuNumSel(65, (104 + (id * 6)), AlarmHourOn[id], 0, 23, 1, (6 + t), 1, 250);
+	to = MenuNumSel(65, (104 + (id * 6)), AlarmHourOn[id], 0, 23, 1, (6 + t), 1, 250);
+	if (to = 32767){ return; }
 	AlarmHourOn[id] = readEEPROM(104 + (id * 6));
 
 	//  CHANGE THE MINUTE ON TIME
@@ -69,7 +70,8 @@ void AlarmSet(byte id)
 	LCDTimeDisplay((6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 99, 0);
 
 	//  call the number selection menu to select the hour
-	MenuNumSel(64, (105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 175);
+	to = MenuNumSel(64, (105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 175);
+	if (to = 32767){ return; }
 	AlarmMinOn[id] = readEEPROM(105 + (id * 6));
 
 	//  CHANGE THE HOUR OFF TIME
@@ -95,7 +97,8 @@ void AlarmSet(byte id)
 	LCDTimeDisplay((6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 99, 0);
 
 	//  call the number selection menu to select the hour
-	MenuNumSel(65, (106 + (id * 6)), AlarmHourOff[id], 0, 23, 1, (6 + t), 1, 250);
+	to = MenuNumSel(65, (106 + (id * 6)), AlarmHourOff[id], 0, 23, 1, (6 + t), 1, 250);
+	if (to = 32767){ return; }
 	AlarmHourOff[id] = readEEPROM(106 + (id * 6));
 
 	//  CHANGE THE MINUTE OFF TIME
@@ -121,7 +124,8 @@ void AlarmSet(byte id)
 	LCDTimeDisplay((6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 99, 0);
 
 	//  call the number selection menu to select the hour
-	MenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 175);
+	to = MenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 175);
+	if (to = 32767){ return; }
 	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
 
 	//  WRITE THE ALARMS TO THE TIMEALARMS LIBRARY
@@ -181,6 +185,7 @@ void AlarmSet(byte id)
 
 		//  call the number selection menu to select the relay
 		rd = MenuNumSel(200, 255, start, 0, 1, 1, (10 + i), 1, 200);
+		if (rd = 32767){ return; }
 		//			AlarmRelay[id] = readEEPROM(103 + (id * 6));
 
 		bit = 1 << i;
@@ -233,7 +238,8 @@ void AlarmSet(byte id)
 	lcd.write(byte(3));		//  print the up arrow
 
 	//	call the numselmenu to select the type of the relay  1-4
-	MenuNumSel(64, (102 + (id * 6)), AlarmType[id], 0, 3, 1, 8, 1, 250);
+	to = MenuNumSel(64, (102 + (id * 6)), AlarmType[id], 0, 3, 1, 8, 1, 250);
+	if (to = 32767){ return; }
 	AlarmType[id] = readEEPROM(102 + (id * 6));
 
 	if ((serialDebug & 4) == 4)
@@ -276,6 +282,7 @@ void AlarmSet(byte id)
 	else{ start = 0; }
 
 	rd = MenuNumSel(4, 255, start, 0, 1, 1, 8, 1, 250);	//	Call the function to edit the variable
+	if (rd = 32767){ return; }
 
 	bit = 1 << id;
 	
