@@ -29,7 +29,7 @@ byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 int version = 0;			//  Sets the version number for the current program
-int build = 23;				//  Sets the build number for the current program
+int build = 24;				//  Sets the build number for the current program
 int today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -83,7 +83,6 @@ int m0Start = 0;		//	starting cursor position for mLevel0
 int m1Start = 0;		//	starting cursor position for mLevel1
 int m2Start = 0;		//  starting cursor position for mLevel2
 int m3Start = 0;		//  starting cursor position for mLevel3
-//int m4Start = 0;		//  starting cursor position for mLevel4
 int miMax = 0;			//  current selected menu item for purposes of up and down movement
 int mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
 
@@ -117,7 +116,7 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 		char* m2Items33[]={"", "Calibrate Sensor 4", "Exit", ""};
 		char* m2Items34[]={"", "Calibrate Flow Sens", "Exit", ""};
 	char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults" };	//	setup menu item 4 for System Setup
-		char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "", "System", "" };
+		char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "Relays", "System", "" };
 		char* m2Items41[] = { "", "Exit Erase EEPROM", "Erase EEPROM", "" };
 		char* m2Items42[] = { "", "Exit", "Restore Defaults", "" };
 
@@ -153,6 +152,7 @@ byte AlarmHourOn[8];		//  hour time the alarm will come on at
 byte AlarmMinOn[8];			//	minute time the alarm will come on at
 byte AlarmHourOff[8];		//	hour time the alarm will go off at
 byte AlarmMinOff[8];		//  minute time the alarm will go off at
+byte RelayState;			//	byte for storing the state of all 8 relays
 
 AlarmID_t ReadDelay_ID;		//  delay between reading the temperature sensors
 AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
@@ -203,6 +203,7 @@ void setup()
 		ReadDelay_ID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to ReadDelayID
 		AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
 		AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
+		RelayState = readEEPROM(150);
 	
 		if ((serialDebug & 4) == 4)
 		{
@@ -267,6 +268,8 @@ void setup()
 			Serial.println(AlarmEnable, BIN);
 			Serial.print("Alarm State : ");
 			Serial.println(AlarmState, BIN);
+			Serial.print("Relay State : ");
+			Serial.println(RelayState, BIN);
 			Serial.print("Num of Alarms : ");
 			rd = Alarm.count();
 			Serial.println(rd);
@@ -306,17 +309,17 @@ void setup()
 	lcd.setBacklight(HIGH);					//  toggle the backlight on
 	
 	START_SCREEN();		//  call the start up screen function
-	
-	RelayStatusDisplay(0, 3);		//	call the relay status display function
-	RelayState();					//	Turn on the relays according to the AlarmState byte
-	
-	lcd.setCursor(0,2);
+
+	RelayStatusDisplay(0, 3);				//	call the relay status display function
+	RelayToggle(RelayState, 1);				//	Turn on the relays according to the AlarmState byte
+		
+	/*lcd.setCursor(0,2);
 	lcd.write(byte(2));
 	lcd.write(byte(3));
 	lcd.write(byte(4));
 	lcd.write(byte(5));
 	lcd.write(byte(6));
-	lcd.write(byte(7));
+	lcd.write(byte(7));*/
 	
 	//  SETUP THE DS18B20 SENSORS
 	//  Check to see how many sensors are on the busses
@@ -368,7 +371,7 @@ void setup()
 	DS18B20_Read();
 	Serial.println("Starting Loop");
 	Serial.println();
-	//RL_Toggle();		//**********NICE SPOT TO TEST RELAYS**************
+	//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
 }
 
 void loop()
@@ -389,7 +392,7 @@ void loop()
 }
 
 void AlarmON()
-{	
+{
 	int id;
 	id = Alarm.getTriggeredAlarmId();
 	id = ((id - 1) / 2);
@@ -400,15 +403,8 @@ void AlarmON()
 	Serial.print(":");
 	Serial.println(minute());
 
-	//	turn on the appropriate relay and write the status to the display
-	digitalWrite(relayPins[id], LOW);
-	lcd.setCursor(id, 3);
-	lcd.print("+");
-
-	//  write the state bit to the EEPROM
-	byte bit = 1 << id;						//	sets bit for the correct id's bit position
-	AlarmState = AlarmState ^ bit;			//	toggles the bit position
-	writeEEPROM(101, AlarmState);
+	RelayToggle(AlarmRelay[id], 1);
+	//RelayStatusDisplay(0 , 3);
 
 	if ((serialDebug & 4) == 4)
 	{
@@ -421,7 +417,6 @@ void AlarmON()
 		Serial.println();
 	}
 }
-
 void AlarmOFF()
 {
 	int id;
@@ -433,16 +428,8 @@ void AlarmOFF()
 	Serial.print(hour());
 	Serial.print(":");
 	Serial.println(minute());
-
-	//	turn on the appropriate relay and write the status to the display
-	digitalWrite(relayPins[id], HIGH);
-	lcd.setCursor(id, 3);
-	lcd.print("-");
-
-	//  write the state bit to the EEPROM
-	byte bit = 1 << id;						//	sets bit for the correct id's bit position
-	AlarmState = AlarmState ^ bit;			//	toggles the bit position
-	writeEEPROM(101, AlarmState);
+	RelayToggle(AlarmRelay[id], 0);
+	//RelayStatusDisplay(0, 3);
 
 	if ((serialDebug & 4) == 4)
 	{
@@ -456,53 +443,86 @@ void AlarmOFF()
 	}
 }
 
-void RL_Toggle()
+void RelayToggleALL()
 {
-	for (int relay = 0; relay < relayCount; relay++){
+	for (int relay = 0; relay < relayCount; relay++)
+	{
 		digitalWrite(relayPins[relay], LOW);
-		//  write the state bit to the EEPROM
 		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
-		AlarmState = AlarmState ^ bit;			//	toggles the bit position
-		writeEEPROM(101, AlarmState);
 		RelayStatusDisplay(0, 3);
-		delay(500);}
-	for (int relay = 0; relay < relayCount; relay++){		
+		delay(500);
+	}
+	for (int relay = 0; relay < relayCount; relay++)
+	{		
 		digitalWrite(relayPins[relay], HIGH);
-		//	write the state bit to the EEPROM
 		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
-		AlarmState = AlarmState ^ bit;			//	toggles the bit position
-		writeEEPROM(101, AlarmState);
 		RelayStatusDisplay(0, 3);
-		delay(500);}
-	for (int relay = 0; relay < relayCount; relay++){
-	digitalWrite(relayPins[relay], HIGH);
-	delay(100);}
-	RelayState();					//	Turn on the relays according to the AlarmState byte
+		delay(500);
+	}
 }
-void RelayState()
+void RelayToggle(int state, int onoff)
 {
+	Serial.print("state = ");
+	Serial.print(state, BIN);
+	Serial.print(" : RelayState = ");
+	Serial.println(RelayState, BIN);
+
 	for (int i = 0; i < 8; i++)
 	{
-		if ((AlarmState & (1 << i)) == (1 << i))
+		byte rl;
+		rl = (state & (1 << i));		//	isolate a single relay to see if its bit is set to 1 or 0
+		Serial.print("rl = ");
+		Serial.print(rl, BIN);
+		lcd.setCursor(i, 3);			//	set the cursor position to the current relay to print a + or -
+		
+		//	switch to turn on or off the relay
+		switch (onoff)
 		{
-			digitalWrite(relayPins[i], LOW);
-			delay(200);
+		case 0:			//  turns off the relay
+			if (rl > 0)
+			{
+				if ((RelayState & (1 << i)) != 0)	//	Only changes if there is not a 0 for that bit.  this prevents changing the relaystate if there it is alread on
+				{
+					RelayState = RelayState ^ (1 << i);		//	toggles the bit held in RelayState
+				}
+				digitalWrite(relayPins[i], HIGH);		//	turns the relay off
+				lcd.print("-");							//	sets the relay to display a - on the LCD screen
+			}
+			break;
+		case 1:
+			if (rl > 0)
+			{
+				if ((RelayState & (1 << i)) != (1 << i))	//	Only changes if there is not a 1 for that bit.  this prevents changing the relaystate if there it is alread on
+				{
+					RelayState = RelayState ^ (1 << i);		//	toggles the bit held in RelayState
+				}
+				digitalWrite(relayPins[i], LOW);		//	turns the relay on
+				lcd.print("+");							//	sets the relay to display a - on the LCD screen
+			}
+			break;
 		}
+		Serial.print(" - RelayState = ");
+		Serial.println(RelayState, BIN);
+		delay(200);
 	}
+	Serial.print("state = ");
+	Serial.print(state, BIN);
+	Serial.print(" - RelayState = ");
+	Serial.println(RelayState, BIN);
+
+	writeEEPROM(150, RelayState);
+	RelayState = readEEPROM(150);
 }
 
 void RelayStatusDisplay(int col, int row)
 {
 	lcd.setCursor(col, row);
-	lcd.print("--------");
 	for (int i = 0; i < 8; i++)
-	{
-		if ((AlarmState & (1 << i)) == (1 << i))
 		{
-			lcd.setCursor(col + i, row);
-			lcd.print("+");
+			lcd.setCursor((col + i), row);
+			if ((RelayState & (1 << i)) == (1 << i)){ lcd.print("+"); }
+			else lcd.print("-");
 		}
-	}
 }
 
 void START_SCREEN()
@@ -761,6 +781,7 @@ void factoryDefaultset()
 	//  Alarm Settings
 	writeEEPROM(100, 255);	//  writes alarms enable flag to off
 	writeEEPROM(101, 0);	//  writes the alarm state flag to 0 or Off
+	writeEEPROM(150, 0);	//	writes the relayState flag to all 0's or OFF
 
 	for (int i = 0; i < 8; i++)		//	loop through all 8 alarms
 	{

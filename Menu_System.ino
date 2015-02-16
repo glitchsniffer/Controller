@@ -1084,7 +1084,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 				lcd.print("      Saving        ");
 			}
 			if ((type & 128) != 128){ writeEEPROM(addr, start); }	//	doesnt write to EEPROM if the 8th bit of type is set
-				delay(150);
+				delay(50);
 				loopNumSel = 0;
 			}
 		if (Left == 1)
@@ -1096,7 +1096,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 				lcd.setCursor(0, 3);
 				lcd.print("  Exit Without Save  ");
 			}
-				delay(150);
+				delay(50);
 				loopNumSel = 0;
 			}
 		delay(dmicro);

@@ -121,7 +121,7 @@ void AlarmSet(byte id)
 	LCDTimeDisplay((6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 99, 0);
 
 	//  call the number selection menu to select the hour
-	MenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 250);
+	MenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 175);
 	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
 
 	//  WRITE THE ALARMS TO THE TIMEALARMS LIBRARY
@@ -144,7 +144,7 @@ void AlarmSet(byte id)
 		Serial.println(rd);
 	}
 
-	//	CHANGE THE RELAY ATTACHED TO THIS ALARM
+	//	CHANGE THE RELAYS ATTACHED TO THIS ALARM
 	//  ***********************************************
 
 	//  set the LCD screen up for the Hour OFF edit
@@ -160,18 +160,18 @@ void AlarmSet(byte id)
 	lcd.print("Relays");
 	lcd.setCursor(9, 2);
 	lcd.print("12345678");
-
-	for (int i = 0; i < 8; i++)
-	{
-		lcd.setCursor((9 + i), 1);
-		if ((AlarmRelay[id] & (1 << i)) == (1 << i)){ lcd.print("+"); }
-		else lcd.print("-");
-	}
-
-	Serial.println();
+	RelayState = AlarmRelay[id];
+	RelayStatusDisplay(9, 1);
+	RelayState = readEEPROM(150);
+		
 	int relaytemp = AlarmRelay[id];
-	Serial.print("relaytemp = ");
-	Serial.println(relaytemp, BIN);
+
+	if ((serialDebug & 4) == 4)
+	{
+		Serial.println();
+		Serial.print("relaytemp = ");
+		Serial.println(relaytemp, BIN);
+	}
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -179,20 +179,22 @@ void AlarmSet(byte id)
 		if ((AlarmRelay[id] & (1 << i)) == (1 << i)){ start = 1; }		//	Check to see if if the timer is enable or disabled
 		else{ start = 0; }
 
-		Serial.print("start = ");
-		Serial.print(start);
-
 		//  call the number selection menu to select the relay
 		rd = MenuNumSel(200, 255, start, 0, 1, 1, (10 + i), 1, 200);
 		//			AlarmRelay[id] = readEEPROM(103 + (id * 6));
 
 		bit = 1 << i;
 
-		Serial.print("rd = ");
-		Serial.print(rd);
-		Serial.print("; ID: ");
-		Serial.print(id);
-		Serial.print("; temp = ");
+		if ((serialDebug & 4) == 4)
+		{
+			Serial.print("start = ");
+			Serial.print(start);
+			Serial.print("; rd = ");
+			Serial.print(rd);
+			Serial.print("; ID: ");
+			Serial.print(id);
+			Serial.print("; temp = ");
+		}
 
 		if (rd != start){ relaytemp = relaytemp ^ bit; }
 
@@ -201,7 +203,7 @@ void AlarmSet(byte id)
 	}
 	writeEEPROM(103 + (id * 6), relaytemp);
 	AlarmRelay[id] = readEEPROM(103 + (id * 6));
-
+	
 	if ((serialDebug & 4) == 4)
 	{
 		Serial.print("Relay set for ");
@@ -321,6 +323,7 @@ void AlarmSetDisplay(int id)
 	if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop
 		AlarmEnable = readEEPROM(100);
 		AlarmState = readEEPROM(101);
+		RelayState = readEEPROM(150);
 		AlarmType[id] = readEEPROM(102 + (id * 6));
 		AlarmRelay[id] = readEEPROM(103 + (id * 6));
 		AlarmHourOn[id] = readEEPROM(104 + (id * 6));
@@ -355,15 +358,11 @@ void AlarmSetDisplay(int id)
 	//	set cursor and print the relay number that the alarm is set to trigger
 	lcd.setCursor(6, 3);
 	lcd.print("Relay");
-//	lcd.print(AlarmRelay[id]);
 	miMax = 1;
 	serialDebug = readEEPROM(5);		//	read out the serial debug againg in case it was disable during the alarm print
-
-	for (int i = 0; i < 8; i++)
-	{
-		Serial.print(i);
-		lcd.setCursor((12 + i), 3);
-		if ((AlarmRelay[id] & (1 << i)) == (1 << i)){ lcd.print("+"); }
-		else lcd.print("-");
-	}
+	
+	//	display the relays that are currently enabled
+	RelayState = AlarmRelay[id];		//  Temporarily set RelayState to AlarmRelay[id]
+	RelayStatusDisplay(12, 3);			//  Display the relays triggered by the alarm
+	RelayState = readEEPROM(150);		//	reset RelayState to the original value from the EEPROM
 }
