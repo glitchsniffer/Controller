@@ -96,7 +96,7 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 		char* m2Items03[] = { "", "Set BL Brightness", "" };
 		char* m2Items04[]={"", "24 Hour", "12 Hour", ""};
 		char* m2Items05[] = { "", "Do Not Display Sec", "Display Seconds", "" };
-		char* m2Items06[]={"", "Need Date/Time Here", ""};
+		char* m2Items06[]={"", "Exit", "Need Date/Time Here", ""};
 	char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Edit", "Exit", ""};
 		char* m2Items11[]={"", "Edit", "Exit", ""};
@@ -174,6 +174,9 @@ void setup()
 	serialDebug = readEEPROM(5);		//	reads out user setting to turn serial debugging on for each type of debugging
 	Serial.begin(115200);				//  start the serial port if debugging is on
 	Serial.println();
+
+	//  SHOW THE COMPILE DATE AND TIME	
+	Serial.println("Compiled: " __DATE__ ", " __TIME__ ", " __AVR_LIBC_VERSION_STRING__);
 
 	//  SETUP THE RTC
 	setSyncProvider(RTC.get);		//  this function get the time from the RTC
@@ -281,7 +284,6 @@ void setup()
 			rd = Alarm.read(ReadDelay_ID);
 			Serial.println(rd);
 			Serial.println();
-
 		}
 		
 	//  SETUP THE BUTTONS

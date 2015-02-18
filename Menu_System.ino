@@ -601,6 +601,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 						case 0:
 							break;
+						case 1:
+							break;
 					}
 					break;
 			}
