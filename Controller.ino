@@ -471,7 +471,7 @@ void RelayToggle(int state, int onoff)
 	Serial.print(" : RelayState = ");
 	Serial.println(RelayState, BIN);
 
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < relayCount; i++)
 	{
 		byte rl;
 		rl = (state & (1 << i));		//	isolate a single relay to see if its bit is set to 1 or 0
@@ -517,7 +517,7 @@ void RelayToggle(int state, int onoff)
 void RelayStatusDisplay(int col, int row)
 {
 	lcd.setCursor(col, row);
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < relayCount; i++)
 		{
 			lcd.setCursor((col + i), row);
 			if ((RelayState & (1 << i)) == (1 << i)){ lcd.print("+"); }
