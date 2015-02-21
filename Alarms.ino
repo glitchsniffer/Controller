@@ -1,5 +1,6 @@
 void AlarmSet(byte id)
 {
+	Serial.println(freeRam());
 	if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop
 	int t = 0;		//	variable for adding the time format to the cursor
 	int rd;			//  variable for reading out variables from the EEPROM
@@ -44,7 +45,7 @@ void AlarmSet(byte id)
 
 	//  call the number selection menu to select the hour
 	to = MenuNumSel(65, (104 + (id * 6)), AlarmHourOn[id], 0, 23, 1, (6 + t), 1, 250);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmHourOn[id] = readEEPROM(104 + (id * 6));
 
 	//  CHANGE THE MINUTE ON TIME
@@ -71,7 +72,7 @@ void AlarmSet(byte id)
 
 	//  call the number selection menu to select the hour
 	to = MenuNumSel(64, (105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 175);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmMinOn[id] = readEEPROM(105 + (id * 6));
 
 	//  CHANGE THE HOUR OFF TIME
@@ -98,7 +99,7 @@ void AlarmSet(byte id)
 
 	//  call the number selection menu to select the hour
 	to = MenuNumSel(65, (106 + (id * 6)), AlarmHourOff[id], 0, 23, 1, (6 + t), 1, 250);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmHourOff[id] = readEEPROM(106 + (id * 6));
 
 	//  CHANGE THE MINUTE OFF TIME
@@ -125,7 +126,7 @@ void AlarmSet(byte id)
 
 	//  call the number selection menu to select the hour
 	to = MenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 175);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
 
 	//  WRITE THE ALARMS TO THE TIMEALARMS LIBRARY
@@ -185,7 +186,7 @@ void AlarmSet(byte id)
 
 		//  call the number selection menu to select the relay
 		rd = MenuNumSel(200, 255, start, 0, 1, 1, (10 + i), 1, 200);
-		if (rd = 32767){ return; }
+		if (rd == 32767){ return; }
 		//			AlarmRelay[id] = readEEPROM(103 + (id * 6));
 
 		bit = 1 << i;
@@ -239,7 +240,7 @@ void AlarmSet(byte id)
 
 	//	call the numselmenu to select the type of the relay  1-4
 	to = MenuNumSel(64, (102 + (id * 6)), AlarmType[id], 0, 3, 1, 8, 1, 250);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmType[id] = readEEPROM(102 + (id * 6));
 
 	if ((serialDebug & 4) == 4)
@@ -282,7 +283,7 @@ void AlarmSet(byte id)
 	else{ start = 0; }
 
 	rd = MenuNumSel(4, 255, start, 0, 1, 1, 8, 1, 250);	//	Call the function to edit the variable
-	if (rd = 32767){ return; }
+	if (rd == 32767){ return; }
 
 	bit = 1 << id;
 	
@@ -320,10 +321,12 @@ void AlarmSet(byte id)
 			}
 		}
 	serialDebug = readEEPROM(5);		//	read out the serial debug againg in case it was disable during the alarm print
+	Serial.println(freeRam());
 }
 
 void AlarmSetDisplay(int id)
 {
+	Serial.println(freeRam());
 	int t = 0;			//  time format modifier for 12 or 24 hour clocks
 
 	//	read all variables for the timer id from the EEPROM
@@ -372,4 +375,5 @@ void AlarmSetDisplay(int id)
 	RelayState = AlarmRelay[id];		//  Temporarily set RelayState to AlarmRelay[id]
 	RelayStatusDisplay(12, 3);			//  Display the relays triggered by the alarm
 	RelayState = readEEPROM(150);		//	reset RelayState to the original value from the EEPROM
+	Serial.println(freeRam());
 }

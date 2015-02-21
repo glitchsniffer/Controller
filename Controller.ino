@@ -380,6 +380,7 @@ void setup()
 
 void loop()
 {
+	Serial.println(freeRam());
 	if (menuMode == 1)
 	{
 		Serial.println("Entering Menu");		//  calls the MenuTitle as long as menuMode = 1
@@ -814,4 +815,11 @@ void eraseEEPROM()
 		readEEPROM(address);
 		address++;
 	}
+}
+
+int freeRam()
+{
+	extern int __heap_start, *__brkval;
+	int v;
+	return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
 }
