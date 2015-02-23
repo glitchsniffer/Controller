@@ -4,8 +4,9 @@
 #include <DS1307RTC.h>          //DS RTC library
 #include <OneWire.h>            //OneWire Library for the DS Sensors
 #include <DallasTemperature.h>  //Dallas Temperature library
-#include <LiquidCrystal_I2C.h>  //LCD I2C library
 #include <Wire.h>               //I2C Wire library
+#include <LiquidCrystal_I2C.h>  //LCD I2C library
+
 
 
 //  INITIALIZE THE EEPROM
@@ -28,9 +29,9 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte secondsDisplay;		//	initializes the byte secondsDisplay
-int version = 0;			//  Sets the version number for the current program
-int build = 26;				//  Sets the build number for the current program
-int today = 0;				//  Sets the today to the current date to display on the RTC
+byte version = 0;			//  Sets the version number for the current program
+byte build = 26;				//  Sets the build number for the current program
+byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
 //  ***********************************************
@@ -52,10 +53,10 @@ LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins 
 byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};  //  set the lcd char for the degree symbol
 byte rarrow[8] = {B00000,B01000,B01100,B01110,B01100,B01000,B00000,};  //  set the lcd char for the right arrow symbol
 byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};  //  set the lcd char for the up arrow symbol
-byte larrow[8] = {B00000,B00010,B00110,B01110,B00110,B00010,B00000,};  //  set the lcd char for the left arrow symbol
-byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};  //  set the lcd char for the down arrow symbol
-byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};  //  set the lcd char for the timer bell symbol
-byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set the lcd char for the relay on symbol
+//byte larrow[8] = {B00000,B00010,B00110,B01110,B00110,B00010,B00000,};  //  set the lcd char for the left arrow symbol
+//byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};  //  set the lcd char for the down arrow symbol
+//byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};  //  set the lcd char for the timer bell symbol
+//byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set the lcd char for the relay on symbol
 
 
 //  DEFINE BUTTON PINS
@@ -67,24 +68,24 @@ byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set th
 
 volatile int menuMode = 0;	//  allow the variable state to change the led on and off
 
-const int button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - button 7 respectively
+//const int button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - button 7 respectively
 
 
 //  INITIALIZE THE MENU VARIABLES
 //  ***********************************************
-int mPoint = 0;			//  current main menu pointer position
-int mCur = 1;			//  current position of the main menu cursor
-int mStart = 0;			//  current starting cursor
-int mLevel = 0;			//  current menu level.  main menu level=0, menu items=1, menu item selected=2
-int m1Sel = 0;			//  current selection for menu level 1
-int m2Sel = 0;			//	current selection for menu level 2
-int m3Sel = 0;			//  current selection for menu level 3
-int m0Start = 0;		//	starting cursor position for mLevel0
-int m1Start = 0;		//	starting cursor position for mLevel1
-int m2Start = 0;		//  starting cursor position for mLevel2
-int m3Start = 0;		//  starting cursor position for mLevel3
-int miMax = 0;			//  current selected menu item for purposes of up and down movement
-int mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
+byte mPoint = 0;			//  current main menu pointer position
+byte mCur = 1;			//  current position of the main menu cursor
+byte mStart = 0;			//  current starting cursor
+byte mLevel = 0;			//  current menu level.  main menu level=0, menu items=1, menu item selected=2
+byte m1Sel = 0;			//  current selection for menu level 1
+byte m2Sel = 0;			//	current selection for menu level 2
+byte m3Sel = 0;			//  current selection for menu level 3
+byte m0Start = 0;		//	starting cursor position for mLevel0
+byte m1Start = 0;		//	starting cursor position for mLevel1
+byte m2Start = 0;		//  starting cursor position for mLevel2
+byte m3Start = 0;		//  starting cursor position for mLevel3
+byte miMax = 0;			//  current selected menu item for purposes of up and down movement
+byte mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
 int menuTimeout;		//	variable to count for a menu system timeout
 int to = 0;				//	generic variable to determine if the menu system needs to time out
 
@@ -140,7 +141,7 @@ DeviceAddress tempDeviceAddress[8];		//  arrays to hold device addresses
 
 int numberOfDevices[NUMBER_OF_BUS];		//  define the variable to store the number of busses
 
-int RTC_Status=1;
+byte RTC_Status = 1;
 
 
 //  INITIALIZE THE ALARM Variables
@@ -148,24 +149,24 @@ int RTC_Status=1;
 
 byte AlarmEnable;			//  byte for storing all 8 alarm's enable flags as bits
 byte AlarmState;			//  byte for storing all 8 alarm's state flags as bits
-byte AlarmType[8];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
-byte AlarmRelay[8];			//  # of the relay this alarm will trigger
-byte AlarmHourOn[8];		//  hour time the alarm will come on at
-byte AlarmMinOn[8];			//	minute time the alarm will come on at
-byte AlarmHourOff[8];		//	hour time the alarm will go off at
-byte AlarmMinOff[8];		//  minute time the alarm will go off at
+byte AlarmType[7];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
+byte AlarmRelay[7];			//  # of the relay this alarm will trigger
+byte AlarmHourOn[7];		//  hour time the alarm will come on at
+byte AlarmMinOn[7];			//	minute time the alarm will come on at
+byte AlarmHourOff[7];		//	hour time the alarm will go off at
+byte AlarmMinOff[7];		//  minute time the alarm will go off at
 byte RelayState;			//	byte for storing the state of all 8 relays
 
 AlarmID_t ReadDelay_ID;		//  delay between reading the temperature sensors
-AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
-AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
+AlarmID_t AlarmIDOn[7];		//  alarm IDs for each alarm's On event
+AlarmID_t AlarmIDOff[7];	//	alarm IDs for each alarm's Off event
 
 
 //  INITIALIZE THE RELAYS
 //  ***********************************************
 
-int relayPins[] = {22,23,24,25,26,27,28,29};		//  Initialize the relay pins
-int relayCount = 8;		//  Set the number of relays
+byte relayPins[] = { 22, 23, 24, 25, 26, 27, 28, 29 };		//  Initialize the relay pins
+byte relayCount = 7;		//  Set the number of relays
 
 
 void setup()
@@ -217,7 +218,7 @@ void setup()
 			Serial.println("ID ON OFF  En  Type   ON    OFF    Relay");
 		}
 
-		for (int id = 0; id < 8; id++)		//  read each of the alarms values out of the EEPROM
+		for (int id = 0; id <= relayCount; id++)		//  read each of the alarms values out of the EEPROM
 		{
 			if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
 			AlarmType[id] = readEEPROM(102 + (id * 6));
@@ -292,23 +293,23 @@ void setup()
 	pinMode(leftButton, INPUT);		//  sets the LeftButton to an input
 	pinMode(rightButton, INPUT);	//  sets the RightButton to an input
 	
-	for(int b = 0; b < 8; b++){pinMode(button[b], INPUT);}	//  sets Button0-7 pins as inputs
+	//for(int b = 0; b < 8; b++){pinMode(button[b], INPUT);}	//  sets Button0-7 pins as inputs
 		
 	attachInterrupt(4, MenuButtonPress, RISING);		//  Attaches int.4, pin 19(RX1) and sets it to trigger on a low input from the menu button
 		
 	//  SETUP THE RELAYS OUTPUTS
-	for(int relay = 0; relay < relayCount; relay++){pinMode(relayPins[relay], OUTPUT);}
-	for(int relay = 0; relay < relayCount; relay++){digitalWrite(relayPins[relay], HIGH);}
+	for(int relay = 0; relay <= relayCount; relay++){pinMode(relayPins[relay], OUTPUT);}
+	for(int relay = 0; relay <= relayCount; relay++){digitalWrite(relayPins[relay], HIGH);}
 
 	//  SETUP THE LCD SCREEN
 	lcd.begin(20,4);						//  setup the LCD's number of columns and rows
 	lcd.createChar(1, degree);				//  init custom characters as numbers
 	lcd.createChar(2, rarrow);				//  init custom characters as numbers
 	lcd.createChar(3, uarrow);				//  init custom characters as numbers
-	lcd.createChar(4, larrow);				//  init custom characters as numbers
-	lcd.createChar(5, darrow);				//  init custom characters as numbers
-	lcd.createChar(6, bell);				//  init custom characters as numbers
-	lcd.createChar(7, relon);				//  init custom characters as numbers
+	//lcd.createChar(4, larrow);				//  init custom characters as numbers
+	//lcd.createChar(5, darrow);				//  init custom characters as numbers
+	//lcd.createChar(6, bell);				//  init custom characters as numbers
+	//lcd.createChar(7, relon);				//  init custom characters as numbers
 	lcd.setBacklightPin(B_Light,POSITIVE);  //  set the backlight pin and polarity
 	lcd.setBacklight(HIGH);					//  toggle the backlight on
 	
@@ -380,7 +381,7 @@ void setup()
 
 void loop()
 {
-	Serial.println(freeRam());
+	//	Serial.println(freeRam());		//	Used to check the ammount of free RAM on the micro
 	if (menuMode == 1)
 	{
 		Serial.println("Entering Menu");		//  calls the MenuTitle as long as menuMode = 1
@@ -450,14 +451,14 @@ void AlarmOFF()
 
 void RelayToggleALL()
 {
-	for (int relay = 0; relay < relayCount; relay++)
+	for (int relay = 0; relay <= relayCount; relay++)
 	{
 		digitalWrite(relayPins[relay], LOW);
 		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
 		RelayStatusDisplay(0, 3);
 		delay(500);
 	}
-	for (int relay = 0; relay < relayCount; relay++)
+	for (int relay = 0; relay <= relayCount; relay++)
 	{		
 		digitalWrite(relayPins[relay], HIGH);
 		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
@@ -472,7 +473,7 @@ void RelayToggle(int state, int onoff)
 	Serial.print(" : RelayState = ");
 	Serial.println(RelayState, BIN);
 
-	for (int i = 0; i < relayCount; i++)
+	for (int i = 0; i <= relayCount; i++)
 	{
 		byte rl;
 		rl = (state & (1 << i));		//	isolate a single relay to see if its bit is set to 1 or 0
@@ -518,7 +519,7 @@ void RelayToggle(int state, int onoff)
 void RelayStatusDisplay(int col, int row)
 {
 	lcd.setCursor(col, row);
-	for (int i = 0; i < relayCount; i++)
+	for (int i = 0; i <= relayCount; i++)
 		{
 			lcd.setCursor((col + i), row);
 			if ((RelayState & (1 << i)) == (1 << i)){ lcd.print("+"); }
@@ -767,7 +768,7 @@ void factoryDefaultset()
 	writeEEPROM(2, 14);		//  writes the build year
 	writeEEPROM(3, 10);		//  writes the build month
 	writeEEPROM(4, 12);		//  writes the build day
-	writeEEPROM(5, 12);					//	writes the serialDebug value = 1 or OFF
+	writeEEPROM(5, 12);		//	writes the serialDebug value = 1 or OFF
 
 	//  User Settings
 	writeEEPROM(20, 1);		//  writes the tempType value = 1 or Fahrenheit
@@ -785,14 +786,14 @@ void factoryDefaultset()
 	writeEEPROM(101, 0);	//  writes the alarm state flag to 0 or Off
 	writeEEPROM(150, 0);	//	writes the relayState flag to all 0's or OFF
 
-	for (int i = 0; i < 8; i++)		//	loop through all 8 alarms
+	for (int i = 0; i <= relayCount; i++)		//	loop through all 8 alarms
 	{
 		writeEEPROM(102 + (i * 6), 0);			//  writes the alarm type to 0, Day Lights
 		int bit = 1 << i;
 		writeEEPROM(103 + (i * 6), (0 ^ bit));	//	writes the relay trigger to relay to match the id
-		writeEEPROM(104 + (i * 6), 0);			//  writes the alarm on hour 12
+		writeEEPROM(104 + (i * 6), 0+i);			//  writes the alarm on hour 12
 		writeEEPROM(105 + (i * 6), 29+i);		//  writes the alarm on minute 1
-		writeEEPROM(106 + (i * 6), 0);			//  writes the alarm off hour 23
+		writeEEPROM(106 + (i * 6), 0+i);			//  writes the alarm off hour 23
 		writeEEPROM(107 + (i * 6), 31+i);		//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");

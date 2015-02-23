@@ -398,8 +398,7 @@ void MenuLoop()
 		
 	delay(200);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
 	}
-	Serial.println("Exiting Menu loop");	//	prints this message when it exits the menu loop
-//	reset all pointers to 0 in preparation for the next time the menu is run
+	//	reset all pointers to 0 in preparation for the next time the menu is run
 	mLevel = 0;
 	m0Start = 0;
 	m1Start = 0;

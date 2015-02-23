@@ -77,7 +77,6 @@ build/
 *.pidb
 *.log
 *.scc
-*.xml
 
 # Visual C++ cache files
 ipch/
@@ -217,4 +216,3 @@ pip-log.txt
 *.filters
 *.vcxproj
 *.sln
-Visual Micro/Compile.vmps.xml
