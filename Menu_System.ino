@@ -248,21 +248,38 @@ void MenuTitle()
 						{
 							case 0:
 								lcd.print(m2Items00[mPoint]);
+								lcd.setCursor(10, 1);
+								if (tempType == 0){ lcd.print("   Celcius"); }
+								else { lcd.print("Fahrenheit"); }
 								break;
 							case 1:
 								lcd.print(m2Items01[mPoint]);
+								lcd.setCursor(15, 1);
+								if (tempPrecision == 0){ lcd.print(" None"); }
+								else { lcd.print("1 Dec"); }
 								break;
 							case 2:
 								lcd.print(m2Items02[mPoint]);
+								lcd.setCursor(13, 1);
+								lcd.print(tempReadDelay);
+								lcd.print(" Sec");
 								break;
 							case 3:
 								lcd.print(m2Items03[mPoint]);
+								lcd.setCursor(17, 1);
+								lcd.print(backlightLevel);
 								break;
 							case 4:
 								lcd.print(m2Items04[mPoint]);
+								lcd.setCursor(13, 1);
+								if (timeFormat == 0){ lcd.print("24 Hour"); }
+								else { lcd.print("12 Hour"); }
 								break;
 							case 5:
 								lcd.print(m2Items05[mPoint]);
+								lcd.setCursor(17, 1);
+								if (secondsDisplay == 0){ lcd.print(" No"); }
+								else { lcd.print("Yes"); }
 								break;
 							case 6:
 								lcd.print(m2Items06[mPoint]);
@@ -335,11 +352,13 @@ void MenuTitle()
 								break;
 						}
 						break;
-					case 4:
+					case 4:										//	prints 3 level System Setup items
 						switch (m2Sel)
 						{
 							case 0:
 								lcd.print(m2Items40[mPoint]);
+								lcd.setCursor(12, 1);
+								lcd.print(serialDebug, BIN);
 								break;
 							case 1:
 								lcd.print(m2Items41[mPoint]);
@@ -536,7 +555,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					case 0:
 						tempReadDelay = readEEPROM(22);
 						to = MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
-						if (to = 32767){ return; }
+						if (to == 32767){ return; }
 						tempReadDelay = readEEPROM(22);
 						Alarm.write(ReadDelay_ID, tempReadDelay);
 						Alarm.disable(ReadDelay_ID);
@@ -553,7 +572,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						//							int blBright = 0;
 						backlightLevel = readEEPROM(25);
 						to = MenuNumSel(0, 25, backlightLevel, 1, 255, 5, 9, 2, 250);
-						if (to = 32767){ return; }
+						if (to == 32767){ return; }
 						backlightLevel = readEEPROM(25);
 						break;
 					}

@@ -30,7 +30,7 @@ byte timeFormat;			//	initializes the byte timeFormat
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
-byte build = 26;				//  Sets the build number for the current program
+byte build = 27;			//  Sets the build number for the current program
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -76,7 +76,7 @@ volatile int menuMode = 0;	//  allow the variable state to change the led on and
 byte mPoint = 0;			//  current main menu pointer position
 byte mCur = 1;			//  current position of the main menu cursor
 byte mStart = 0;			//  current starting cursor
-byte mLevel = 0;			//  current menu level.  main menu level=0, menu items=1, menu item selected=2
+int mLevel = 0;			//  current menu level.  main menu level=0, menu items=1, menu item selected=2
 byte m1Sel = 0;			//  current selection for menu level 1
 byte m2Sel = 0;			//	current selection for menu level 2
 byte m3Sel = 0;			//  current selection for menu level 3
@@ -661,7 +661,7 @@ void DS18B20_Read()
 			case 0:
 				lcd.setCursor(13, j);	//  Set the lcd cursor depending on what sensor your are reading
 				lcd.print("S");
-				lcd.print(j + 1);			//  print the sensor number
+				lcd.print(j + 1);		//  print the sensor number
 				lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
 
 				//  determine if padding is needed for temps higher than 3 digits

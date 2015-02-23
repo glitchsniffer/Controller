@@ -44,7 +44,7 @@ void AlarmSet(byte id)
 
 	//  call the number selection menu to select the hour
 	to = MenuNumSel(65, (104 + (id * 6)), AlarmHourOn[id], 0, 23, 1, (6 + t), 1, 250);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmHourOn[id] = readEEPROM(104 + (id * 6));
 
 	//  CHANGE THE MINUTE ON TIME
@@ -71,7 +71,7 @@ void AlarmSet(byte id)
 
 	//  call the number selection menu to select the hour
 	to = MenuNumSel(64, (105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 175);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmMinOn[id] = readEEPROM(105 + (id * 6));
 
 	//  CHANGE THE HOUR OFF TIME
@@ -98,7 +98,7 @@ void AlarmSet(byte id)
 
 	//  call the number selection menu to select the hour
 	to = MenuNumSel(65, (106 + (id * 6)), AlarmHourOff[id], 0, 23, 1, (6 + t), 1, 250);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmHourOff[id] = readEEPROM(106 + (id * 6));
 
 	//  CHANGE THE MINUTE OFF TIME
@@ -125,7 +125,7 @@ void AlarmSet(byte id)
 
 	//  call the number selection menu to select the hour
 	to = MenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 175);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
 
 	//  WRITE THE ALARMS TO THE TIMEALARMS LIBRARY
@@ -239,7 +239,7 @@ void AlarmSet(byte id)
 
 	//	call the numselmenu to select the type of the relay  1-4
 	to = MenuNumSel(64, (102 + (id * 6)), AlarmType[id], 0, 3, 1, 8, 1, 250);
-	if (to = 32767){ return; }
+	if (to == 32767){ return; }
 	AlarmType[id] = readEEPROM(102 + (id * 6));
 
 	if ((serialDebug & 4) == 4)
