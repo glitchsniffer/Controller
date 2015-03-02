@@ -160,7 +160,7 @@ void MenuTitle()
 				{
 					case 0:
 						lcd.print("  Serial Debugging");
-						miMax = 7;
+						miMax = 8;
 						break;
 					case 1:
 						lcd.print("    Erase EEPROM");
@@ -557,9 +557,9 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						to = MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
 						if (to == 32767){ return; }
 						tempReadDelay = readEEPROM(22);
-						Alarm.write(ReadDelay_ID, tempReadDelay);
-						Alarm.disable(ReadDelay_ID);
-						Alarm.enable(ReadDelay_ID);
+						Alarm.write(tempReadID, tempReadDelay);
+						Alarm.disable(tempReadID);
+						Alarm.enable(tempReadID);
 						break;
 					}
 					break;
@@ -808,12 +808,12 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					if ((readee & 16) == 16)			//  see if the 4th bit flag is set.
 					{
 						readee = readee - 16;		//  if it is set, turn it off
-						lcd.print("Disabled EEPROM Dbg");
+						lcd.print("Disabled Relay Dbg");
 					}
 					else
 					{
 						readee = readee + 16;		//  if it is not set, turn it on
-						lcd.print("Enabled EEPROM Dbg");
+						lcd.print("Enabled Relay Dbg");
 					}
 					writeEEPROM(5, readee);
 					serialDebug = readEEPROM(5);
@@ -829,6 +829,21 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 						readee = readee + 16;		//  if it is not set, turn it on
 						lcd.print("Enabled System Dbg");
+					}
+					writeEEPROM(5, readee);
+					serialDebug = readEEPROM(5);
+					break;
+				case 8:
+					readee = readEEPROM(5);
+					if ((readee & 64) == 64)			//  see if the 4th bit flag is set.
+					{
+						readee = readee - 64;		//  if it is set, turn it off
+						lcd.print("Disabled Flow Dbg");
+					}
+					else
+					{
+						readee = readee + 64;		//  if it is not set, turn it on
+						lcd.print("Enabled Flow Dbg");
 					}
 					writeEEPROM(5, readee);
 					serialDebug = readEEPROM(5);

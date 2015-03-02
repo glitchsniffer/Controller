@@ -185,7 +185,7 @@ void AlarmSet(byte id)
 
 		//  call the number selection menu to select the relay
 		rd = MenuNumSel(200, 255, start, 0, 1, 1, (10 + i), 1, 200);
-		if (rd = 32767){ return; }
+		if (rd == 32767){ return; }
 		//			AlarmRelay[id] = readEEPROM(103 + (id * 6));
 
 		bit = 1 << i;
@@ -282,7 +282,7 @@ void AlarmSet(byte id)
 	else{ start = 0; }
 
 	rd = MenuNumSel(4, 255, start, 0, 1, 1, 8, 1, 250);	//	Call the function to edit the variable
-	if (rd = 32767){ return; }
+	if (rd == 32767){ return; }
 
 	bit = 1 << id;
 	
