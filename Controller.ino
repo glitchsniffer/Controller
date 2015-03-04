@@ -89,7 +89,7 @@ int menuTimeout;		//	variable to count for a menu system timeout
 int to = 0;				//	generic variable to determine if the menu system needs to time out
 
 char* m0Items[]={"", "User Setup", "Timers Setup", "Sensor Addr Setup","Calibration","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
-char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "" };  //  setup menu item 1 for System Config Min 0 Max 6
+char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "Flow Read Delay", "Flow Read Time", "" };  //  setup menu item 1 for System Config Min 0 Max 8
 		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
 		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
 		char* m2Items02[] = { "", "Set Temp Read Delay", "" };
@@ -97,6 +97,9 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 		char* m2Items04[]={"", "24 Hour", "12 Hour", ""};
 		char* m2Items05[] = { "", "Do Not Display Sec", "Display Seconds", "" };
 		char* m2Items06[]={"", "Exit", "Need Date/Time Here", ""};
+		char* m2Items07[] = { "", "Read Delay", "Exit", "" };
+		char* m2Items08[] = { "", "Read Time", "Exit", "" };
+
 	char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Edit", "Exit", ""};
 		char* m2Items11[]={"", "Edit", "Exit", ""};

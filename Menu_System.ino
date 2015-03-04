@@ -24,7 +24,7 @@ void MenuTitle()
 			{
 				case 0:
 					lcd.print("     User Setup");
-					miMax = 6;
+					miMax = 8;
 					break;
 				case 1:
 					lcd.print("    Timer Setup");
@@ -76,6 +76,14 @@ void MenuTitle()
 						break;
 					case 6:
 						lcd.print("   Set Date/Time");
+						miMax = 1;
+						break;
+					case 7:
+						lcd.print("Set Flow Read Delay");
+						miMax = 1;
+						break;
+					case 8:
+						lcd.print("Set Flow Read Time");
 						miMax = 1;
 						break;
 				}
@@ -283,6 +291,16 @@ void MenuTitle()
 								break;
 							case 6:
 								lcd.print(m2Items06[mPoint]);
+								break;
+							case 7:
+								lcd.print(m2Items07[mPoint]);
+								lcd.setCursor(17, 1);
+								lcd.print(flowReadDelay);
+								break;
+							case 8:
+								lcd.print(m2Items08[mPoint]);
+								lcd.setCursor(17, 1);
+								lcd.print(flowReadTime);
 								break;
 						}
 						break;
@@ -621,6 +639,34 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							break;
 						case 1:
 							break;
+					}
+					break;
+				case 7:
+					lcd.print("Flow Read Delay");
+					lcd.setCursor(0, 2);
+					switch (m2Start)
+					{
+					case 0:
+						flowReadDelay = readEEPROM(28);
+						to = MenuNumSel(0, 28, flowReadDelay, 1, 255, 5, 9, 2, 250);
+						if (to == 32767){ return; }
+						flowReadDelay = readEEPROM(28);
+						Alarm.free(flowReadID);
+						flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);
+						break;
+					}
+					break;
+				case 8:
+					lcd.print("Flow Read Time");
+					lcd.setCursor(0, 2);
+					switch (m2Start)
+					{
+					case 0:
+						flowReadTime = readEEPROM(29);
+						to = MenuNumSel(0, 29, flowReadTime, 1, 255, 1, 9, 2, 250);
+						if (to == 32767){ return; }
+						flowReadTime = readEEPROM(29);
+						break;
 					}
 					break;
 			}
