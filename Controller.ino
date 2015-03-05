@@ -89,7 +89,7 @@ int menuTimeout;		//	variable to count for a menu system timeout
 int to = 0;				//	generic variable to determine if the menu system needs to time out
 
 char* m0Items[]={"", "User Setup", "Timers Setup", "Sensor Addr Setup","Calibration","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
-char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "Flow Read Delay", "Flow Read Time", "" };  //  setup menu item 1 for System Config Min 0 Max 8
+char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "XXXX", "XXXX", "" };  //  setup menu item 1 for System Config Min 0 Max 8
 		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
 		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
 		char* m2Items02[] = { "", "Set Temp Read Delay", "" };
@@ -97,8 +97,8 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 		char* m2Items04[]={"", "24 Hour", "12 Hour", ""};
 		char* m2Items05[] = { "", "Do Not Display Sec", "Display Seconds", "" };
 		char* m2Items06[]={"", "Exit", "Need Date/Time Here", ""};
-		char* m2Items07[] = { "", "Read Delay", "Exit", "" };
-		char* m2Items08[] = { "", "Read Time", "Exit", "" };
+		char* m2Items07[] = { "", "XXXX", "Exit", "" };
+		char* m2Items08[] = { "", "XXXX", "Exit", "" };
 
 	char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Edit", "Exit", ""};
@@ -240,6 +240,14 @@ void setup()
 
 		tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
 		flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_IS to flowReadID
+		
+		int zd;
+		Serial.print("Flow Sensor Read Delay ID = ");
+		Serial.print(flowReadID);
+		Serial.print(" : ");
+		zd = Alarm.read(flowReadID);
+		Serial.println(zd);
+
 		AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
 		AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
 		RelayState = readEEPROM(150);
@@ -316,6 +324,11 @@ void setup()
 			Serial.print(tempReadID);
 			Serial.print(" : ");
 			rd = Alarm.read(tempReadID);
+			Serial.println(rd);
+			Serial.print("Flow Sensor Read Delay ID = ");
+			Serial.print(flowReadID);
+			Serial.print(" : ");
+			rd = Alarm.read(flowReadID);
 			Serial.println(rd);
 			Serial.println();
 		}
