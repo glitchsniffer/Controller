@@ -79,7 +79,7 @@ void MenuTitle()
 						miMax = 1;
 						break;
 					case 7:
-						lcd.print("XXXXXX");
+						lcd.print("Flow Sensor Enable");
 						miMax = 1;
 						break;
 					case 8:
@@ -159,7 +159,7 @@ void MenuTitle()
 						break;
 					case 4:
 						lcd.print(" Flow Sensor Calib");
-						miMax = 1;
+						miMax = 2;
 						break;
 					}
 					break;
@@ -293,6 +293,10 @@ void MenuTitle()
 								lcd.print(m2Items06[mPoint]);
 								break;
 							case 7:
+								lcd.print(m2Items07[mPoint]);
+								lcd.setCursor(17, 1);
+								if (flowSensorEnable == 0){ lcd.print(" No"); }
+								else { lcd.print("Yes"); }
 								break;
 							case 8:
 								break;
@@ -636,6 +640,22 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					}
 					break;
 				case 7:
+					lcd.setCursor(0, 0);
+					lcd.print(" Flow Sensor Enable");
+					lcd.setCursor(0, 2);
+					switch (m2Start)
+					{
+					case 0:
+						writeEEPROM(27, 0);
+						flowSensorEnable = readEEPROM(27);
+						lcd.print("Flow Sensor Enabled");
+						break;
+					case 1:
+						writeEEPROM(27, 1);
+						flowSensorEnable = readEEPROM(27);
+						lcd.print("Flow Sensor Disabled");
+						break;
+					}
 					break;
 				case 8:
 					break;
@@ -737,6 +757,69 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 		case 2:		//  sensor addressing menu items
 			break;
 		case 3:		//  calibration menu items
+			switch (m2Sel)
+			{
+			case 4:
+				switch (m2Start)
+				{
+				case 0:
+					int rd;
+					lcd.setCursor(0, 1);
+					lcd.print("  Are you sure you");
+					lcd.print(" want to calibrate");
+					lcd.print("  the Flow Sensor");
+					rd = MenuNumSel(2, 28, 0, 0, 1, 1, 9, 3, 250);
+					if (rd = 0){ break; }
+					lcd.clear();
+					lcd.setCursor(0, 0);
+					lcd.print(" Taking 5 readings");
+					lcd.setCursor(0, 2);
+					lcd.print(" Taking reading #");
+					for (int i; i <= 4; i++)
+					{
+						FlowSensorRead();
+						lcd.setCursor(16, 2);
+						lcd.print(i);
+						delay(1000);
+					}
+					lcd.clear();
+					lcd.setCursor(0, 0);
+					lcd.print("   Avg Flow = ");
+					lcd.print(flowPulseTotal);
+					lcd.setCursor(0, 1);
+					lcd.print("Set as normal flow?");
+					rd = MenuNumSel(2, 28, 0, 0, 1, 1, 9, 2, 250);
+					if (rd = 0)
+					{
+						lcd.clear();
+						lcd.setCursor(5, 1);
+						lcd.print("Not Saving");
+					}
+					else
+					{
+						writeEEPROM(28, 1);
+						flowRateMax = readEEPROM(28);
+						writeEEPROM(27, 1);
+						flowSensorEnable = readEEPROM(27);
+						lcd.clear();
+						lcd.setCursor(2, 1);
+						lcd.print("Flow Rate Normal");
+						lcd.setCursor(7, 2);
+						lcd.print("Saved");
+					}
+					
+					break;
+				case 1:
+					writeEEPROM(27, 0);
+					flowSensorEnable = readEEPROM(27);
+					lcd.print("Flow Sensor Disabled");
+					break;
+				case 2:
+					lcd.print("      Exiting");
+					break;
+					break;
+				}
+			}
 			break;
 		case 4:
 			switch (m2Sel)

@@ -29,7 +29,7 @@ byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout;
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
-byte build = 27;			//  Sets the build number for the current program
+byte build = 28;			//  Sets the build number for the current program
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -89,7 +89,7 @@ int menuTimeout;		//	variable to count for a menu system timeout
 int to = 0;				//	generic variable to determine if the menu system needs to time out
 
 char* m0Items[]={"", "User Setup", "Timers Setup", "Sensor Addr Setup","Calibration","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
-char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "XXXX", "XXXX", "" };  //  setup menu item 1 for System Config Min 0 Max 8
+char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "Flow Sensor Enable", "XXXX", "" };  //  setup menu item 1 for System Config Min 0 Max 8
 		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
 		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
 		char* m2Items02[] = { "", "Set Temp Read Delay", "" };
@@ -97,7 +97,7 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 		char* m2Items04[]={"", "24 Hour", "12 Hour", ""};
 		char* m2Items05[] = { "", "Do Not Display Sec", "Display Seconds", "" };
 		char* m2Items06[]={"", "Exit", "Need Date/Time Here", ""};
-		char* m2Items07[] = { "", "XXXX", "Exit", "" };
+		char* m2Items07[] = { "", "Yes", "No", "" };
 		char* m2Items08[] = { "", "XXXX", "Exit", "" };
 
 	char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
@@ -119,7 +119,7 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 		char* m2Items31[]={"", "Calibrate Sensor 2", "Exit", ""};
 		char* m2Items32[]={"", "Calibrate Sensor 3", "Exit", ""};
 		char* m2Items33[]={"", "Calibrate Sensor 4", "Exit", ""};
-		char* m2Items34[]={"", "Calibrate Flow Sens", "Exit", ""};
+		char* m2Items34[]={"", "Calibrate Flow Sens", "Disable Flow Sensor", "Exit", ""};
 	char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults" };	//	setup menu item 4 for System Setup
 		char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "Relays", "System", "Flow Sensor", "" };
 		char* m2Items41[] = { "", "Exit Erase EEPROM", "Erase EEPROM", "" };
@@ -171,22 +171,16 @@ AlarmID_t AlarmIDOff[7];	//	alarm IDs for each alarm's Off event
 byte flowSensorInterrupt = 5;		//	interrupt to trigger for the flow sensor
 byte flowSensorIntPin = 18;			//	pin on the arduino to use for the interrupt
 byte flowSensorEnable;				//	initializes the byte flowSensorEnable
-byte flowReadDelay;					//	initializes the byte flowReadDelay (currently in seconds)
+byte flowReadDelay = 5;				//	initializes the byte flowReadDelay (currently in seconds)
 
-float flowPulseFactor = 2.25;		//	number to multiply the number of pulses by to get the flow rate
 volatile int flowPulseCount = 0;	//	number of pulses trigger in the interrupt
-
-float flowRate;						//	calculated flow rate of the sensor
-int flowReadTime;					//	time to read the flow sensor in ms
+		
 int flowRateMax;					//	maximum flow rate as calibrated by the user
 int flowRateMin;					//  minimum flow rate before an alarm is triggered, this is a percentage of flowRateMax
 
 int	flowPulseReading[5];			//	the array to store the last 5 flow pulse readings in
 byte flowPulseIndex = 0;			//	the number that selects the number of the flowPulseReadings array to write to
-int flowPulseTotal;
-
-unsigned long flowStartTime;		//	time in millis that the flow rate sample started
-unsigned long flowEndTime;			//	time in millis that the flow rate sample ended
+int flowPulseTotal;					//	the variable used to store the running total of the last 5 flowPulseCount samples
 
 //  INITIALIZE THE RELAYS
 //  ***********************************************
@@ -231,23 +225,13 @@ void setup()
 		backlightLevel = readEEPROM(25);	//	reads out the user setting to control the backlight level
 		backlightTimeout = readEEPROM(26);	//	reads out the user setting to control when the backlight level times out
 		flowSensorEnable = readEEPROM(27);	//	reads out the user setting to determine if the flow sensor is enabled
-		flowReadDelay = readEEPROM(28);		//	reads out the user setting for the delay between flow sensor readings
-		flowReadTime = readEEPROM(29);		//	reads out the user setting for the ammount of time to read the flow sensor
-		flowRateMax = (readEEPROM(30) + readEEPROM(31));		//	reads out the user setting that is set for the max flow rate as an integer
-		flowRateMin = readEEPROM(32);		//	reads out the user setting for the minimum flow rate
+		flowRateMax = (readEEPROM(28));		//	reads out the user setting that is set for the max flow rate as an integer
+		flowRateMin = readEEPROM(29);		//	reads out the user setting for the minimum flow rate
 
 		//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
 
 		tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
 		flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_IS to flowReadID
-		
-		int zd;
-		Serial.print("Flow Sensor Read Delay ID = ");
-		Serial.print(flowReadID);
-		Serial.print(" : ");
-		zd = Alarm.read(flowReadID);
-		Serial.println(zd);
-
 		AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
 		AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
 		RelayState = readEEPROM(150);
@@ -325,11 +309,7 @@ void setup()
 			Serial.print(" : ");
 			rd = Alarm.read(tempReadID);
 			Serial.println(rd);
-			Serial.print("Flow Sensor Read Delay ID = ");
-			Serial.print(flowReadID);
-			Serial.print(" : ");
-			rd = Alarm.read(flowReadID);
-			Serial.println(rd);
+
 			Serial.println();
 		}
 		
@@ -761,6 +741,12 @@ void DS18B20_Read()
 
 void FlowSensorRead()
 {
+	float flowRate = 0;					//	calculated flow rate of the sensor
+	byte flowReadTime = 1;				//	time to read the flow sensor in ms
+	float flowPulseFactor = 2.25;		//	number to multiply the number of pulses by to get the flow rate
+	unsigned long flowStartTime;		//	time in millis that the flow rate sample started
+	unsigned long flowEndTime;			//	time in millis that the flow rate sample ended
+
 	//	convert the flowReadTime stored in the EEPROM to milliseconds
 	int rdtime = ((flowReadTime * 1000) - 1);
 
@@ -925,11 +911,10 @@ void factoryDefaultset()
 	writeEEPROM(25, 100);	//	writes the backlightLevel value = 100 or half
 	writeEEPROM(26, 30);	//  writes the backlightTimeout to be 30 seconds
 	writeEEPROM(27, 0);		//	writes the flowSensorEnable to be disabled
-	writeEEPROM(28, 10);	//	writes the flowReadDelay to 50 seconds
-	writeEEPROM(29, 5);		//	writes the flowReadTime to 5 seconds
-	writeEEPROM(30, 255);		//	writes the flow sensor 100% value to 0
-	writeEEPROM(31, 9);		//  writes the 2nd bit of the flow sensor 100% value to 0
-	writeEEPROM(32, 75);	//  writes the flow sensor user level to 75 or 75%
+	writeEEPROM(28, 55);	//	writes the 1st bit of the flow sensor 100% value to 0
+	writeEEPROM(29, 75);	//  writes the flow sensor user level to 75 or 75% 
+	writeEEPROM(30, 0);
+	writeEEPROM(32, 0);
 
 	//  Alarm Settings
 	writeEEPROM(100, 255);	//  writes alarms enable flag to off
