@@ -99,16 +99,8 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 		char* m2Items06[]={"", "Exit", "Need Date/Time Here", ""};
 		char* m2Items07[] = { "", "XXXX", "XXXX", "" };
 		char* m2Items08[] = { "", "XXXX", "XXXX", "" };
-
 	char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Edit", "Exit", ""};
-		char* m2Items11[]={"", "Edit", "Exit", ""};
-		char* m2Items12[]={"", "Edit", "Exit", ""};
-		char* m2Items13[]={"", "Edit", "Exit", ""};
-		char* m2Items14[]={"", "Edit", "Exit", ""};
-		char* m2Items15[]={"", "Edit", "Exit", ""};
-		char* m2Items16[]={"", "Edit", "Exit", ""};
-		char* m2Items17[]={"", "Edit", "Exit", ""};
 	char* m1Items2[]={"", "Temp Sens 1 Add", "Temp Sens 2 Add", "Temp Sens 3 Add", "Temp Sens 4 Add", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
 		char* m2Items20[]={"", "Set Sens 1 Address", "Exit", ""};
 		char* m2Items21[]={"", "Set Sens 2 Address", "Exit", ""};
@@ -207,7 +199,7 @@ void setup()
 		Serial.println("Unable to get the RTC");
 		Serial.println();
 	}
-	else{ Serial.println("RTC has set the system time"); }
+	else{ Serial.println("RTC system time"); }
 
 	//  READ THE VARIABLES OUT OF THE EEPROM
 	
@@ -239,7 +231,7 @@ void setup()
 		if ((serialDebug & 4) == 4)
 		{
 			Serial.println();
-			Serial.println("***********ALARM EEPROM READING***********");
+			Serial.println("ALARM EEPROM SETTINGS");
 			Serial.println("ID ON OFF  En  Type   ON    OFF    Relay");
 		}
 
@@ -298,23 +290,23 @@ void setup()
 		{
 			int rd;
 			Serial.println();
-			Serial.print("Alarm Enable : ");
+			Serial.print("AlarmEnable ");
 			Serial.println(AlarmEnable, BIN);
-			Serial.print("Alarm State : ");
+			Serial.print("AlarmState ");
 			Serial.println(AlarmState, BIN);
-			Serial.print("Relay State : ");
+			Serial.print("RelayState ");
 			Serial.println(RelayState, BIN);
-			Serial.print("Num of Alarms : ");
+			Serial.print("# of Alarms ");
 			rd = Alarm.count();
 			Serial.println(rd);
-			Serial.print("Temp Read Delay ID = ");
+			Serial.print("tempReadID ");
 			Serial.print(tempReadID);
-			Serial.print(" : ");
+			Serial.print(",");
 			rd = Alarm.read(tempReadID);
 			Serial.println(rd);
-			Serial.print("Flow Read Delay ID = ");
+			Serial.print("flowReadID ");
 			Serial.print(flowReadID);
-			Serial.print(" : ");
+			Serial.print(",");
 			rd = Alarm.read(flowReadID);
 			Serial.println(rd);
 
@@ -376,7 +368,7 @@ void setup()
 		
 		if ((serialDebug & 1) == 1)
 		{
-			Serial.print("Locating devices...");
+			Serial.print("Locating devices ");
 			Serial.print("Found ");
 			Serial.print(numberOfDevices[i], DEC);
 			Serial.print(" devices on port ");
@@ -392,9 +384,9 @@ void setup()
 				{
 					Serial.print("Found device ");
 					Serial.print(j, DEC);
-					Serial.print(" with address: ");
+					Serial.print(" with address ");
 					printAddress(tempDeviceAddress[j]);
-					Serial.println("");
+					Serial.println();
 				}
 
 				// set the resolution to TEMPERATURE_PRECISION bit (Each Dallas/Maxim device is capable of several different resolutions)
@@ -441,9 +433,9 @@ void AlarmON()
 	int id;
 	id = Alarm.getTriggeredAlarmId();
 	id = ((id - 1) / 2);
-	Serial.print("Alarm: ");
+	Serial.print("Alarm ");
 	Serial.print(id);
-	Serial.print(" - Triggered ON at ");
+	Serial.print(" ON @ ");
 	Serial.print(hour());
 	Serial.print(":");
 	Serial.println(minute());
@@ -455,9 +447,9 @@ void AlarmON()
 	{
 		int trigger;
 		trigger = Alarm.getNextTrigger();
-		Serial.print("Next trigger after ALRM ON: ");
+		Serial.print("Next ");
 		Serial.println(trigger);
-		Serial.print("Alarm State: ");
+		Serial.print("Alarm State ");
 		Serial.println(AlarmState, BIN);
 		Serial.println();
 	}
@@ -467,9 +459,9 @@ void AlarmOFF()
 	int id;
 	id = Alarm.getTriggeredAlarmId();
 	id = ((id - 2) / 2);
-	Serial.print("Alarm: ");
+	Serial.print("Alarm ");
 	Serial.print(id);
-	Serial.print(" - Triggered OFF at ");
+	Serial.print(" OFF @ ");
 	Serial.print(hour());
 	Serial.print(":");
 	Serial.println(minute());
@@ -480,9 +472,9 @@ void AlarmOFF()
 	{
 		int trigger;
 		trigger = Alarm.getNextTrigger();
-		Serial.print("Next trigger after ALRM OFF: ");
+		Serial.print("Next ");
 		Serial.println(trigger);
-		Serial.print("Alarm State: ");
+		Serial.print("Alarm State ");
 		Serial.println(AlarmState, BIN);
 		Serial.println();
 	}
@@ -507,9 +499,9 @@ void RelayToggleALL()
 }
 void RelayToggle(int state, int onoff)
 {
-	Serial.print("Before state = ");
+	Serial.print("Before state ");
 	Serial.print(state, BIN);
-	Serial.print(" : RelayState = ");
+	Serial.print(" RelayState ");
 	Serial.println(RelayState, BIN);
 
 	for (int i = 0; i <= relayCount; i++)
@@ -546,9 +538,9 @@ void RelayToggle(int state, int onoff)
 		}
 		delay(200);
 	}
-	Serial.print("After state = ");
+	Serial.print("After state ");
 	Serial.print(state, BIN);
-	Serial.print(" : RelayState = ");
+	Serial.print(" RelayState ");
 	Serial.println(RelayState, BIN);
 
 	writeEEPROM(150, RelayState);
@@ -693,7 +685,7 @@ void DS18B20_Read()
 			if ((serialDebug & 1) == 1)
 			{
 				Serial.print(j);
-				Serial.print(" - ");
+				Serial.print(" ");
 			}
 			switch (tempPrecision)
 			{
@@ -759,14 +751,14 @@ void FlowSensorRead()
 	int rdtime = ((flowReadTime * 1000) - 1);
 
 	//	turn on the flow sensor, take the flow reading, and turn off the flow sensor
-	Serial.print("Turning on the Flow Sensor  @ ");
+	Serial.print("Flow ON @ ");
 	Serial.println(now());
 	flowStartTime = millis();											//	set the current millis to the start time
 	attachInterrupt(flowSensorInterrupt, FlowSensorCounter, FALLING);	//	enable the interrupt to start the reading
 	Alarm.delay(rdtime);												//	delay for the ammount of time in millis
 	detachInterrupt(flowSensorInterrupt);								//	disable the interrupt for the flow sensor
 	flowEndTime = millis();												//	set the current millis to the end time
-	Serial.print("Turning off the Flow Sensor @ ");
+	Serial.print("Flow OFF @ ");
 	Serial.println(now());
 	Serial.println();
 
@@ -798,19 +790,19 @@ void FlowSensorRead()
 	//	print the stats to the Serial port
 	if ((serialDebug & 64) == 64)
 	{
-		Serial.print("Duration: ");
+		Serial.print("Duration ");
 		Serial.print(flowEndTime);
-		Serial.print(" - ");
+		Serial.print("-");
 		Serial.print(flowStartTime);
-		Serial.print(" = ");
+		Serial.print("=");
 		Serial.println(flowEndTime - flowStartTime);
-		Serial.print("flowPulseCount = ");
+		Serial.print("PulseCount ");
 		Serial.println(flowPulseCount);
-		Serial.print("flowPulseTotal = ");
+		Serial.print("PulseTotal ");
 		Serial.print(flowPulseTotal);
-		Serial.print(", Avg = ");
+		Serial.print(", Avg ");
 		Serial.println(flowPulseTotal / 5);
-		Serial.print("flowRate = ");
+		Serial.print("Rate ");
 		Serial.println(flowRate);
 
 		//  print the flow rate in L/h and G/h
@@ -818,25 +810,15 @@ void FlowSensorRead()
 
 		flowRate = flowRate / 10;
 
-		Serial.print("Flow Rate: ");
-		Serial.print(int(flowRate));
-		Serial.print(".");
-		frac = (flowRate - int(flowRate)) * 100;	//	gives the fractional portion 2 decimal places
-		Serial.print(frac, DEC);
-		Serial.print("L/min - ");
+		Serial.print("Rate ");
 		Serial.print(flowRate * 60);
-		Serial.println("L/hour");
+		Serial.print("L/h");
 
 		flowRate = flowRate * 0.264172;		//	convert to gallons
 
-		Serial.print("Flow Rate: ");
-		Serial.print(int(flowRate));
-		Serial.print(".");
-		frac = (flowRate - int(flowRate)) * 100;	//	gives the fractional portion 2 decimal places
-		Serial.print(frac, DEC);
-		Serial.print("G/min - ");
+		Serial.print(", ");
 		Serial.print(flowRate * 60);
-		Serial.println("G/hour");
+		Serial.println("G/h");
 		Serial.println();
 	}
 
@@ -874,9 +856,9 @@ void writeEEPROM(int address, byte data)
 	delay(10);
 	if ((serialDebug & 8) == 8)
 	{
-		Serial.print("Writing to address ");
+		Serial.print("Write ");
 		Serial.print(address);
-		Serial.print(" - ");
+		Serial.print(",");
 		Serial.println(data);
 	}
 }
@@ -891,9 +873,9 @@ byte readEEPROM(int address)
 	data = Wire.read();							//  sets the value read to data
 	if ((serialDebug & 8) == 8)
 	{
-		Serial.print("Reading from address ");
+		Serial.print("Read ");
 		Serial.print(address);
-		Serial.print(" - ");
+		Serial.print(",");
 		Serial.println(data);
 	}
 	return data;								//  returns data to the previous call

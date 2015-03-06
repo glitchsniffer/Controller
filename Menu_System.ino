@@ -309,25 +309,25 @@ void MenuTitle()
 								lcd.print(m2Items10[mPoint]);
 								break;
 							case 1:
-								lcd.print(m2Items11[mPoint]);
+								lcd.print(m2Items10[mPoint]);
 								break;
 							case 2:
-								lcd.print(m2Items12[mPoint]);
+								lcd.print(m2Items10[mPoint]);
 								break;
 							case 3:
-								lcd.print(m2Items13[mPoint]);
+								lcd.print(m2Items10[mPoint]);
 								break;
 							case 4:
-								lcd.print(m2Items13[mPoint]);
+								lcd.print(m2Items10[mPoint]);
 								break;
 							case 5:
-								lcd.print(m2Items13[mPoint]);
+								lcd.print(m2Items10[mPoint]);
 								break;
 							case 6:
-								lcd.print(m2Items13[mPoint]);
+								lcd.print(m2Items10[mPoint]);
 								break;
 							case 7:
-								lcd.print(m2Items13[mPoint]);
+								lcd.print(m2Items10[mPoint]);
 								break;
 						}
 						break;
