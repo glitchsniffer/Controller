@@ -35,7 +35,7 @@ void MenuTitle()
 					miMax = 3;
 					break;
 				case 3:
-					lcd.print("    Calibration");
+					lcd.print("    Sensor Setup");
 					miMax = 4;
 					break;
 				case 4:
@@ -79,7 +79,7 @@ void MenuTitle()
 						miMax = 1;
 						break;
 					case 7:
-						lcd.print("Flow Sensor Enable");
+						lcd.print("XXXXXX");
 						miMax = 1;
 						break;
 					case 8:
@@ -142,24 +142,24 @@ void MenuTitle()
 				switch (m2Sel)
 					{
 					case 0:
-						lcd.print(" Temp Sens 1 Calib");
+						lcd.print(" Temp Sens 1");
 						miMax = 1;
 						break;
 					case 1:
-						lcd.print(" Temp Sens 2 Calib");
+						lcd.print(" Temp Sens 2");
 						miMax = 1;
 						break;
 					case 2:
-						lcd.print(" Temp Sens 3 Calib");
+						lcd.print(" Temp Sens 3");
 						miMax = 1;
 						break;
 					case 3:
-						lcd.print(" Temp Sens 4 Calib");
+						lcd.print(" Temp Sens 4");
 						miMax = 1;
 						break;
 					case 4:
-						lcd.print(" Flow Sensor Calib");
-						miMax = 2;
+						lcd.print(" Flow Sensor");
+						miMax = 3;
 						break;
 					}
 					break;
@@ -348,7 +348,7 @@ void MenuTitle()
 								break;
 						}
 						break;
-					case 3:										//	prints 3rd level Calibration Items
+					case 3:										//	prints 3rd level Sensor Items
 						switch (m2Sel)
 						{
 							case 0:
@@ -640,20 +640,20 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					}
 					break;
 				case 7:
-					lcd.setCursor(0, 0);
-					lcd.print(" Flow Sensor Enable");
-					lcd.setCursor(0, 2);
+					//lcd.setCursor(0, 0);
+					//lcd.print(" Flow Sensor Enable");
+					//lcd.setCursor(0, 2);
 					switch (m2Start)
 					{
 					case 0:
-						writeEEPROM(27, 0);
-						flowSensorEnable = readEEPROM(27);
-						lcd.print("Flow Sensor Enabled");
+						//writeEEPROM(27, 0);
+						//flowSensorEnable = readEEPROM(27);
+						//lcd.print("Flow Sensor Enabled");
 						break;
 					case 1:
-						writeEEPROM(27, 1);
-						flowSensorEnable = readEEPROM(27);
-						lcd.print("Flow Sensor Disabled");
+						//writeEEPROM(27, 1);
+						//flowSensorEnable = readEEPROM(27);
+						//lcd.print("Flow Sensor Disabled");
 						break;
 					}
 					break;
@@ -764,32 +764,37 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 				{
 				case 0:
 					int rd;
-					lcd.setCursor(0, 1);
-					lcd.print("  Are you sure you");
-					lcd.print(" want to calibrate");
-					lcd.print("  the Flow Sensor");
-					rd = MenuNumSel(2, 28, 0, 0, 1, 1, 9, 3, 250);
-					if (rd = 0){ break; }
+					lcd.setCursor(2, 0);
+					lcd.print("Are you sure you");
+					lcd.setCursor(1, 1);
+					lcd.print("want to calibrate");
+					lcd.setCursor(2, 2);
+					lcd.print("the Flow Sensor");
+					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 9, 3, 250);
+					if (rd == 0){ break; }
+					Alarm.disable(tempReadID);
+					Alarm.disable(flowReadID);
 					lcd.clear();
-					lcd.setCursor(0, 0);
-					lcd.print(" Taking 5 readings");
-					lcd.setCursor(0, 2);
-					lcd.print(" Taking reading #");
+					lcd.setCursor(2, 0);
+					lcd.print("Taking Readings");
+					lcd.setCursor(1, 2);
+					lcd.print("Sensor Reading #");
 					for (int i; i <= 4; i++)
 					{
+						flowRateMax = 0;		//	using this variable to supress the LCD display for Flow Good/Alarm
 						FlowSensorRead();
-						lcd.setCursor(16, 2);
-						lcd.print(i);
-						delay(1000);
+						lcd.setCursor(17, 2);
+						lcd.print(i+1);
+						delay(1500);
 					}
 					lcd.clear();
-					lcd.setCursor(0, 0);
-					lcd.print("   Avg Flow = ");
-					lcd.print(flowPulseTotal);
+					lcd.setCursor(2, 0);
+					lcd.print("Avg Flow = ");
+					lcd.print(flowPulseTotal / 5);
 					lcd.setCursor(0, 1);
-					lcd.print("Set as normal flow?");
-					rd = MenuNumSel(2, 28, 0, 0, 1, 1, 9, 2, 250);
-					if (rd = 0)
+					lcd.print("Set As Normal Flow?");
+					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 9, 2, 250);
+					if (rd == 0)
 					{
 						lcd.clear();
 						lcd.setCursor(5, 1);
@@ -797,7 +802,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					}
 					else
 					{
-						writeEEPROM(28, 1);
+						writeEEPROM(28, (flowPulseTotal / 5));
 						flowRateMax = readEEPROM(28);
 						writeEEPROM(27, 1);
 						flowSensorEnable = readEEPROM(27);
@@ -807,18 +812,29 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						lcd.setCursor(7, 2);
 						lcd.print("Saved");
 					}
-					
+					Alarm.enable(tempReadID);
+					Alarm.enable(flowReadID);
 					break;
 				case 1:
+					lcd.setCursor(2, 1);
+					lcd.print("Set Minimum Flow");
+					flowRateMin = readEEPROM(29);
+					lcd.setCursor(11, 2);
+					lcd.print("%");
+					to = MenuNumSel(0, 29, flowRateMin, 5, 100, 5, 8, 2, 250);
+					if (to == 32767){ return; }
+					flowRateMin = readEEPROM(29);
+					break;
+				case 2:
 					writeEEPROM(27, 0);
 					flowSensorEnable = readEEPROM(27);
 					lcd.print("Flow Sensor Disabled");
 					break;
-				case 2:
+				case 3:
 					lcd.print("      Exiting");
 					break;
-					break;
 				}
+				break;
 			}
 			break;
 		case 4:
@@ -1001,7 +1017,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 //  type of display, EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
 //  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
 //  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours
-//  types are 0=normal numbers, 1=time, 2=yes/no, 4=enable/disable 8=+/-.  Add 128 to any number to disable writing to eeprom
+//  types are 0=normal numbers, 1=time, 2=yes/no, 4=enable/disable 8=+/-.  Add 64 to disable the Saving message or 128 to disable writing to eeprom
 //	If you are only displaying 1 digit, you need to set the col to -1 because all displays in this function are set to the 10's digit
 {
 	int loopNumSel = 1;		//	variable to stay in the loop
