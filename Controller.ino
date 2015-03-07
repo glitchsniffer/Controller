@@ -102,21 +102,16 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 	char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
 		char* m2Items10[]={"", "Edit", "Exit", ""};
 	char* m1Items2[]={"", "Temp Sens 1 Add", "Temp Sens 2 Add", "Temp Sens 3 Add", "Temp Sens 4 Add", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
-		char* m2Items20[]={"", "Set Sens 1 Address", "Exit", ""};
-		char* m2Items21[]={"", "Set Sens 2 Address", "Exit", ""};
-		char* m2Items22[]={"", "Set Sens 3 Address", "Exit", ""};
-		char* m2Items23[]={"", "Set Sens 4 Address", "Exit", ""};
+		char* m2Items20[]={"", "Address Sens ", "Exit", ""};
 	char* m1Items3[]={"", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Sensor Calibration Min 0 Max 4
-		char* m2Items30[]={"", "Calibrate Sensor 1", "Exit", ""};
-		char* m2Items31[]={"", "Calibrate Sensor 2", "Exit", ""};
-		char* m2Items32[]={"", "Calibrate Sensor 3", "Exit", ""};
-		char* m2Items33[]={"", "Calibrate Sensor 4", "Exit", ""};
+		char* m2Items30[]={"", "Calibrate Sensor ", "Exit", ""};
 		char* m2Items34[] = { "", "Calibrate Flow Sens", "Set Min Flow", "Disable Flow Sensor", "Exit", "" };
 	char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults" };	//	setup menu item 4 for System Setup
 		char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "Relays", "System", "Flow Sensor", "" };
 		char* m2Items41[] = { "", "Exit Erase EEPROM", "Erase EEPROM", "" };
 		char* m2Items42[] = { "", "Exit", "Restore Defaults", "" };
 
+	String strExiting = "Exiting";
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
@@ -232,7 +227,7 @@ void setup()
 		{
 			Serial.println();
 			Serial.println("ALARM EEPROM SETTINGS");
-			Serial.println("ID ON OFF  En  Type   ON    OFF    Relay");
+			Serial.println("ID ON OFF  En  Typ  ON     OFF   Relay");
 		}
 
 		for (int id = 0; id <= relayCount; id++)		//  read each of the alarms values out of the EEPROM
@@ -260,7 +255,7 @@ void setup()
 				if ((AlarmEnable & (1 << id)) == (1 << id)){ Serial.print(" ON   "); }
 				else{ Serial.print(" OFF  "); }
 				Serial.print(AlarmType[id]);
-				Serial.print("   ");
+				Serial.print("  ");
 
 				if (AlarmHourOn[id] < 10){ Serial.print(" "); }
 				Serial.print(AlarmHourOn[id]);
@@ -368,6 +363,7 @@ void setup()
 		
 		if ((serialDebug & 1) == 1)
 		{
+			Serial.println();
 			Serial.print("Locating devices ");
 			Serial.print("Found ");
 			Serial.print(numberOfDevices[i], DEC);

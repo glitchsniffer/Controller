@@ -16,30 +16,36 @@ void MenuTitle()
 	switch (mLevel)
 	{
 		case 0:
-			lcd.print("     Main Menu");
+			lcd.setCursor(5, 0);
+			lcd.print("Main Menu");
 			miMax = 4;
 			break;
 		case 1:
 			switch (m1Sel)
 			{
 				case 0:
-					lcd.print("     User Setup");
+					lcd.setCursor(5, 0);
+					lcd.print("User Setup");
 					miMax = 8;
 					break;
 				case 1:
-					lcd.print("    Timer Setup");
+					lcd.setCursor(3, 0);
+					lcd.print("Timer Setup");
 					miMax = 7;
 					break;
 				case 2:
-					lcd.print(" Sensor Addr Setup");
+					lcd.setCursor(1, 0);
+					lcd.print("Sensor Addr Setup");
 					miMax = 3;
 					break;
 				case 3:
-					lcd.print("    Sensor Setup");
+					lcd.setCursor(4, 0);
+					lcd.print("Sensor Setup");
 					miMax = 4;
 					break;
 				case 4:
-					lcd.print("    System Setup");
+					lcd.setCursor(4, 0);
+					lcd.print("System Setup");
 					miMax = 2;
 					break;
 			}
@@ -51,31 +57,38 @@ void MenuTitle()
 				switch (m2Sel)
 				{
 					case 0:
-						lcd.print("     Temp Type");
+						lcd.setCursor(5, 0);
+						lcd.print("Temp Type");
 						miMax = 1;
 						break;
 					case 1:
-						lcd.print("   Temp Precision");
+						lcd.setCursor(3, 0);
+						lcd.print("Temp Precision");
 						miMax = 1;
 						break;
 					case 2:
-						lcd.print("  Temp Read Delay");
+						lcd.setCursor(2, 0);
+						lcd.print("Temp Read Delay");
 						miMax = 0;
 						break;
 					case 3:
-						lcd.print("  B Light Brightness");
+						lcd.setCursor(2, 0);
+						lcd.print("B Light Brightness");
 						miMax = 0;
 						break;
 					case 4:
-						lcd.print("    Time Format");
+						lcd.setCursor(4, 0);
+						lcd.print("Time Format");
 						miMax = 1;
 						break;
 					case 5:
-						lcd.print("  Display Seconds");
+						lcd.setCursor(2, 0);
+						lcd.print("Display Seconds");
 						miMax = 1;
 						break;
 					case 6:
-						lcd.print("   Set Date/Time");
+						lcd.setCursor(3, 0);
+						lcd.print("Set Date/Time");
 						miMax = 1;
 						break;
 					case 7:
@@ -121,19 +134,23 @@ void MenuTitle()
 				switch (m2Sel)
 				{
 					case 0:
-						lcd.print("  Temp Sens 1 Addr");
+						lcd.setCursor(2, 0);
+						lcd.print("Temp Sens 1 Addr");
 						miMax = 1;
 						break;
 					case 1:
-						lcd.print("  Temp Sens 2 Addr");
+						lcd.setCursor(2, 0);
+						lcd.print("Temp Sens 2 Addr");
 						miMax = 1;
 						break;
 					case 2:
-						lcd.print("  Temp Sens 3 Addr");
+						lcd.setCursor(2, 0);
+						lcd.print("Temp Sens 3 Addr");
 						miMax = 1;
 						break;
 					case 3:
-						lcd.print("  Temp Sens 4 Addr");
+						lcd.setCursor(2, 0);
+						lcd.print("Temp Sens 4 Addr");
 						miMax = 1;
 						break;
 				}
@@ -142,23 +159,28 @@ void MenuTitle()
 				switch (m2Sel)
 					{
 					case 0:
-						lcd.print(" Temp Sens 1");
+						lcd.setCursor(1, 0);
+						lcd.print("Temp Sens 1");
 						miMax = 1;
 						break;
 					case 1:
-						lcd.print(" Temp Sens 2");
+						lcd.setCursor(1, 0);
+						lcd.print("Temp Sens 2");
 						miMax = 1;
 						break;
 					case 2:
-						lcd.print(" Temp Sens 3");
+						lcd.setCursor(1, 0);
+						lcd.print("Temp Sens 3");
 						miMax = 1;
 						break;
 					case 3:
-						lcd.print(" Temp Sens 4");
+						lcd.setCursor(1, 0);
+						lcd.print("Temp Sens 4");
 						miMax = 1;
 						break;
 					case 4:
-						lcd.print(" Flow Sensor");
+						lcd.setCursor(1, 0);
+						lcd.print("Flow Sensor");
 						miMax = 3;
 						break;
 					}
@@ -167,15 +189,18 @@ void MenuTitle()
 				switch (m2Sel)
 				{
 					case 0:
-						lcd.print("  Serial Debugging");
+						lcd.setCursor(2, 0);
+						lcd.print("Serial Debugging");
 						miMax = 8;
 						break;
 					case 1:
-						lcd.print("    Erase EEPROM");
+						lcd.setCursor(4, 0);
+						lcd.print("Erase EEPROM");
 						miMax = 1;
 						break;
 					case 2:
-						lcd.print("  Restore Defaults");
+						lcd.setCursor(2, 0);
+						lcd.print("Restore Defaults");
 						miMax = 1;
 						break;
 				}
@@ -235,6 +260,8 @@ void MenuTitle()
 						break;
 					case 1:								//	prints 2nd level Timer Setup items
 						lcd.print(m1Items1[mPoint]);
+						Serial.println(mPoint);
+
 						LCDTimeDisplay(13, 1, AlarmHourOn[mPoint-2], AlarmMinOn[mPoint-2], 99, 1);			//	prints the alarms on time
 						LCDTimeDisplay(13, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 99, 1);	//	prints the alarms off time
 						break;
@@ -338,13 +365,13 @@ void MenuTitle()
 								lcd.print(m2Items20[mPoint]);
 								break;
 							case 1:
-								lcd.print(m2Items21[mPoint]);
+								lcd.print(m2Items20[mPoint]);
 								break;
 							case 2:
-								lcd.print(m2Items22[mPoint]);
+								lcd.print(m2Items20[mPoint]);
 								break;
 							case 3:
-								lcd.print(m2Items23[mPoint]);
+								lcd.print(m2Items20[mPoint]);
 								break;
 						}
 						break;
@@ -355,16 +382,16 @@ void MenuTitle()
 								lcd.print(m2Items30[mPoint]);
 								break;
 							case 1:
-								lcd.print(m2Items31[mPoint]);
+								lcd.print(m2Items30[mPoint]);
 								break;
 							case 2:
-								lcd.print(m2Items32[mPoint]);
+								lcd.print(m2Items30[mPoint]);
 								break;
 							case 3:
-								lcd.print(m2Items33[mPoint]);
+								lcd.print(m2Items30[mPoint]);
 								break;
 							case 4:
-								lcd.print(m2Items34[mPoint]);
+								lcd.print(m2Items30[mPoint]);
 								break;
 						}
 						break;
@@ -388,7 +415,7 @@ void MenuTitle()
 			default:
 				break;
 		}
-		mCur++;		//	increase the cursor and return to the begining of the for loop
+		mCur++;		//	increase the cursor and return to the begining of the for loop 
 	}
 	
 //	after the for loop prints the 3 lines it sets the new starting position for the pointer
@@ -530,41 +557,48 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 			switch (m2Sel)
 			{
 				case 0:
-					lcd.print("  Temperature Type");
+					lcd.setCursor(2, 0);
+					lcd.print("Temperature Type");
 					lcd.setCursor(0,2);
 					switch (m2Start)
 					{
 						case 0:
 							writeEEPROM(20,0);
 							tempType = readEEPROM(20);
-							lcd.print("   Set to Celsius");
+							lcd.setCursor(3, 0);
+							lcd.print("Set to Celsius");
 							break;
 						case 1:
 							writeEEPROM(20,1);
 							tempType = readEEPROM(20);
-							lcd.print("  Set to Fahrenheit");
+							lcd.setCursor(2, 0);
+							lcd.print("Set to Fahrenheit");
 							break;
 					}
 					break;
 				case 1:
-					lcd.print("   Temp Precision");
+					lcd.setCursor(3, 0);
+					lcd.print("Temp Precision");
 					lcd.setCursor(0,2);
 					switch (m2Start)
 					{
 						case 0:
 							writeEEPROM(21,0);
 							tempPrecision = readEEPROM(21);
-							lcd.print(" Set to No Decimal");
+							lcd.setCursor(1, 0);
+							lcd.print("Set to No Decimal");
 							break;
 						case 1:
 							writeEEPROM(21,1);
 							tempPrecision = readEEPROM(21);
-							lcd.print("  Set to 1 Decimal");
+							lcd.setCursor(2, 0);
+							lcd.print("Set to 1 Decimal");
 							break;
 					}
 					break;
 				case 2:
-					lcd.print("  Temp Read Delay");
+					lcd.setCursor(2, 0);
+					lcd.print("Temp Read Delay");
 					lcd.setCursor(0, 2);
 					switch (m2Start)
 					{
@@ -585,7 +619,6 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						//							int blBright = 0;
 						backlightLevel = readEEPROM(25);
 						to = MenuNumSel(0, 25, backlightLevel, 1, 255, 5, 9, 2, 250);
 						if (to == 32767){ return; }
@@ -594,42 +627,49 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					}
 					break;
 				case 4:
-					lcd.print("   Time Format");
+					lcd.setCursor(3, 0);
+					lcd.print("Time Format");
 					lcd.setCursor(0,2);
 					switch (m2Start)
 					{
 						case 0:
 							writeEEPROM(23,0);
 							timeFormat = readEEPROM(23);
-							lcd.print("   Set to 24 Hour");
+							lcd.setCursor(3, 0);
+							lcd.print("Set to 24 Hour");
 							break;
 						case 1:
 							writeEEPROM(23,1);
 							timeFormat = readEEPROM(23);
-							lcd.print("   Set to 12 Hour");
+							lcd.setCursor(3, 0);
+							lcd.print("Set to 12 Hour");
 							break;
 					}
 					break;
 				case 5:
 					lcd.setCursor(0, 0);
-					lcd.print("  Display Seconds");
+					lcd.setCursor(2, 0);
+					lcd.print("Display Seconds");
 					lcd.setCursor(0, 2);
 					switch (m2Start)
 					{
 					case 0:
 						writeEEPROM(24, 0);
 						secondsDisplay = readEEPROM(24);
-						lcd.print(" Display Seconds Off");
+						lcd.setCursor(1, 0);
+						lcd.print("Display Seconds Off");
 						break;
 					case 1:
 						writeEEPROM(24, 1);
 						secondsDisplay = readEEPROM(24);
-						lcd.print(" Display Seconds On");
+						lcd.setCursor(1, 0);
+						lcd.print("Display Seconds On");
 						break;
 					}
 					break;
 				case 6:
-					lcd.print(" Set Date and Time");
+					lcd.setCursor(1, 0);
+					lcd.print("Set Date and Time");
 					lcd.setCursor(0,2);
 					switch (m2Start)
 					{
@@ -671,7 +711,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							AlarmSet(0);
 							break;
 						case 1:
-							lcd.print("      Exiting");
+							lcd.setCursor(6, 1);
+							lcd.print((String)strExiting);
 							break;
 					}
 					break;
@@ -682,7 +723,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						AlarmSet(1);
 						break;
 					case 1:
-						lcd.print("      Exiting");
+						lcd.setCursor(6, 1);
+						lcd.print((String)strExiting);
 						break;
 					}
 					break;
@@ -693,7 +735,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						AlarmSet(2);
 						break;
 					case 1:
-						lcd.print("      Exiting");
+						lcd.setCursor(6, 1);
+						lcd.print((String)strExiting);
 						break;
 					}
 					break;
@@ -704,7 +747,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						AlarmSet(3);
 						break;
 					case 1:
-						lcd.print("      Exiting");
+						lcd.setCursor(6, 1);
+						lcd.print((String)strExiting);
 						break;
 					}
 					break;
@@ -715,7 +759,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						AlarmSet(4);
 						break;
 					case 1:
-						lcd.print("      Exiting");
+						lcd.setCursor(6, 1);
+						lcd.print((String)strExiting);
 						break;
 					}
 					break;
@@ -726,7 +771,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						AlarmSet(5);
 						break;
 					case 1:
-						lcd.print("      Exiting");
+						lcd.setCursor(6, 1);
+						lcd.print((String)strExiting);
 						break;
 					}
 					break;
@@ -737,7 +783,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						AlarmSet(6);
 						break;
 					case 1:
-						lcd.print("      Exiting");
+						lcd.setCursor(6, 1);
+						lcd.print((String)strExiting);
 						break;
 					}
 					break;
@@ -748,7 +795,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						AlarmSet(7);
 						break;
 					case 1:
-						lcd.print("      Exiting");
+						lcd.setCursor(6, 1);
+						lcd.print((String)strExiting);
 						break;
 					}
 					break;
@@ -764,12 +812,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 				{
 				case 0:
 					int rd;
-					lcd.setCursor(2, 0);
-					lcd.print("Are you sure you");
-					lcd.setCursor(1, 1);
-					lcd.print("want to calibrate");
-					lcd.setCursor(2, 2);
-					lcd.print("the Flow Sensor");
+					lcd.setCursor(0, 1);
+					lcd.print("Calibrate Flow Sens");
 					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 9, 3, 250);
 					if (rd == 0){ break; }
 					Alarm.disable(tempReadID);
@@ -841,7 +885,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 			switch (m2Sel)
 			{
 			case 0:
-				lcd.print("  Serial Debugging");
+				lcd.setCursor(2, 0);
+				lcd.print("Serial Debugging");
 				lcd.setCursor(0, 2);
 				switch (m2Start)
 				{
@@ -850,12 +895,14 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 				case 0:
 					writeEEPROM(5, 0);
 					serialDebug = readEEPROM(5);
-					lcd.print("  All Debugging OFF");
+					lcd.setCursor(2, 2);
+					lcd.print("All Debugging OFF");
 					break;
 				case 1:
 					writeEEPROM(5, 255);
 					serialDebug = readEEPROM(5);
-					lcd.print("  ALL Debugging ON");
+					lcd.setCursor(2, 2);
+					lcd.print("ALL Debugging ON");
 					break;
 				case 2:
 					readee = readEEPROM(5);
@@ -973,35 +1020,36 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 				switch (m2Start)
 				{
 				case 0:
-					lcd.print("      Exiting");
+					lcd.setCursor(6, 2);
+					lcd.print(strExiting);
 					break;
 				case 1:
-					lcd.print("   Erasing EEPROM");
+					lcd.setCursor(3, 2);
+					lcd.print("Erasing EEPROM");
 					eraseEEPROM();
 					lcd.clear();
-					lcd.setCursor(0, 0);
-					lcd.print("    Erase EEPROM");
-					lcd.setCursor(0, 2);
-					lcd.print("   Erase Complete");
+					lcd.setCursor(3, 2);
+					lcd.print("Erase Complete");
 					break;
 				}
 				break;
 			case 2:
-				lcd.setCursor(0, 0);
-				lcd.print("  Restore Defaults");
-				lcd.setCursor(0, 2);
+				lcd.setCursor(2, 0);
+				lcd.print("Restore Defaults");
 				switch (m2Start)
 				{
 				case 0:
-					lcd.print("      Exiting");
+					lcd.setCursor(6, 2);
+					lcd.print("Exiting");
 					break;
 				case 1:
-					lcd.print(" Restoring Defaults");
+					lcd.setCursor(1, 2);
+					lcd.print("Restoring Defaults");
 					serialDebug = (serialDebug | 8);
 					factoryDefaultset();
 					lcd.clear();
-					lcd.setCursor(0, 2);
-					lcd.print(" Defaults Restored");
+					lcd.setCursor(1, 2);
+					lcd.print("Defaults Restored");
 					break;
 				}
 				break;
@@ -1242,7 +1290,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 					lcd.setCursor(0, 2);
 					lcd.print("                    ");
 					lcd.setCursor(0, 3);
-					lcd.print("      Saving        ");
+					lcd.print("       Saving       ");
 				}
 				if ((type & 128) != 128){ writeEEPROM(addr, start); }	//	doesnt write to EEPROM if the 8th bit of type is set
 					delay(50);
@@ -1256,7 +1304,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 					lcd.setCursor(0, 2);
 					lcd.print("                    ");
 					lcd.setCursor(0, 3);
-					lcd.print("  Exit Without Save  ");
+					lcd.print(" Exit Without Save  ");
 				}
 					delay(50);
 					loopNumSel = 0;
