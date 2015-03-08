@@ -29,7 +29,7 @@ byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout;
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
-byte build = 28;			//  Sets the build number for the current program
+byte build = 29;			//  Sets the build number for the current program
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -46,7 +46,7 @@ byte today = 0;				//  Sets the today to the current date to display on the RTC
 #define D6 6
 #define D7 7
 LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
-
+const int backlight = 8;		//	variable used to store the pin for the backlight
 
 //  SETUP CUSTOM CHARACTERS
 byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};  //  set the lcd char for the degree symbol
@@ -129,7 +129,7 @@ DallasTemperature *sensors[NUMBER_OF_BUS];  // Pass onewire reference to Dallas 
 DeviceAddress tempDeviceAddress[8];		//  arrays to hold device addresses
 
 int numberOfDevices[NUMBER_OF_BUS];		//  define the variable to store the number of busses
-byte tempType;				//  initializes the byte tempTye
+byte tempType;				//  initializes the byte tempType
 byte tempPrecision;			//	initializes the byte tempPrecision
 byte tempReadDelay;			//	initializes the byte tempReadDelay
 
@@ -338,6 +338,8 @@ void setup()
 	//lcd.createChar(7, relon);				//  init custom characters as numbers
 	lcd.setBacklightPin(B_Light,POSITIVE);  //  set the backlight pin and polarity
 	lcd.setBacklight(HIGH);					//  toggle the backlight on
+	pinMode(backlight, OUTPUT);				//	set the pin for the backlight as an output
+	analogWrite(backlight, backlightLevel);	//	write the backlightlevel to the pin for the backlight
 	
 	START_SCREEN();		//  call the start up screen function
 

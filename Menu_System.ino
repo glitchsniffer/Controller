@@ -102,33 +102,8 @@ void MenuTitle()
 				}
 				break;
 			case 1:
-				switch (m2Sel)
-				{
-					case 0:
-						AlarmSetDisplay(m2Sel);
-						break;
-					case 1:
-						AlarmSetDisplay(m2Sel);
-						break;
-					case 2:
-						AlarmSetDisplay(m2Sel);
-						break;
-					case 3:
-						AlarmSetDisplay(m2Sel);
-						break;
-					case 4:
-						AlarmSetDisplay(m2Sel);
-						break;
-					case 5:
-						AlarmSetDisplay(m2Sel);
-						break;
-					case 6:
-						AlarmSetDisplay(m2Sel);
-						break;
-					case 7:
-						AlarmSetDisplay(m2Sel);
-						break;
-				}
+				//	its going to call the same function no matter what case, so no switch is needed
+				AlarmSetDisplay(m2Sel);
 				break;
 			case 2:
 				switch (m2Sel)
@@ -209,7 +184,7 @@ void MenuTitle()
 			break;
 	}
 
-//	sets the menu navigation pointers up for the line printing for statement
+	//	sets the menu navigation pointers up for the line printing for statement
 	switch (mLevel)
 	{	
 		case 0:
@@ -241,12 +216,12 @@ void MenuTitle()
 	lcd.write(byte(2));		//	prints the right arrow to indicate the current menu selection
 	mCur = 1;				//	sets the lcd cursor to start on line 1
 
-//	this for loop actually prints the lines.  it runs this loop 3 times to print each line
+	//	this for loop actually prints the lines.  it runs this loop 3 times to print each line
 	for (; mPoint < mmax; mPoint++)
 	{
 		lcd.setCursor(1,mCur);		//	move the lcd cursor to the lines location
 		
-//	determines what menu array to use when printing each line.
+	//	determines what menu array to use when printing each line.
 		switch (mLevel)
 		{
 			case 0:
@@ -260,8 +235,6 @@ void MenuTitle()
 						break;
 					case 1:								//	prints 2nd level Timer Setup items
 						lcd.print(m1Items1[mPoint]);
-						Serial.println(mPoint);
-
 						LCDTimeDisplay(13, 1, AlarmHourOn[mPoint-2], AlarmMinOn[mPoint-2], 99, 1);			//	prints the alarms on time
 						LCDTimeDisplay(13, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 99, 1);	//	prints the alarms off time
 						break;
@@ -330,33 +303,8 @@ void MenuTitle()
 						}
 						break;
 					case 1:										//	prints 3rd level Timer Setup Items
-						switch (m2Sel)
-						{
-							case 0:
-								lcd.print(m2Items10[mPoint]);
-								break;
-							case 1:
-								lcd.print(m2Items10[mPoint]);
-								break;
-							case 2:
-								lcd.print(m2Items10[mPoint]);
-								break;
-							case 3:
-								lcd.print(m2Items10[mPoint]);
-								break;
-							case 4:
-								lcd.print(m2Items10[mPoint]);
-								break;
-							case 5:
-								lcd.print(m2Items10[mPoint]);
-								break;
-							case 6:
-								lcd.print(m2Items10[mPoint]);
-								break;
-							case 7:
-								lcd.print(m2Items10[mPoint]);
-								break;
-						}
+						//	its going to print the same string no matter what case, so no switch is needed
+						lcd.print(m2Items10[mPoint]);
 						break;
 					case 2:										//	prints 3rd level Sensor Addr Config Items
 						switch (m2Sel)
@@ -418,7 +366,7 @@ void MenuTitle()
 		mCur++;		//	increase the cursor and return to the begining of the for loop 
 	}
 	
-//	after the for loop prints the 3 lines it sets the new starting position for the pointer
+	//	after the for loop prints the 3 lines it sets the new starting position for the pointer
 	switch (mLevel)
 	{
 		case 0:
@@ -620,9 +568,10 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 					case 0:
 						backlightLevel = readEEPROM(25);
-						to = MenuNumSel(0, 25, backlightLevel, 1, 255, 5, 9, 2, 250);
+						to = MenuNumSel(0, 25, backlightLevel, 0, 255, 5, 9, 2, 250);
 						if (to == 32767){ return; }
 						backlightLevel = readEEPROM(25);
+						analogWrite(backlight, backlightLevel);
 						break;
 					}
 					break;
