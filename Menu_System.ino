@@ -339,7 +339,7 @@ void MenuTitle()
 								lcd.print(m2Items30[mPoint]);
 								break;
 							case 4:
-								lcd.print(m2Items30[mPoint]);
+								lcd.print(m2Items34[mPoint]);	//	prints flow sensor calibration items
 								break;
 						}
 						break;
@@ -763,7 +763,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					int rd;
 					lcd.setCursor(0, 1);
 					lcd.print("Calibrate Flow Sens");
-					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 9, 3, 250);
+					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 8, 3, 250);
 					if (rd == 0){ break; }
 					Alarm.disable(tempReadID);
 					Alarm.disable(flowReadID);
@@ -772,7 +772,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					lcd.print("Taking Readings");
 					lcd.setCursor(1, 2);
 					lcd.print("Sensor Reading #");
-					for (int i; i <= 4; i++)
+					for (int i = 0; i <= 4; i++)
 					{
 						flowRateMax = 0;		//	using this variable to supress the LCD display for Flow Good/Alarm
 						FlowSensorRead();
@@ -786,7 +786,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					lcd.print(flowPulseTotal / 5);
 					lcd.setCursor(0, 1);
 					lcd.print("Set As Normal Flow?");
-					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 9, 2, 250);
+					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 8, 2, 250);
 					if (rd == 0)
 					{
 						lcd.clear();
