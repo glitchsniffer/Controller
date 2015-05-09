@@ -29,7 +29,7 @@ byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout;
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
-byte build = 29;			//  Sets the build number for the current program
+byte build = 30;			//  Sets the build number for the current program
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -49,13 +49,13 @@ LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins 
 const int backlight = 8;		//	variable used to store the pin for the backlight
 
 //  SETUP CUSTOM CHARACTERS
-byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};  //  set the lcd char for the degree symbol
-byte rarrow[8] = {B00000,B01000,B01100,B01110,B01100,B01000,B00000,};  //  set the lcd char for the right arrow symbol
-byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};  //  set the lcd char for the up arrow symbol
-//byte larrow[8] = {B00000,B00010,B00110,B01110,B00110,B00010,B00000,};  //  set the lcd char for the left arrow symbol
-//byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};  //  set the lcd char for the down arrow symbol
-//byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};  //  set the lcd char for the timer bell symbol
-//byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};  //  set the lcd char for the relay on symbol
+byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};	//  set the lcd char for the degree symbol
+byte rarrow[8] = {B00000,B01000,B01100,B01110,B01100,B01000,B00000,};	//  set the lcd char for the right arrow symbol
+byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};	//  set the lcd char for the up arrow symbol
+//byte larrow[8] = {B00000,B00010,B00110,B01110,B00110,B00010,B00000,};		//  set the lcd char for the left arrow symbol
+//byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};		//  set the lcd char for the down arrow symbol
+//byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};		//  set the lcd char for the timer bell symbol
+//byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};		//  set the lcd char for the relay on symbol
 
 
 //  DEFINE BUTTON PINS
@@ -72,9 +72,9 @@ volatile int menuMode = 0;	//  set the variable that will be change to enable th
 
 //  INITIALIZE THE MENU VARIABLES
 //  ***********************************************
-byte mPoint = 0;			//  current main menu pointer position
+byte mPoint = 0;		//  current main menu pointer position
 byte mCur = 1;			//  current position of the main menu cursor
-byte mStart = 0;			//  current starting cursor
+byte mStart = 0;		//  current starting cursor
 int mLevel = 0;			//  current menu level.  main menu level=0, menu items=1, menu item selected=2
 byte m1Sel = 0;			//  current selection for menu level 1
 byte m2Sel = 0;			//	current selection for menu level 2
@@ -88,23 +88,23 @@ byte mRet = 0;			//	variable to determine if the menu has just started.  if it h
 int menuTimeout;		//	variable to count for a menu system timeout
 int to = 0;				//	generic variable to determine if the menu system needs to time out
 
-char* m0Items[]={"", "User Setup", "Timers Setup", "Sensor Addr Setup","Sensor Setup","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
-char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "XXXX", "XXXX", "" };  //  setup menu item 1 for System Config Min 0 Max 8
-		char* m2Items00[]={"", "Celsius", "Fahrenheit", ""};
-		char* m2Items01[]={"", "No Decimal", "1 Decimal", ""};
+char* m0Items[] = { "", "User Setup", "Timers Setup", "Sensor Addr Setup","Sensor Setup","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
+char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "Flow Sensor On/Off", "XXXX", "" };  //  setup menu item 1 for System Config Min 0 Max 8
+		char* m2Items00[] = { "", "Celsius", "Fahrenheit", ""};
+		char* m2Items01[] = { "", "No Decimal", "1 Decimal", ""};
 		char* m2Items02[] = { "", "Set Temp Read Delay", "" };
 		char* m2Items03[] = { "", "Set BL Brightness", "" };
-		char* m2Items04[]={"", "24 Hour", "12 Hour", ""};
+		char* m2Items04[] = { "", "24 Hour", "12 Hour", ""};
 		char* m2Items05[] = { "", "Do Not Display Sec", "Display Seconds", "" };
-		char* m2Items06[]={"", "Exit", "Need Date/Time Here", ""};
-		char* m2Items07[] = { "", "XXXX", "XXXX", "" };
+		char* m2Items06[] = { "", "Exit", "Need Date/Time Here", ""};
+		char* m2Items07[] = { "", "Disable", "Enable", "" };
 		char* m2Items08[] = { "", "XXXX", "XXXX", "" };
-	char* m1Items1[]={ "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
-		char* m2Items10[]={"", "Edit", "Exit", ""};
-	char* m1Items2[]={"", "Temp Sens 1 Add", "Temp Sens 2 Add", "Temp Sens 3 Add", "Temp Sens 4 Add", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
-		char* m2Items20[]={"", "Address Sens ", "Exit", ""};
-	char* m1Items3[]={"", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Sensor Calibration Min 0 Max 4
-		char* m2Items30[]={"", "Calibrate Sensor ", "Exit", ""};
+	char* m1Items1[] = { "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
+		char* m2Items10[] = { "", "Edit", "Exit", ""};
+	char* m1Items2[] = { "", "Temp Sens 1 Add", "Temp Sens 2 Add", "Temp Sens 3 Add", "Temp Sens 4 Add", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
+		char* m2Items20[] = { "", "Address Sens ", "Exit", ""};
+	char* m1Items3[] = { "", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Sensor Calibration Min 0 Max 4
+		char* m2Items30[] = { "", "Calibrate Sensor ", "Exit", ""};
 		char* m2Items34[] = { "", "Calibrate Flow Sens", "Set Min Flow", "Disable Flow Sensor", "Exit", "" };
 	char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults" };	//	setup menu item 4 for System Setup
 		char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "Relays", "System", "Flow Sensor", "" };
@@ -197,87 +197,99 @@ void setup()
 	else{ Serial.println("RTC system time"); }
 
 	//  READ THE VARIABLES OUT OF THE EEPROM
-	
-		//  READ NON USER SETTINGS FROM EEPROM
-		e2Empty = readEEPROM(0);			//	reads the e2Empty out to determine if it needs to set defaults
-		if (e2Empty == 0){factoryDefaultset();}
-		configID = readEEPROM(0);			//  reads the configID out
 
-		//  READ USER SETTINGS FROM EEPROM
-		tempType = readEEPROM(20);			//  reads out user setting to selects between 0 = Celsius or 1 = Fahrenheit
-		tempPrecision = readEEPROM(21);		//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
-		tempReadDelay = readEEPROM(22);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
-		timeFormat = readEEPROM(23);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
-		secondsDisplay = readEEPROM(24);	//	reads out user setting to display seconds 0 = No and 1 = Yes
-		backlightLevel = readEEPROM(25);	//	reads out the user setting to control the backlight level
-		backlightTimeout = readEEPROM(26);	//	reads out the user setting to control when the backlight level times out
-		flowSensorEnable = readEEPROM(27);	//	reads out the user setting to determine if the flow sensor is enabled
-		flowRateMax = (readEEPROM(28));		//	reads out the user setting that is set for the max flow rate as an integer
-		flowRateMin = readEEPROM(29);		//	reads out the user setting for the minimum flow rate
+	//  READ NON USER SETTINGS FROM EEPROM
+	e2Empty = readEEPROM(0);			//	reads the e2Empty out to determine if it needs to set defaults
+	if (e2Empty == 0){ factoryDefaultset(); }
+	configID = readEEPROM(0);			//  reads the configID out
 
-		//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
+	//  READ USER SETTINGS FROM EEPROM
+	tempType = readEEPROM(20);			//  reads out user setting to selects between 0 = Celsius or 1 = Fahrenheit
+	tempPrecision = readEEPROM(21);		//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
+	tempReadDelay = readEEPROM(22);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
+	timeFormat = readEEPROM(23);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
+	secondsDisplay = readEEPROM(24);	//	reads out user setting to display seconds 0 = No and 1 = Yes
+	backlightLevel = readEEPROM(25);	//	reads out the user setting to control the backlight level
+	backlightTimeout = readEEPROM(26);	//	reads out the user setting to control when the backlight level times out
+	flowSensorEnable = readEEPROM(27);	//	reads out the user setting to determine if the flow sensor is enabled
+	flowRateMax = (readEEPROM(28));		//	reads out the user setting that is set for the max flow rate as an integer
+	flowRateMin = readEEPROM(29);		//	reads out the user setting for the minimum flow rate
 
-		tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
-		//flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_ID to flowReadID
-		AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
-		AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
-		RelayState = readEEPROM(150);
-	
+	//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
+
+	tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
+	//flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_ID to flowReadID
+	AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
+	AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
+	RelayState = readEEPROM(150);
+
+	if ((serialDebug & 4) == 4)
+	{
+		Serial.println();
+		Serial.println("ALARM EEPROM SETTINGS");
+		Serial.println("ID ON OFF  En  Typ  ON     OFF   Relay");
+	}
+
+	for (int id = 0; id <= relayCount; id++)		//  read each of the alarms values out of the EEPROM
+	{
+		if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
+		AlarmType[id] = readEEPROM(102 + (id * 6));
+		AlarmRelay[id] = readEEPROM(103 + (id * 6));
+		AlarmHourOn[id] = readEEPROM(104 + (id * 6));
+		AlarmMinOn[id] = readEEPROM(105 + (id * 6));
+		AlarmHourOff[id] = readEEPROM(106 + (id * 6));
+		AlarmMinOff[id] = readEEPROM(107 + (id * 6));
+		AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmON);
+		AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmOFF);
+
 		if ((serialDebug & 4) == 4)
 		{
-			Serial.println();
-			Serial.println("ALARM EEPROM SETTINGS");
-			Serial.println("ID ON OFF  En  Typ  ON     OFF   Relay");
-		}
+			Serial.print(id);
+			Serial.print("  ");
+			Serial.print(AlarmIDOn[id]);
+			if (AlarmIDOn[id] >= 10){ Serial.print("  "); }
+			else { Serial.print("   "); }
+			Serial.print(AlarmIDOff[id]);
+			if (AlarmIDOff[id] >= 10){ Serial.print(" "); }
+			else { Serial.print("  "); }
+			if ((AlarmEnable & (1 << id)) == (1 << id)){ Serial.print(" ON   "); }
+			else{ Serial.print(" OFF  "); }
+			Serial.print(AlarmType[id]);
+			Serial.print("  ");
 
-		for (int id = 0; id <= relayCount; id++)		//  read each of the alarms values out of the EEPROM
-		{
-			if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
-			AlarmType[id] = readEEPROM(102 + (id * 6));
-			AlarmRelay[id] = readEEPROM(103 + (id * 6));
-			AlarmHourOn[id] = readEEPROM(104 + (id * 6));
-			AlarmMinOn[id] = readEEPROM(105 + (id * 6));
-			AlarmHourOff[id] = readEEPROM(106 + (id * 6));
-			AlarmMinOff[id] = readEEPROM(107 + (id * 6));
-			AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmON);
-			AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmOFF);
-
-			if ((serialDebug & 4) == 4)
-			{
-				Serial.print(id);
-				Serial.print("  ");
-				Serial.print(AlarmIDOn[id]);
-				if (AlarmIDOn[id] >= 10){ Serial.print("  "); }
-				else { Serial.print("   "); }
-				Serial.print(AlarmIDOff[id]);
-				if (AlarmIDOff[id] >= 10){ Serial.print(" "); }
-				else { Serial.print("  "); }
-				if ((AlarmEnable & (1 << id)) == (1 << id)){ Serial.print(" ON   "); }
-				else{ Serial.print(" OFF  "); }
-				Serial.print(AlarmType[id]);
-				Serial.print("  ");
-
-				if (AlarmHourOn[id] < 10){ Serial.print(" "); }
-				Serial.print(AlarmHourOn[id]);
-				Serial.print(":");
-				if (AlarmMinOn[id] < 10){Serial.print("0");
-					Serial.print(AlarmMinOn[id]);}
-				else{ Serial.print(AlarmMinOn[id]); }
-				Serial.print("  ");
-				if (AlarmHourOff[id] < 10){ Serial.print(" "); }
-				Serial.print(AlarmHourOff[id]);
-				Serial.print(":");
-				if (AlarmMinOff[id] < 10){
-					Serial.print("0");
-					Serial.print(AlarmMinOff[id]);
-				}
-				else{ Serial.print(AlarmMinOff[id]); }
-				Serial.print("  ");
-				Serial.println(AlarmRelay[id], BIN);
+			if (AlarmHourOn[id] < 10){ Serial.print(" "); }
+			Serial.print(AlarmHourOn[id]);
+			Serial.print(":");
+			if (AlarmMinOn[id] < 10){
+				Serial.print("0");
+				Serial.print(AlarmMinOn[id]);
 			}
+			else{ Serial.print(AlarmMinOn[id]); }
+			Serial.print("  ");
+			if (AlarmHourOff[id] < 10){ Serial.print(" "); }
+			Serial.print(AlarmHourOff[id]);
+			Serial.print(":");
+			if (AlarmMinOff[id] < 10){
+				Serial.print("0");
+				Serial.print(AlarmMinOff[id]);
+			}
+			else{ Serial.print(AlarmMinOff[id]); }
+			Serial.print("  ");
+			Serial.println(AlarmRelay[id], BIN);
 		}
+	}
 
-		flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_IS to flowReadID
+	flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_IS to flowReadID
+	if (flowSensorEnable == 0)
+	{
+		Alarm.disable(flowReadID);
+		Serial.println("Flow Readings Disabled");
+	}
+	else
+	{
+		Alarm.enable(flowReadID);
+		Serial.println("Flow Readings Enabled");
+	}
 
 		serialDebug = readEEPROM(5);		//	read out the serial debug again in case it was disable during the alarm print
 

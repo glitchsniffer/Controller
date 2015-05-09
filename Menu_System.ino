@@ -92,7 +92,8 @@ void MenuTitle()
 						miMax = 1;
 						break;
 					case 7:
-						lcd.print("XXXXXX");
+						lcd.setCursor(4, 0);
+						lcd.print("Flow Sensor");
 						miMax = 1;
 						break;
 					case 8:
@@ -294,9 +295,9 @@ void MenuTitle()
 								break;
 							case 7:
 								lcd.print(m2Items07[mPoint]);
-								lcd.setCursor(17, 1);
-								if (flowSensorEnable == 0){ lcd.print(" No"); }
-								else { lcd.print("Yes"); }
+								lcd.setCursor(12, 1);
+								if (flowSensorEnable == 0){ lcd.print("Disabled"); }
+								else { lcd.print(" Enabled"); }
 								break;
 							case 8:
 								break;
@@ -629,20 +630,22 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					}
 					break;
 				case 7:
-					//lcd.setCursor(0, 0);
-					//lcd.print(" Flow Sensor Enable");
-					//lcd.setCursor(0, 2);
+					lcd.setCursor(0, 0);
+					lcd.print(" Flow Sensor Enable");
+					lcd.setCursor(0, 2);
 					switch (m2Start)
 					{
 					case 0:
-						//writeEEPROM(27, 0);
-						//flowSensorEnable = readEEPROM(27);
-						//lcd.print("Flow Sensor Enabled");
+						writeEEPROM(27, 0);
+						flowSensorEnable = readEEPROM(27);
+						Alarm.disable(flowReadID);
+						lcd.print("Flow Sensor Disabled");
 						break;
 					case 1:
-						//writeEEPROM(27, 1);
-						//flowSensorEnable = readEEPROM(27);
-						//lcd.print("Flow Sensor Disabled");
+						writeEEPROM(27, 1);
+						flowSensorEnable = readEEPROM(27);
+						Alarm.enable(flowReadID);
+						lcd.print("Flow Sensor Enabled");
 						break;
 					}
 					break;
