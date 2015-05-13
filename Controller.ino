@@ -9,9 +9,10 @@
 
 
 
-//  INITIALIZE THE EEPROM
+//  INITIALIZE THE EEPROM & RTC
 //  ***********************************************
 
+#define DS1307RTC 0x68			//	Set the address of the DS1307 RTC
 #define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
 
 int eePointer = 0;			//  Sets the pointer location to 0 initially
@@ -96,7 +97,7 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 		char* m2Items03[] = { "", "Set BL Brightness", "" };
 		char* m2Items04[] = { "", "24 Hour", "12 Hour", ""};
 		char* m2Items05[] = { "", "Do Not Display Sec", "Display Seconds", "" };
-		char* m2Items06[] = { "", "Exit", "Need Date/Time Here", ""};
+		char* m2Items06[] = { "", "Exit", "Set Date and Time", ""};
 		char* m2Items07[] = { "", "Disable", "Enable", "" };
 		char* m2Items08[] = { "", "XXXX", "XXXX", "" };
 	char* m1Items1[] = { "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
@@ -429,7 +430,7 @@ void loop()
 		MenuTitle();
 		Serial.println("Exiting Menu");
 	}
-	if (RTC_Status == 1){ LCDDateDisplay(); }						//  only calls LCDDateDisplay if the RTC has been set
+	if (RTC_Status == 1){ LCDDateDisplay(0, 0, 1); }						//  only calls LCDDateDisplay if the RTC has been set
 	
 	//	adjusts for 12 or 24 hour spacing on the LCD screen
 	if (timeFormat == 0){ LCDTimeDisplay(1, 0, hour(), minute(), second(), 0); }
@@ -654,20 +655,44 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	}
 }
 
-void LCDDateDisplay()
+void LCDDateDisplay(int display, int col, int row)
+//	display - 0 to not change the date if it is the same day.
+//	display - 1 to enable 0 padding on the day
+
 {
-	if(day()==today){return;}		//	if the day hasn't changed, dont refresh it	
-	else{
-	lcd.setCursor(0,1);
-	lcd.print("           ");
-	if(month() >=10){lcd.setCursor(0,1);}
-		else{lcd.setCursor(1,1);}
-	lcd.print(month());
-	lcd.print("/");
-	lcd.print(day());
-	lcd.print("/");
-	lcd.print(year());
-	today = day();}					//	set the day = to today so that it doesn't refresh the display with it until tomorrow
+	if(display == 0 && day() == today){ return; }		//	if the day hasn't changed, dont refresh it	
+	else
+	{
+		int addcol = 0;
+		int tempcol = 0;
+
+		lcd.setCursor(col, row);
+		lcd.print("           ");					//	erase the current line
+
+		//	display and shift the cursor according to the month
+		if (month() < 10){ addcol = 1; }
+		lcd.setCursor(col + addcol, row);
+		lcd.print(month());
+		lcd.print("/");
+		col = col + 3;
+		addcol = 0;
+
+		//	display and shift the cursor according to the day
+		if (display == 1 && day() < 10)
+		{
+			lcd.print("0");
+			addcol = 1;
+		}
+		lcd.setCursor(col + addcol , row);
+		lcd.print(day());
+		lcd.print("/");
+		col = col + 3;
+		addcol = 0;
+
+		//	display the year
+		lcd.print(year());
+		today = day();					//	set the day = to today so that it doesn't refresh the display with it until tomorrow
+	}
 }
 
 void DS18B20_Read()
@@ -959,4 +984,14 @@ int freeRam()
 	extern int __heap_start, *__brkval;
 	int v;
 	return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
+}
+
+byte decToBcd(byte val)
+{
+	return ((val / 10 * 16) + (val % 10));
+}
+
+byte bcdToDec(byte val)
+{
+	return ((val / 16 * 10) + (val % 16));
 }

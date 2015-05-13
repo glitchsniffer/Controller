@@ -624,8 +624,137 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 						case 0:
+							lcd.setCursor(6, 1);
+							lcd.print((String)strExiting);
 							break;
 						case 1:
+							int setyear;
+							int setmonth;
+							int setday;
+							int setweekday;
+							int sethour;
+							int setminutes;
+							int setseconds;
+							int tmp;
+
+							//	set up the lcd screen for setting the date
+							lcd.clear();
+							lcd.setCursor(4, 0);
+							lcd.print("Set the Date");
+
+							//	print the current date
+							LCDDateDisplay(1, 5, 1);
+
+							//	set the month
+							lcd.setCursor(5, 2);
+							lcd.write(byte(3));		//  print the up arrow
+							lcd.write(byte(3));		//  print the up arrow
+							setmonth = MenuNumSel(192, 255, month(), 1, 12, 1, 5, 1, 250);
+							lcd.setCursor(5, 2);
+							lcd.print("  ");
+
+							// set the day
+							lcd.setCursor(8, 2);
+							lcd.write(byte(3));		//  print the up arrow
+							lcd.write(byte(3));		//  print the up arrow
+							setday = MenuNumSel(192, 255, day(), 1, 31, 1, 8, 1, 250);
+							lcd.setCursor(8, 2);
+							lcd.print("  ");
+
+							//	set the year
+							lcd.setCursor(13, 2);
+							lcd.write(byte(3));		//  print the up arrow
+							lcd.write(byte(3));		//  print the up arrow
+							tmp = year() - 2000;
+							setyear = MenuNumSel(192, 255, tmp, 1, 99, 1, 13, 1, 250);
+							lcd.setCursor(13, 2);
+							lcd.print("  ");
+
+							//	set the day of the week
+							lcd.clear();
+							lcd.setCursor(1, 0);
+							lcd.print("Set the Day of Week");
+							setweekday = MenuNumSel(208, 255, weekday(), 1, 7, 1, 6, 2, 250);
+							
+							//	setup the lcd for the time setting
+							lcd.clear();
+							lcd.setCursor(4, 0);
+							lcd.print("Set the Time");
+							
+							//	print the current time
+							LCDTimeDisplay(6, 1, hour(), minute(), second(), 0);
+							
+							//	set the hour
+							lcd.setCursor(6, 2);
+							lcd.write(byte(3));
+							lcd.write(byte(3));
+							sethour = MenuNumSel(193, 255, hour(), 0, 23, 1, 6, 1, 250);
+							lcd.setCursor(6, 2);
+							lcd.print("  ");
+
+							//	set the minutes
+							lcd.setCursor(9, 2);
+							lcd.write(byte(3));
+							lcd.write(byte(3));
+							setminutes = MenuNumSel(193, 255, minute(), 1, 59, 1, 9, 1, 250);
+							lcd.setCursor(9, 2);
+							lcd.print("  ");
+
+							//	set the seconds
+							lcd.setCursor(12, 2);
+							lcd.write(byte(3));
+							lcd.write(byte(3));
+							setseconds = MenuNumSel(193, 255, second(), 1, 59, 1, 12, 1, 250);
+							lcd.setCursor(12, 2);
+							lcd.print("  ");
+
+
+							//	verify to set the time and date
+							lcd.setCursor(1, 0);
+							lcd.print("Do you want to set");
+							lcd.setCursor(0, 1);
+							lcd.print("the Date and Time to");
+							lcd.setCursor(2, 2);
+							lcd.print(setday);
+							lcd.print("/");
+							lcd.print(setmonth);
+							lcd.print("/");
+							lcd.print(setyear);
+							lcd.print(" ");
+							lcd.print(sethour);
+							lcd.print(":");
+							lcd.print(setminutes);
+							lcd.print(":");
+							lcd.print(setseconds);
+							
+							tmp = MenuNumSel(194, 255, 0, 0, 1, 1, 8, 3, 250);
+							
+							//	write the date and time to the RTC
+							if (tmp == 0){ break; }
+							else
+							{
+								Wire.beginTransmission(DS1307RTC);
+								Wire.write(byte(0));
+								Wire.write(decToBcd(setseconds));
+								Wire.write(decToBcd(setminutes));
+								Wire.write(decToBcd(sethour));
+								Wire.write(decToBcd(setweekday));
+								Wire.write(decToBcd(setday));
+								Wire.write(decToBcd(setmonth));
+								Wire.write(decToBcd(setyear));
+								Wire.write(byte(0));
+								Wire.endTransmission();
+
+								//  GET THE TIME FROM THE RTC
+								setSyncProvider(RTC.get);		//  this function get the time from the RTC
+								if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
+								{
+									RTC_Status = 0;
+									Serial.println("Unable to get the RTC");
+									Serial.println();
+								}
+								else{ Serial.println("RTC system time"); }
+							}
 							break;
 					}
 					break;
@@ -1017,7 +1146,7 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 //  type of display, EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
 //  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
 //  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours
-//  types are 0=normal numbers, 1=time, 2=yes/no, 4=enable/disable 8=+/-.  Add 64 to disable the Saving message or 128 to disable writing to eeprom
+//  types are 0=normal numbers, 1=time, 2=yes/no, 4=enable/disable 8=+/- 16 day of the week.  Add 64 to disable the Saving message or 128 to disable writing to eeprom
 //	If you are only displaying 1 digit, you need to set the col to -1 because all displays in this function are set to the 10's digit
 {
 	int loopNumSel = 1;		//	variable to stay in the loop
@@ -1217,7 +1346,59 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 				break;
 			}
 		}
-		else { lcd.print(start); }				//	print start if not time
+
+		//	Weekday selection
+		else if ((type & 16) == 16)
+		{
+			if (start > 7)
+			{
+				lcd.setCursor(col, row);
+				lcd.print("Invalid number");
+				break;
+			}
+			switch (start)
+			{
+			case 0:
+				lcd.setCursor(col, row);
+				lcd.print("Invalid number");
+				break;
+
+			case 1:
+				lcd.setCursor(col, row);
+				lcd.print("Sunday   ");
+				break;
+			case 2:
+				lcd.setCursor(col, row);
+				lcd.print("Monday   ");
+				break;
+			case 3:
+				lcd.setCursor(col, row);
+				lcd.print("Tuesday  ");
+				break;
+			case 4:
+				lcd.setCursor(col, row);
+				lcd.print("Wednesday");
+				break;
+			case 5:
+				lcd.setCursor(col, row);
+				lcd.print("Thursday ");
+				break;
+			case 6:
+				lcd.setCursor(col, row);
+				lcd.print("Friday   ");
+				break;
+			case 7:
+				lcd.setCursor(col, row);
+				lcd.print("Saturday ");
+				break;
+
+			}
+		}
+
+
+
+
+		else { lcd.print(start); }				//	print start if no other options
 		
 		//	Directional button code
 		
@@ -1225,14 +1406,14 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 			{
 				menuTimeout = 0;
 				if (start < max){ start = start + step; }		//	add the step size to start to increment
-				else{ start = (min + (max - max)); }			//	reset to min if the max has been reached
+				else{ start = min; }			//	reset to min if the max has been reached
 
 			}
 		if (Down == 1)
 			{
 				menuTimeout = 0;
 				if (start > min){ start = start - step; }		//	add the step size to start to increment
-				else{ start = min + max; }						//	reset to min if the max has been reached
+				else{ start = max; }						//	reset to min if the max has been reached
 			}
 		if (Right == 1)
 			{
