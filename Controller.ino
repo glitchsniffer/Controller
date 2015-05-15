@@ -591,7 +591,7 @@ void START_SCREEN()
 void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	//	col needs to account for HH:MM:SS:XM for a total of 11 digits
 {	//	mod can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
-	
+	//	if sec == 99 then dont print seconds, if sec == 98 print seconds and AM/PM, if sec != 99 then print the seconds only
 	//	add seconds to the display of AMPM
 
 	//  set the initial cursor position
@@ -650,6 +650,7 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 	if (timeFormat == 1)
 	{
 		if ((sec == 99) && (mod != 0)){ lcd.setCursor(col + 4 + mod, row); }
+		if ((sec == 98) && (mod != 0)){ lcd.setCursor(col + 8 + mod, row); }
 		if (realhour >= 12){ lcd.print("PM"); }
 		else if (realhour <= 11){ lcd.print("AM"); }
 	}

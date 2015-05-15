@@ -636,6 +636,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							int setminutes;
 							int setseconds;
 							int tmp;
+							int column;
 
 							//	set up the lcd screen for setting the date
 							lcd.clear();
@@ -682,32 +683,37 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.print("Set the Time");
 							
 							//	print the current time
-							LCDTimeDisplay(6, 1, hour(), minute(), second(), 0);
+							if (timeFormat == 1){ column = 4; }
+							else { column = 6; }
+							LCDTimeDisplay(column, 1, hour(), minute(), 98, 1);
 							
+							/*
 							//	set the hour
-							lcd.setCursor(6, 2);
+							lcd.setCursor(column, 2);
 							lcd.write(byte(3));
 							lcd.write(byte(3));
-							sethour = MenuNumSel(193, 255, hour(), 0, 23, 1, 6, 1, 250);
-							lcd.setCursor(6, 2);
+							sethour = MenuNumSel(193, 255, hour(), 0, 23, 1, column, 1, 250);
+							lcd.setCursor(column, 2);
 							lcd.print("  ");
 
 							//	set the minutes
-							lcd.setCursor(9, 2);
+							lcd.setCursor(column + 3, 2);
 							lcd.write(byte(3));
 							lcd.write(byte(3));
-							setminutes = MenuNumSel(193, 255, minute(), 1, 59, 1, 9, 1, 250);
-							lcd.setCursor(9, 2);
+							setminutes = MenuNumSel(192, 255, minute(), 0, 59, 1, column + 3, 1, 250);
+							lcd.setCursor(column + 3, 2);
 							lcd.print("  ");
 
 							//	set the seconds
-							lcd.setCursor(12, 2);
+							lcd.setCursor(column + 6, 2);
 							lcd.write(byte(3));
 							lcd.write(byte(3));
-							setseconds = MenuNumSel(193, 255, second(), 1, 59, 1, 12, 1, 250);
-							lcd.setCursor(12, 2);
+							setseconds = MenuNumSel(192, 255, second(), 0, 59, 1, column + 6, 1, 250);
+							lcd.setCursor(column + 6, 2);
 							lcd.print("  ");
+							*/
 
+							delay(10000);
 
 							//	verify to set the time and date
 							lcd.setCursor(1, 0);
@@ -730,7 +736,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							tmp = MenuNumSel(194, 255, 0, 0, 1, 1, 8, 3, 250);
 							
 							//	write the date and time to the RTC
-							if (tmp == 0){ break; }
+							/*if (tmp == 0){ break; }
 							else
 							{
 								Wire.beginTransmission(DS1307RTC);
@@ -754,7 +760,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 									Serial.println();
 								}
 								else{ Serial.println("RTC system time"); }
-							}
+							}*/
 							break;
 					}
 					break;
@@ -1264,14 +1270,15 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 			//	adds the AM/PM printing to the display
 			if (timeFormat == 1)
 			{
+				if (secondsDisplay == 1){ lcd.setCursor(col + 9, row); }
+				else { lcd.setCursor(col + 6, row); }
+
 				switch (apm)
 				{
 				case 0:
-					lcd.setCursor(col + 6, row);
 					lcd.print("AM");
 					break;
 				case 1:
-					lcd.setCursor(col + 6, row);
 					lcd.print("PM");
 					break;
 				}
