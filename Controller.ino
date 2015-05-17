@@ -30,7 +30,7 @@ byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout;
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
-byte build = 30;			//  Sets the build number for the current program
+byte build = 31;			//  Sets the build number for the current program
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -432,10 +432,18 @@ void loop()
 	}
 	if (RTC_Status == 1){ LCDDateDisplay(0, 0, 1); }						//  only calls LCDDateDisplay if the RTC has been set
 	
-	//	adjusts for 12 or 24 hour spacing on the LCD screen
-	if (timeFormat == 0){ LCDTimeDisplay(1, 0, hour(), minute(), second(), 0); }
-	else { LCDTimeDisplay(0, 0, hour(), minute(), second(), 0); }
-	
+	//	adjusts for 12 or 24 hour and if the seconds are to be displayed on the LCD screen
+	switch (secondsDisplay)
+	{
+	case 0:
+		if (timeFormat == 0){ LCDTimeDisplay(0, 2, 0, hour(), minute(), second(), 0); }
+		else { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
+		break;
+	case 1:
+		if (timeFormat == 0){ LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
+		else { LCDTimeDisplay(0, 0, 0, hour(), minute(), second(), 0); }
+		break;
+	}
 	Alarm.delay(1000);										//  uses the Alarm.delay to use the timer
 }
 
@@ -588,21 +596,17 @@ void START_SCREEN()
 	lcd.clear();
 }
 	
-void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
-	//	col needs to account for HH:MM:SS:XM for a total of 11 digits
-{	//	mod can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
-	//	if sec == 99 then dont print seconds, if sec == 98 print seconds and AM/PM, if sec != 99 then print the seconds only
-	//	add seconds to the display of AMPM
-
-	//  set the initial cursor position
-	if (secondsDisplay == 0)
-	{
-		col = col + 1;
-	}
-
+void LCDTimeDisplay(byte disp, int col, int row, int hour, int min, int sec, int space)
+//	disp is used for options
+//		0 = No options
+//		1 = force seconds display off.
+//		2 = force seconds display on.
+//	space can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
+//	if sec == 99 then dont print seconds, if sec == 98 print seconds and AM/PM, if sec != 99 then print the seconds only
+{
+	//	display the hour
 	int realhour = hour;
-	//	use timeFormat to determine where to put the cursor for the hour if set for 12 hour time and print the hour and AM/PM
-	switch (timeFormat)
+	switch (timeFormat)		//	use timeFormat to determine where to put the cursor for the hour if set for 12 hour time and print the hour and AM/PM
 	{
 	case 0:		//	if 24 hour set the cursor to use 2 digits
 		if (hour <= 9){ lcd.setCursor(col + 1, row); }	//  set cursor for single digits
@@ -623,40 +627,44 @@ void LCDTimeDisplay(int col, int row, int hour, int min, int sec, int mod)
 		break;
 	}
 
-	//	print the minutes
-	lcd.setCursor(col + 2, row);		//	set cursor back to the minutes position
-	lcd.print(":");
+	//	display the minutes
+	col = col + 2;
+	lcd.setCursor(col, row);		//	set cursor for the colon
+	lcd.print(":");						//	print the colon for the minutes
 
-	//	if the minutes is 1 digit pad a 0 to the single digit
-	if (min <= 9){ lcd.print("0"); }
+	if (min <= 9){ lcd.print("0"); }	//	if the minutes is 1 digit pad a 0 to the single digit
 	lcd.print(min);
 
-	//	if secondsDisplay is on then print seconds.
-	if (secondsDisplay == 1)
+	col = col + 3;
+	lcd.setCursor(col, row);		//	set the cursor for the either the seconds or AMPM printing
+
+	//	display the seconds
+	if ((secondsDisplay == 1) || (disp == 2))		//  only display seconds if disp forces it or they are set to display
 	{
-		if (sec != 99)
+		if ((disp & 1) != 1)		//	if the disp byte is not set to force seconds digits off, print the seconds
 		{
 			lcd.print(":");
-			if (second() <= 9)			//	if the seconds is 1 digit pad a 0 to the single digit
+			if (second() <= 9)				//	print the 1 digit second padded with a 0
 			{
 				lcd.print("0");
 				lcd.print(second());
 			}
-			else { lcd.print(second()); }
+			else { lcd.print(second()); }	//	print the 2 digit second
+			col = col + 3;
 		}
-		else if (sec == 99){ lcd.print(" "); }
 	}
-	//  determine weather to display AM or PM
+	//  display AM/PM
 	if (timeFormat == 1)
 	{
-		if ((sec == 99) && (mod != 0)){ lcd.setCursor(col + 4 + mod, row); }
-		if ((sec == 98) && (mod != 0)){ lcd.setCursor(col + 8 + mod, row); }
+		//	if ((disp & 1) != 1){ lcd.setCursor(col + 3, row); }
+		col = col + space;
+		lcd.setCursor(col, row);
 		if (realhour >= 12){ lcd.print("PM"); }
 		else if (realhour <= 11){ lcd.print("AM"); }
 	}
 }
 
-void LCDDateDisplay(int display, int col, int row)
+void LCDDateDisplay(byte display, int col, int row)
 //	display - 0 to not change the date if it is the same day.
 //	display - 1 to enable 0 padding on the day
 

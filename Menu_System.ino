@@ -236,8 +236,8 @@ void MenuTitle()
 						break;
 					case 1:								//	prints 2nd level Timer Setup items
 						lcd.print(m1Items1[mPoint]);
-						LCDTimeDisplay(13, 1, AlarmHourOn[mPoint-2], AlarmMinOn[mPoint-2], 99, 1);			//	prints the alarms on time
-						LCDTimeDisplay(13, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 99, 1);	//	prints the alarms off time
+						LCDTimeDisplay(1, 13, 1, AlarmHourOn[mPoint-2], AlarmMinOn[mPoint-2], 0, 0);			//	prints the alarms on time
+						LCDTimeDisplay(1, 13, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 0, 0);	//	prints the alarms off time
 						break;
 					case 2:								//	prints 2nd level Sensor Addr Config items
 						lcd.print(m1Items2[mPoint]);
@@ -635,7 +635,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							int sethour;
 							int setminutes;
 							int setseconds;
-							int tmp;
+							int tmp = 99;
 							int column;
 
 							//	set up the lcd screen for setting the date
@@ -683,16 +683,16 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.print("Set the Time");
 							
 							//	print the current time
-							if (timeFormat == 1){ column = 4; }
+							if (timeFormat == 1) { column = 4; }
+							if (secondsDisplay == 0) { column = 4; }
 							else { column = 6; }
-							LCDTimeDisplay(column, 1, hour(), minute(), 98, 1);
+							LCDTimeDisplay(2, column, 1, hour(), minute(), second(), 1);
 							
-							/*
 							//	set the hour
 							lcd.setCursor(column, 2);
 							lcd.write(byte(3));
 							lcd.write(byte(3));
-							sethour = MenuNumSel(193, 255, hour(), 0, 23, 1, column, 1, 250);
+							sethour = MenuNumSel(197, 255, hour(), 0, 23, 1, column, 1, 250);
 							lcd.setCursor(column, 2);
 							lcd.print("  ");
 
@@ -711,27 +711,70 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							setseconds = MenuNumSel(192, 255, second(), 0, 59, 1, column + 6, 1, 250);
 							lcd.setCursor(column + 6, 2);
 							lcd.print("  ");
-							*/
-
-							delay(10000);
 
 							//	verify to set the time and date
-							lcd.setCursor(1, 0);
-							lcd.print("Do you want to set");
-							lcd.setCursor(0, 1);
-							lcd.print("the Date and Time to");
+							lcd.clear();
+							lcd.setCursor(0, 0);
+							lcd.print("Set Date and Time to");
+							lcd.setCursor(6, 1);
+
+							switch (setweekday)
+							{
+							case 0:
+								lcd.print("Invalid number");
+								break;
+							case 1:
+								lcd.print("Sunday   ");
+								break;
+							case 2:
+								lcd.print("Monday   ");
+								break;
+							case 3:
+								lcd.print("Tuesday  ");
+								break;
+							case 4:
+								lcd.print("Wednesday");
+								break;
+							case 5:
+								lcd.print("Thursday ");
+								break;
+							case 6:
+								lcd.print("Friday   ");
+								break;
+							case 7:
+								lcd.print("Saturday ");
+								break;
+							default:
+								lcd.setCursor(1, 0);
+								lcd.print("Invalid Selection");
+								break;
+							}
+
 							lcd.setCursor(2, 2);
-							lcd.print(setday);
-							lcd.print("/");
 							lcd.print(setmonth);
+							lcd.print("/");
+							lcd.print(setday);
 							lcd.print("/");
 							lcd.print(setyear);
 							lcd.print(" ");
-							lcd.print(sethour);
+							if (timeFormat == 1)
+							{
+								if (sethour == 0) {tmp = 12; }
+								else if (sethour >= 13){ tmp = sethour - 12; }
+							}
+							else tmp = sethour;
+							lcd.print(tmp);
 							lcd.print(":");
+							if (setminutes <= 9){ lcd.print("0"); }
 							lcd.print(setminutes);
 							lcd.print(":");
+							if (setseconds <= 9){ lcd.print("0"); }
 							lcd.print(setseconds);
+							if (timeFormat == 1)
+							{
+								if (sethour >= 12){ lcd.print("PM"); }
+								else if (sethour <= 11){ lcd.print("AM"); }
+							}
 							
 							tmp = MenuNumSel(194, 255, 0, 0, 1, 1, 8, 3, 250);
 							
@@ -1152,11 +1195,12 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 //  type of display, EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
 //  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
 //  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours
-//  types are 0=normal numbers, 1=time, 2=yes/no, 4=enable/disable 8=+/- 16 day of the week.  Add 64 to disable the Saving message or 128 to disable writing to eeprom
+//  types are 0=normal numbers, 1=time, 2=yes/no, ***4=enable/disable 8=+/-, 16=day of the week.  Add 64 to disable the Saving message or 128 to disable writing to eeprom
+//	*** if time type and enable/disable setting are both set, this will force AM/PM to be displayed as if seconds were enabled.
 //	If you are only displaying 1 digit, you need to set the col to -1 because all displays in this function are set to the 10's digit
 {
 	int loopNumSel = 1;		//	variable to stay in the loop
-	int apm = 0;			//	variable for storing whether or not am or pm has rolled over.
+	int apm = 0;			//	variable for storing whether or not am or pm has rolled over
 
 	delay(250);
 
@@ -1270,7 +1314,8 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 			//	adds the AM/PM printing to the display
 			if (timeFormat == 1)
 			{
-				if (secondsDisplay == 1){ lcd.setCursor(col + 9, row); }
+				//	it type is also set to 4 it will print as if the seconds were displayed.
+				if ((secondsDisplay == 1) || ((type & 4) == 4) ){ lcd.setCursor(col + 9, row); }
 				else { lcd.setCursor(col + 6, row); }
 
 				switch (apm)
