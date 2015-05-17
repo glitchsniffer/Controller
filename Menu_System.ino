@@ -779,7 +779,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							tmp = MenuNumSel(194, 255, 0, 0, 1, 1, 8, 3, 250);
 							
 							//	write the date and time to the RTC
-							/*if (tmp == 0){ break; }
+							if (tmp == 0){ break; }
 							else
 							{
 								Wire.beginTransmission(DS1307RTC);
@@ -803,7 +803,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 									Serial.println();
 								}
 								else{ Serial.println("RTC system time"); }
-							}*/
+							}
 							break;
 					}
 					break;
