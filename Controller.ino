@@ -61,10 +61,10 @@ byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};	//  set th
 
 //  DEFINE BUTTON PINS
 //  ***********************************************
-#define upButton 53			//  set the up button to pin 53  Orange
-#define downButton 50		//  set the down button to pin 50  Blue
-#define leftButton 52		//  set the right button to pin 52  Yellow
-#define rightButton 51		//  set the left button to pin 51  Green
+#define upButton 49			//  set the up button to pin 53  Orange
+#define leftButton 48		//  set the right button to pin 52  Yellow
+#define rightButton 47		//  set the left button to pin 51  Green
+#define downButton 46		//  set the down button to pin 50  Blue
 
 volatile int menuMode = 0;	//  set the variable that will be change to enable the menu in the interrupt
 
@@ -134,6 +134,8 @@ byte tempType;				//  initializes the byte tempType
 byte tempPrecision;			//	initializes the byte tempPrecision
 byte tempReadDelay;			//	initializes the byte tempReadDelay
 
+float tempReadC[3];		//	array to hold the temperature readings taken
+float tempReadF[3];		//	array to hold the temperature readings taken
 
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
@@ -725,6 +727,10 @@ void DS18B20_Read()
 
 			float tempC = sensors[i]->getTempC(tempDeviceAddress[j]);
 			float tempF = sensors[i]->getTempF(tempDeviceAddress[j]);
+
+			tempReadC[j] = tempC;	//	store the current reading to be logged in Celcius
+			tempReadF[j] = tempF;	//	store the current reading to be logged in Fahrenheit
+
 
 			if ((serialDebug & 1) == 1)
 			{
