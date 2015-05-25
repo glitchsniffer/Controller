@@ -1,4 +1,5 @@
-#include "Alarms.h"
+#include <SPI.h>
+#include <SD.h>
 #include <Time.h>               //Time Library
 #include <TimeAlarms.h>			//TimeAlarms Library
 #include <DS1307RTC.h>          //DS RTC library
@@ -6,8 +7,9 @@
 #include <DallasTemperature.h>  //Dallas Temperature library
 #include <Wire.h>               //I2C Wire library
 #include <LiquidCrystal_I2C.h>  //LCD I2C library
+//#include <Alarms.h>
 
-
+#define LOOP_INTERVAL 1000				//	millis between log readings
 
 //  INITIALIZE THE EEPROM & RTC
 //  ***********************************************
@@ -30,7 +32,7 @@ byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout;
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
-byte build = 31;			//  Sets the build number for the current program
+byte build = 32;			//  Sets the build number for the current program
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -118,7 +120,7 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 //  ***********************************************
 
 // define the DS18B20 global variables
-const int ONE_WIRE_BUS[]={12};		// the array to define which pins you will use for the busses ie {2,3,4,5};
+const int ONE_WIRE_BUS[]={42};		// the array to define which pins you will use for the busses ie {2,3,4,5};
 
 #define TEMPERATURE_PRECISION 10
 #define NUMBER_OF_BUS 1				// how many busses will you use for the sensors
@@ -134,8 +136,8 @@ byte tempType;				//  initializes the byte tempType
 byte tempPrecision;			//	initializes the byte tempPrecision
 byte tempReadDelay;			//	initializes the byte tempReadDelay
 
-float tempReadC[3];		//	array to hold the temperature readings taken
-float tempReadF[3];		//	array to hold the temperature readings taken
+float tempReadC[4];		//	array to hold the temperature readings taken
+float tempReadF[4];		//	array to hold the temperature readings taken
 
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
@@ -177,6 +179,21 @@ int flowPulseTotal;					//	the variable used to store the running total of the l
 
 byte relayPins[] = { 22, 23, 24, 25, 26, 27, 28, 29 };		//  Initialize the relay pins
 byte relayCount = 7;		//  Set the number of relays
+
+//  INITIALIZE THE SD CARD
+//  ***********************************************
+#define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
+uint32_t syncTime = 0;					//	time of the last sync
+
+const int chipSelect = 53;				//	pin for the chip select line on the SD Card
+
+File logfile;							//	initialize the file to log to
+
+//  INITIALIZE THE LEDS
+//  ***********************************************
+#define redledpin 44
+#define greenledpin 45
+#define blueledpin 43
 
 
 void setup()
@@ -221,7 +238,6 @@ void setup()
 	//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
 
 	tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
-	//flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_ID to flowReadID
 	AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
 	AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
 	RelayState = readEEPROM(150);
@@ -386,6 +402,7 @@ void setup()
 			Serial.print(numberOfDevices[i], DEC);
 			Serial.print(" devices on port ");
 			Serial.println(ONE_WIRE_BUS[i], DEC);
+			Serial.println();
 		}
 		for(int j=0;j<numberOfDevices[i]; j++)
 		{
@@ -411,14 +428,53 @@ void setup()
 					Serial.print("Found ghost device at ");
 					Serial.print(j, DEC);
 					Serial.print(" but could not detect address. Check power and cabling");
+					Serial.println();
 				}
 			}
 		}
 		delay(200);
 	}
+
+	//	INITIALIZE THE LEDS
+	pinMode(redledpin, OUTPUT);
+	pinMode(greenledpin, OUTPUT);
+	pinMode(blueledpin, OUTPUT);
+
+	//	INITIALIZE THE SD CARD
+	Serial.println("Initializing the SD Card...");
+	pinMode(53, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
+
+	if (!SD.begin(chipSelect))	{ Serial.println("Card Failed, or Card is not present"); }
+	Serial.println("SD card initialized.");
+	Serial.println();
+
+	//	CREATE A NEW FILE
+	char filename[] = "LOGGER00.CSV";
+	for (uint8_t i = 0; i < 100; i++)
+	{
+		filename[6] = i / 10 + '0';
+		filename[7] = i % 10 + '0';
+		if (!SD.exists(filename))
+		{
+			logfile = SD.open(filename, FILE_WRITE);	//	only open a new file if it doesn't exist
+			break;
+		}
+	}
+
+	if (!logfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
+
+	//	print the filename that was created in the code above
+	Serial.print("Logging to: ");
+	Serial.println(filename);
+	Serial.println();
+
+	//	CREATE A HEADER FOR THE LOGFILE
+	logfile.println("millis, stamp, time, temp1, temp2, temp3, temp4");
+
 	if ((serialDebug & 1) == 1){ Serial.println(); }
 	DS18B20_Read();
-	Serial.println("Starting Loop");
+	Serial.print("Starting Loop :");
+	Serial.print(millis());
 	Serial.println();
 	//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
 }
@@ -432,8 +488,9 @@ void loop()
 		MenuTitle();
 		Serial.println("Exiting Menu");
 	}
+
 	if (RTC_Status == 1){ LCDDateDisplay(0, 0, 1); }						//  only calls LCDDateDisplay if the RTC has been set
-	
+
 	//	adjusts for 12 or 24 hour and if the seconds are to be displayed on the LCD screen
 	switch (secondsDisplay)
 	{
@@ -446,7 +503,9 @@ void loop()
 		else { LCDTimeDisplay(0, 0, 0, hour(), minute(), second(), 0); }
 		break;
 	}
-	Alarm.delay(1000);										//  uses the Alarm.delay to use the timer
+
+	//	delay for the ammount of time selected between readings
+	Alarm.delay(((LOOP_INTERVAL - 1) - (millis() % LOOP_INTERVAL)));	//  uses the Alarm.delay to use the timer
 }
 
 void AlarmON()
@@ -500,7 +559,6 @@ void AlarmOFF()
 		Serial.println();
 	}
 }
-
 void RelayToggleALL()
 {
 	for (int relay = 0; relay <= relayCount; relay++)
@@ -787,6 +845,114 @@ void DS18B20_Read()
 		}
 		if ((serialDebug & 1) == 1){ Serial.println(); }
 	}
+	logger();
+}
+
+void logger()
+{
+	time_t t;
+
+	digitalWrite(greenledpin, HIGH);
+
+	// log the millis since starting
+	uint32_t m = millis();
+	logfile.print(m);
+	logfile.print(", ");
+
+	Serial.print(m);
+	Serial.print(", ");
+
+	t = now();		//	fetch the current time
+
+	//	print the log time
+	logfile.print(t);
+	logfile.print(", ");
+	logfile.print(year(t), DEC);
+	logfile.print("/");
+	logfile.print(month(t), DEC);
+	logfile.print("/");
+	logfile.print(day(t), DEC);
+	logfile.print(" ");
+	logfile.print(hour(t), DEC);
+	logfile.print(":");
+	logfile.print(minute(t), DEC);
+	logfile.print(":");
+	logfile.print(second(t), DEC);
+	//	echo to the serial port
+	if ((serialDebug & 1) == 1)
+	{
+		Serial.print(t);
+		Serial.print(", ");
+		Serial.print(year(t), DEC);
+		Serial.print("/");
+		Serial.print(month(t), DEC);
+		Serial.print("/");
+		Serial.print(day(t), DEC);
+		Serial.print(" ");
+		Serial.print(hour(t), DEC);
+		Serial.print(":");
+		Serial.print(minute(t), DEC);
+		Serial.print(":");
+		Serial.print(second(t), DEC);
+	}
+	//	log the data
+	switch (tempType)
+	{
+	case 0:
+		logfile.print(", ");
+		logfile.print(tempReadC[0]);
+		logfile.print(", ");
+		logfile.print(tempReadC[1]);
+		logfile.print(", ");
+		logfile.print(tempReadC[2]);
+		logfile.print(", ");
+		logfile.println(tempReadC[3]);
+		if ((serialDebug & 1) == 1)
+		{
+			Serial.print(", ");
+			Serial.print(tempReadC[0]);
+			Serial.print(", ");
+			Serial.print(tempReadC[1]);
+			Serial.print(", ");
+			Serial.print(tempReadC[2]);
+			Serial.print(", ");
+			Serial.println(tempReadC[3]);
+		}
+		break;
+	case 1:
+		logfile.print(", ");
+		logfile.print(tempReadF[0]);
+		logfile.print(", ");
+		logfile.print(tempReadF[1]);
+		logfile.print(", ");
+		logfile.print(tempReadF[2]);
+		logfile.print(", ");
+		logfile.println(tempReadF[3]);
+		if ((serialDebug & 1) == 1)
+		{
+			Serial.print(", ");
+			Serial.print(tempReadF[0]);
+			Serial.print(", ");
+			Serial.print(tempReadF[1]);
+			Serial.print(", ");
+			Serial.print(tempReadF[2]);
+			Serial.print(", ");
+			Serial.println(tempReadF[3]);
+		}
+		break;
+	}
+
+	digitalWrite(greenledpin, LOW);
+
+	//  Write the data to disk if the millis are more than the write interval
+	if ((millis() - syncTime) < SDCARD_WRITE_INTERVAL) { return; }
+	syncTime = millis();
+
+	//	write the logfiles data to the SD Card
+	Serial.println("Writing log to the SD Card");
+	digitalWrite(blueledpin, HIGH);
+	logfile.flush();
+	digitalWrite(blueledpin, LOW);
 }
 
 void FlowSensorRead()
@@ -1009,4 +1175,12 @@ byte decToBcd(byte val)
 byte bcdToDec(byte val)
 {
 	return ((val / 16 * 10) + (val % 16));
+}
+
+void error(char*str)
+{
+	Serial.print("Error: ");
+	Serial.println(str);
+	digitalWrite(redledpin, HIGH);
+	while (1);
 }
