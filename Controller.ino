@@ -460,7 +460,6 @@ void setup()
 			break;
 		}
 	}
-
 	if (!logfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
 
 	//	print the filename that was created in the code above
@@ -469,8 +468,9 @@ void setup()
 	Serial.println();
 
 	//	CREATE A HEADER FOR THE LOGFILE
-	logfile.println("millis, stamp, time, temp1, temp2, temp3, temp4");
+	logfile.println("millis, stamp, time, temp1, temp2, temp3, temp4, relaystate");
 
+	//	TAKE A TEMP READING AND START THE LOOP
 	if ((serialDebug & 1) == 1){ Serial.println(); }
 	DS18B20_Read();
 	Serial.print("Starting Loop :");
@@ -521,7 +521,6 @@ void AlarmON()
 	Serial.println(minute());
 
 	RelayToggle(AlarmRelay[id], 1);
-	//RelayStatusDisplay(0 , 3);
 
 	if ((serialDebug & 4) == 4)
 	{
@@ -546,7 +545,6 @@ void AlarmOFF()
 	Serial.print(":");
 	Serial.println(minute());
 	RelayToggle(AlarmRelay[id], 0);
-	//RelayStatusDisplay(0, 3);
 
 	if ((serialDebug & 4) == 4)
 	{
