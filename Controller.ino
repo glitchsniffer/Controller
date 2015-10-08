@@ -32,7 +32,7 @@ byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout;
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
-byte build = 32;			//  Sets the build number for the current program
+byte build = 33;			//  Sets the build number for the current program
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -468,7 +468,7 @@ void setup()
 	Serial.println();
 
 	//	CREATE A HEADER FOR THE LOGFILE
-	logfile.println("millis, stamp, time, temp1, temp2, temp3, temp4, relaystate");
+	logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
 
 	//	TAKE A TEMP READING AND START THE LOOP
 	if ((serialDebug & 1) == 1){ Serial.println(); }
@@ -852,13 +852,19 @@ void logger()
 
 	digitalWrite(greenledpin, HIGH);
 
+	if ((serialDebug & 1) == 1)
+	{Serial.println("Preparing Data");}
+
 	// log the millis since starting
 	uint32_t m = millis();
 	logfile.print(m);
 	logfile.print(", ");
 
-	Serial.print(m);
-	Serial.print(", ");
+	if ((serialDebug & 1) == 1)
+	{
+		Serial.print(m);
+		Serial.print(", ");
+	}
 
 	t = now();		//	fetch the current time
 
@@ -898,44 +904,60 @@ void logger()
 	{
 	case 0:
 		logfile.print(", ");
-		logfile.print(tempReadC[0]);
+		logfile.print("C");
 		logfile.print(", ");
-		logfile.print(tempReadC[1]);
+		logfile.print(tempReadC[0], 2);
 		logfile.print(", ");
-		logfile.print(tempReadC[2]);
+		logfile.print(tempReadC[1], 2);
 		logfile.print(", ");
-		logfile.println(tempReadC[3]);
+		logfile.print(tempReadC[2], 2);
+		logfile.print(", ");
+		logfile.print(tempReadC[3], 2);
+		logfile.print(", ");
+		logfile.println(RelayState, BIN);
 		if ((serialDebug & 1) == 1)
 		{
 			Serial.print(", ");
-			Serial.print(tempReadC[0]);
+			Serial.print("C");
 			Serial.print(", ");
-			Serial.print(tempReadC[1]);
+			Serial.print(tempReadC[0], 2);
 			Serial.print(", ");
-			Serial.print(tempReadC[2]);
+			Serial.print(tempReadC[1], 2);
 			Serial.print(", ");
-			Serial.println(tempReadC[3]);
+			Serial.print(tempReadC[2], 2);
+			Serial.print(", ");
+			Serial.print(tempReadC[3], 2);
+			Serial.print(",");
+			Serial.println(RelayState, BIN);
 		}
 		break;
 	case 1:
 		logfile.print(", ");
-		logfile.print(tempReadF[0]);
+		logfile.print("F");
 		logfile.print(", ");
-		logfile.print(tempReadF[1]);
+		logfile.print(tempReadF[0], 2);
 		logfile.print(", ");
-		logfile.print(tempReadF[2]);
+		logfile.print(tempReadF[1], 2);
 		logfile.print(", ");
-		logfile.println(tempReadF[3]);
+		logfile.print(tempReadF[2], 2);
+		logfile.print(", ");
+		logfile.print(tempReadF[3], 2);
+		logfile.print(", ");
+		logfile.println(RelayState, BIN);
 		if ((serialDebug & 1) == 1)
 		{
 			Serial.print(", ");
-			Serial.print(tempReadF[0]);
+			Serial.print("F");
 			Serial.print(", ");
-			Serial.print(tempReadF[1]);
+			Serial.print(tempReadF[0], 2);
 			Serial.print(", ");
-			Serial.print(tempReadF[2]);
+			Serial.print(tempReadF[1], 2);
 			Serial.print(", ");
-			Serial.println(tempReadF[3]);
+			Serial.print(tempReadF[2], 2);
+			Serial.print(", ");
+			Serial.print(tempReadF[3], 2);
+			Serial.print(",");
+			Serial.println(RelayState, BIN);
 		}
 		break;
 	}
@@ -947,7 +969,11 @@ void logger()
 	syncTime = millis();
 
 	//	write the logfiles data to the SD Card
-	Serial.println("Writing log to the SD Card");
+	if ((serialDebug & 1) == 1)
+	{
+		Serial.println("Writing log to the SD Card");
+		Serial.println("");
+	}
 	digitalWrite(blueledpin, HIGH);
 	logfile.flush();
 	digitalWrite(blueledpin, LOW);
