@@ -468,7 +468,7 @@ void setup()
 	Serial.println();
 
 	//	CREATE A HEADER FOR THE LOGFILE
-	logfile.println("millis, stamp, time, temp1, temp2, temp3, temp4, temptype, relaystate");
+	logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
 
 	//	TAKE A TEMP READING AND START THE LOOP
 	if ((serialDebug & 1) == 1){ Serial.println(); }
@@ -765,12 +765,6 @@ void LCDDateDisplay(byte display, int col, int row)
 void DS18B20_Read()
 {
 	int c;
-
-	if ((serialDebug & 1) == 1)
-	{
-		Serial.println("Reading Temperature Sensors");
-	}
-
 	//  Read the DS sensors found in void setup
 	for (int i = 0; i < NUMBER_OF_BUS; i++)   // poll every bus
 	{
@@ -859,32 +853,30 @@ void logger()
 	digitalWrite(greenledpin, HIGH);
 
 	if ((serialDebug & 1) == 1)
-	{	
-		Serial.println("Preparing Data");
-	}
+	{Serial.println("Preparing Data");}
 
 	// log the millis since starting
 	uint32_t m = millis();
 	logfile.print(m);
-	logfile.print(",");
+	logfile.print(", ");
 
 	if ((serialDebug & 1) == 1)
 	{
 		Serial.print(m);
-		Serial.print(",");
+		Serial.print(", ");
 	}
 
 	t = now();		//	fetch the current time
 
 	//	print the log time
 	logfile.print(t);
-	logfile.print(",");
+	logfile.print(", ");
 	logfile.print(year(t), DEC);
 	logfile.print("/");
 	logfile.print(month(t), DEC);
 	logfile.print("/");
 	logfile.print(day(t), DEC);
-	logfile.print("");
+	logfile.print(" ");
 	logfile.print(hour(t), DEC);
 	logfile.print(":");
 	logfile.print(minute(t), DEC);
@@ -894,7 +886,7 @@ void logger()
 	if ((serialDebug & 1) == 1)
 	{
 		Serial.print(t);
-		Serial.print(",");
+		Serial.print(", ");
 		Serial.print(year(t), DEC);
 		Serial.print("/");
 		Serial.print(month(t), DEC);
@@ -911,63 +903,61 @@ void logger()
 	switch (tempType)
 	{
 	case 0:
-		logfile.print(",");
-		logfile.print(tempReadC[0], 2);
-		logfile.print(",");
-		logfile.print(tempReadC[1], 2);
-		logfile.print(",");
-		logfile.print(tempReadC[2], 2);
-		logfile.print(",");
-		logfile.print(tempReadC[3], 2);
-		logfile.print(",");
+		logfile.print(", ");
 		logfile.print("C");
-		logfile.print(",");
+		logfile.print(", ");
+		logfile.print(tempReadC[0], 2);
+		logfile.print(", ");
+		logfile.print(tempReadC[1], 2);
+		logfile.print(", ");
+		logfile.print(tempReadC[2], 2);
+		logfile.print(", ");
+		logfile.print(tempReadC[3], 2);
+		logfile.print(", ");
 		logfile.println(RelayState, BIN);
 		if ((serialDebug & 1) == 1)
 		{
-			Serial.print(",");
+			Serial.print(", ");
+			Serial.print("C");
+			Serial.print(", ");
 			Serial.print(tempReadC[0], 2);
-			Serial.print(",");
+			Serial.print(", ");
 			Serial.print(tempReadC[1], 2);
-			Serial.print(",");
+			Serial.print(", ");
 			Serial.print(tempReadC[2], 2);
-			Serial.print(",");
+			Serial.print(", ");
 			Serial.print(tempReadC[3], 2);
 			Serial.print(",");
-			Serial.print("C");
-			Serial.print(",");
 			Serial.println(RelayState, BIN);
-			Serial.println("");
 		}
 		break;
 	case 1:
-		logfile.print(",");
-		logfile.print(tempReadF[0], 2);
-		logfile.print(",");
-		logfile.print(tempReadF[1], 2);
-		logfile.print(",");
-		logfile.print(tempReadF[2], 2);
-		logfile.print(",");
-		logfile.print(tempReadF[3], 2);
-		logfile.print(",");
+		logfile.print(", ");
 		logfile.print("F");
-		logfile.print(",");
+		logfile.print(", ");
+		logfile.print(tempReadF[0], 2);
+		logfile.print(", ");
+		logfile.print(tempReadF[1], 2);
+		logfile.print(", ");
+		logfile.print(tempReadF[2], 2);
+		logfile.print(", ");
+		logfile.print(tempReadF[3], 2);
+		logfile.print(", ");
 		logfile.println(RelayState, BIN);
 		if ((serialDebug & 1) == 1)
 		{
-			Serial.print(",");
+			Serial.print(", ");
+			Serial.print("F");
+			Serial.print(", ");
 			Serial.print(tempReadF[0], 2);
-			Serial.print(",");
+			Serial.print(", ");
 			Serial.print(tempReadF[1], 2);
-			Serial.print(",");
+			Serial.print(", ");
 			Serial.print(tempReadF[2], 2);
-			Serial.print(",");
+			Serial.print(", ");
 			Serial.print(tempReadF[3], 2);
 			Serial.print(",");
-			Serial.print("F");
-			Serial.print(",");
 			Serial.println(RelayState, BIN);
-			Serial.println("");
 		}
 		break;
 	}
@@ -1158,9 +1148,9 @@ void factoryDefaultset()
 	writeEEPROM(32, 0);
 
 	//  Alarm Settings
-	writeEEPROM(100, 255);	//  writes alarms enable flag to off for all alarms
-	writeEEPROM(101, 0);	//  writes the alarmstate flag to 0 or Off for all alarms
-	writeEEPROM(150, 0);	//	writes the relayState flag to all 0's or OFF for all relays
+	writeEEPROM(100, 255);	//  writes alarms enable flag to off
+	writeEEPROM(101, 0);	//  writes the alarm state flag to 0 or Off
+	writeEEPROM(150, 0);	//	writes the relayState flag to all 0's or OFF
 
 	for (int i = 0; i <= relayCount; i++)		//	loop through all 8 alarms
 	{
