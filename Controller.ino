@@ -32,7 +32,8 @@ byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout;
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
-byte build = 33;			//  Sets the build number for the current program
+byte build = 34;			//  Sets the build number for the current program
+byte subbuild = 0;
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -186,6 +187,7 @@ byte relayCount = 7;		//  Set the number of relays
 uint32_t syncTime = 0;					//	time of the last sync
 
 const int chipSelect = 53;				//	pin for the chip select line on the SD Card
+int SDexist = 0;						//	variable to determine if there is a problem with the sd card.  If there is then dont use the SD card.
 
 File logfile;							//	initialize the file to log to
 
@@ -310,43 +312,43 @@ void setup()
 		Serial.println("Flow Readings Enabled");
 	}
 
-		serialDebug = readEEPROM(5);		//	read out the serial debug again in case it was disable during the alarm print
+	serialDebug = readEEPROM(5);		//	read out the serial debug again in case it was disable during the alarm print
 
-		if ((serialDebug & 4) == 4)
-		{
-			int rd;
-			Serial.println();
-			Serial.print("AlarmEnable ");
-			Serial.println(AlarmEnable, BIN);
-			Serial.print("AlarmState ");
-			Serial.println(AlarmState, BIN);
-			Serial.print("RelayState ");
-			Serial.println(RelayState, BIN);
-			Serial.print("# of Alarms ");
-			rd = Alarm.count();
-			Serial.println(rd);
-			Serial.print("tempReadID ");
-			Serial.print(tempReadID);
-			Serial.print(",");
-			rd = Alarm.read(tempReadID);
-			Serial.println(rd);
-			Serial.print("flowReadID ");
-			Serial.print(flowReadID);
-			Serial.print(",");
-			rd = Alarm.read(flowReadID);
-			Serial.println(rd);
+	if ((serialDebug & 4) == 4)
+	{
+		int rd;
+		Serial.println();
+		Serial.print("AlarmEnable ");
+		Serial.println(AlarmEnable, BIN);
+		Serial.print("AlarmState ");
+		Serial.println(AlarmState, BIN);
+		Serial.print("RelayState ");
+		Serial.println(RelayState, BIN);
+		Serial.print("# of Alarms ");
+		rd = Alarm.count();
+		Serial.println(rd);
+		Serial.print("tempReadID ");
+		Serial.print(tempReadID);
+		Serial.print(",");
+		rd = Alarm.read(tempReadID);
+		Serial.println(rd);
+		Serial.print("flowReadID ");
+		Serial.print(flowReadID);
+		Serial.print(",");
+		rd = Alarm.read(flowReadID);
+		Serial.println(rd);
 
-			Serial.println();
-		}
-		
+		Serial.println();
+	}
+
 	//  SETUP THE BUTTONS
 	pinMode(upButton, INPUT);		//  sets the UpButton to an input
 	pinMode(downButton, INPUT);		//  sets the DownButton to an input
 	pinMode(leftButton, INPUT);		//  sets the LeftButton to an input
 	pinMode(rightButton, INPUT);	//  sets the RightButton to an input
-	
+
 	//for(int b = 0; b < 8; b++){pinMode(button[b], INPUT);}	//  sets Button0-7 pins as inputs
-		
+
 	attachInterrupt(4, MenuButtonPress, RISING);		//  Attaches int.4, pin 19(RX1) and sets it to trigger on a low input from the menu button
 
 	//  SETUP THE FLOW SENSOR
@@ -355,11 +357,11 @@ void setup()
 	digitalWrite(flowSensorIntPin, HIGH);			//	write the pin high to be active low
 
 	//  SETUP THE RELAYS OUTPUTS
-	for(int relay = 0; relay <= relayCount; relay++){pinMode(relayPins[relay], OUTPUT);}
-	for(int relay = 0; relay <= relayCount; relay++){digitalWrite(relayPins[relay], HIGH);}
+	for (int relay = 0; relay <= relayCount; relay++){ pinMode(relayPins[relay], OUTPUT); }
+	for (int relay = 0; relay <= relayCount; relay++){ digitalWrite(relayPins[relay], HIGH); }
 
 	//  SETUP THE LCD SCREEN
-	lcd.begin(20,4);						//  setup the LCD's number of columns and rows
+	lcd.begin(20, 4);						//  setup the LCD's number of columns and rows
 	lcd.createChar(1, degree);				//  init custom characters as numbers
 	lcd.createChar(2, rarrow);				//  init custom characters as numbers
 	lcd.createChar(3, uarrow);				//  init custom characters as numbers
@@ -367,16 +369,16 @@ void setup()
 	//lcd.createChar(5, darrow);				//  init custom characters as numbers
 	//lcd.createChar(6, bell);				//  init custom characters as numbers
 	//lcd.createChar(7, relon);				//  init custom characters as numbers
-	lcd.setBacklightPin(B_Light,POSITIVE);  //  set the backlight pin and polarity
+	lcd.setBacklightPin(B_Light, POSITIVE);  //  set the backlight pin and polarity
 	lcd.setBacklight(HIGH);					//  toggle the backlight on
 	pinMode(backlight, OUTPUT);				//	set the pin for the backlight as an output
 	analogWrite(backlight, backlightLevel);	//	write the backlightlevel to the pin for the backlight
-	
+
 	START_SCREEN();		//  call the start up screen function
 
 	RelayStatusDisplay(0, 3);				//	call the relay status display function
 	RelayToggle(RelayState, 1);				//	Turn on the relays according to the AlarmState byte
-		
+
 	/*lcd.setCursor(0,2);
 	lcd.write(byte(2));
 	lcd.write(byte(3));
@@ -384,16 +386,16 @@ void setup()
 	lcd.write(byte(5));
 	lcd.write(byte(6));
 	lcd.write(byte(7));*/
-	
+
 	//  SETUP THE DS18B20 SENSORS
 	//  Check to see how many sensors are on the busses
-	for(int i=0;i<NUMBER_OF_BUS; i++)   //search each bus one by one
+	for (int i = 0; i < NUMBER_OF_BUS; i++)   //search each bus one by one
 	{
 		oneWire[i] = new OneWire(ONE_WIRE_BUS[i]);
 		sensors[i] = new DallasTemperature(oneWire[i]);
 		sensors[i]->begin();
 		numberOfDevices[i] = sensors[i]->getDeviceCount();
-		
+
 		if ((serialDebug & 1) == 1)
 		{
 			Serial.println();
@@ -404,12 +406,12 @@ void setup()
 			Serial.println(ONE_WIRE_BUS[i], DEC);
 			Serial.println();
 		}
-		for(int j=0;j<numberOfDevices[i]; j++)
+		for (int j = 0; j < numberOfDevices[i]; j++)
 		{
 			// Search the wire for address
-			if(sensors[i]->getAddress(tempDeviceAddress[j], j))
+			if (sensors[i]->getAddress(tempDeviceAddress[j], j))
 			{
-				
+
 				if ((serialDebug & 1) == 1)
 				{
 					Serial.print("Found device ");
@@ -444,39 +446,51 @@ void setup()
 	Serial.println("Initializing the SD Card...");
 	pinMode(53, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
 
-	if (!SD.begin(chipSelect))	{ Serial.println("Card Failed, or Card is not present"); }
-	Serial.println("SD card initialized.");
-	Serial.println();
+	if (!SD.begin(chipSelect))
+	{
+		Serial.println("Card Failed, or Card is not present");
+		SDexist = 0;
+		digitalWrite(redledpin, HIGH);
+	}
+	else
+	{
+		Serial.println("SD card initialized.");
+		Serial.println();
+		SDexist = 0;
+	}
 
 	//	CREATE A NEW FILE
-	char filename[] = "LOGGER00.CSV";
-	for (uint8_t i = 0; i < 100; i++)
+	if (SDexist == 1)
 	{
-		filename[6] = i / 10 + '0';
-		filename[7] = i % 10 + '0';
-		if (!SD.exists(filename))
+		char filename[] = "LOGGER00.CSV";
+		for (uint8_t i = 0; i < 100; i++)
 		{
-			logfile = SD.open(filename, FILE_WRITE);	//	only open a new file if it doesn't exist
-			break;
+			filename[6] = i / 10 + '0';
+			filename[7] = i % 10 + '0';
+			if (!SD.exists(filename))
+			{
+				logfile = SD.open(filename, FILE_WRITE);	//	only open a new file if it doesn't exist
+				break;
+			}
 		}
+		if (!logfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
+
+		//	print the filename that was created in the code above
+		Serial.print("Logging to: ");
+		Serial.println(filename);
+		Serial.println();
+
+		//	CREATE A HEADER FOR THE LOGFILE
+		logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
 	}
-	if (!logfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
-
-	//	print the filename that was created in the code above
-	Serial.print("Logging to: ");
-	Serial.println(filename);
-	Serial.println();
-
-	//	CREATE A HEADER FOR THE LOGFILE
-	logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
-
-	//	TAKE A TEMP READING AND START THE LOOP
-	if ((serialDebug & 1) == 1){ Serial.println(); }
-	DS18B20_Read();
-	Serial.print("Starting Loop :");
-	Serial.print(millis());
-	Serial.println();
-	//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
+		//	TAKE A TEMP READING AND START THE LOOP
+		if ((serialDebug & 1) == 1){ Serial.println(); }
+		DS18B20_Read();
+		Serial.print("Starting Loop :");
+		Serial.print(millis());
+		Serial.println();
+		//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
+	
 }
 
 void loop()
@@ -649,6 +663,8 @@ void START_SCREEN()
 	lcd.print(".");
 	if (build < 10){lcd.print("0");}
 	lcd.print(build);
+	lcd.print(".");
+	lcd.print(subbuild);
 	delay(1000);
 	lcd.setCursor(0,0);
 	lcd.clear();
@@ -843,7 +859,7 @@ void DS18B20_Read()
 		}
 		if ((serialDebug & 1) == 1){ Serial.println(); }
 	}
-	logger();
+	if(SDexist == 1){ logger(); }
 }
 
 void logger()
@@ -1206,5 +1222,5 @@ void error(char*str)
 	Serial.print("Error: ");
 	Serial.println(str);
 	digitalWrite(redledpin, HIGH);
-	while (1);
+	//while (1);
 }
