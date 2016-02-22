@@ -144,18 +144,18 @@ float tempReadF[4];		//	array to hold the temperature readings taken
 
 byte AlarmEnable;			//  byte for storing all 8 alarm's enable flags as bits
 byte AlarmState;			//  byte for storing all 8 alarm's state flags as bits
-byte AlarmType[7];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
-byte AlarmRelay[7];			//  # of the relay this alarm will trigger
-byte AlarmHourOn[7];		//  hour time the alarm will come on at
-byte AlarmMinOn[7];			//	minute time the alarm will come on at
-byte AlarmHourOff[7];		//	hour time the alarm will go off at
-byte AlarmMinOff[7];		//  minute time the alarm will go off at
+byte AlarmType[8];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
+byte AlarmRelay[8];			//  # of the relay this alarm will trigger
+byte AlarmHourOn[8];		//  hour time the alarm will come on at
+byte AlarmMinOn[8];			//	minute time the alarm will come on at
+byte AlarmHourOff[8];		//	hour time the alarm will go off at
+byte AlarmMinOff[8];		//  minute time the alarm will go off at
 byte RelayState;			//	byte for storing the state of all 8 relays
 
 AlarmID_t tempReadID;		//  delay between reading the temperature sensors
 AlarmID_t flowReadID;		//	delay between reading the flow sensor
-AlarmID_t AlarmIDOn[7];		//  alarm IDs for each alarm's On event
-AlarmID_t AlarmIDOff[7];	//	alarm IDs for each alarm's Off event
+AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
+AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
 
 //  INITIALIZE THE FLOW SENSOR
 //  ***********************************************
