@@ -32,7 +32,7 @@ byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout;
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
-byte build = 34;			//  Sets the build number for the current program
+byte build = 35;			//  Sets the build number for the current program
 byte subbuild = 0;
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
@@ -456,9 +456,9 @@ void setup()
 	{
 		Serial.println("SD card initialized.");
 		Serial.println();
-		SDexist = 0;
+		SDexist = 1;
 	}
-
+	Serial.println(SDexist);
 	//	CREATE A NEW FILE
 	if (SDexist == 1)
 	{
