@@ -13,45 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="_core">
-      <UniqueIdentifier>{f99c5512-fe73-4cda-8c7a-fbec6f727161}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries">
-      <UniqueIdentifier>{73a8156c-7768-4c1a-af51-b3e50056d80e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\DallasTemperature">
-      <UniqueIdentifier>{92d50911-e672-4e16-8343-be5b27251e3f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\DS1307RTC">
-      <UniqueIdentifier>{e01efac2-1f7d-49d7-b0e3-46d8e880a6dc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\LiquidCrystal">
-      <UniqueIdentifier>{7701b60c-46d1-40ac-a651-3b25b580f9d8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\OneWire">
-      <UniqueIdentifier>{a107c0c4-f92d-49fd-a3a7-3f94acca9826}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\SD">
-      <UniqueIdentifier>{d810baf4-6cd0-45f5-8e30-330d1aa023d7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\SD\utility">
-      <UniqueIdentifier>{4599338e-8ed8-4ac6-8226-275eb249e3f2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\SPI">
-      <UniqueIdentifier>{15f342f8-2c09-49b1-9a91-45d5570be6e8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\Time">
-      <UniqueIdentifier>{0159e701-b2e0-4b6f-9697-ed33f555b8cb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\TimeAlarms">
-      <UniqueIdentifier>{280e9224-5e9e-4bc3-a6d0-d0ca824a3660}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\Wire">
-      <UniqueIdentifier>{2957e547-80bc-4f9d-8bf4-5ab625c63ede}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\Wire\utility">
-      <UniqueIdentifier>{8df2d3c6-bd4b-4547-8656-aacc434caa32}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Controller.ino" />
@@ -59,10 +20,10 @@
     <None Include="Alarms.ino" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Visual Micro\.Controller.vsarduino.h">
+    <ClInclude Include="Alarms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Alarms.h">
+    <ClInclude Include="__vm\.Controller.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

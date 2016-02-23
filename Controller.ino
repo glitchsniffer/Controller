@@ -206,7 +206,7 @@ void setup()
 	Serial.println();
 
 	//  SHOW THE COMPILE DATE AND TIME	
-	Serial.println("Compiled: " __DATE__ ", " __TIME__ ", " __AVR_LIBC_VERSION_STRING__);
+	//Serial.println("Compiled: " __DATE__ ", " __TIME__ ", " __AVR_LIBC_VERSION_STRING__);
 
 	//  SETUP THE RTC
 	setSyncProvider(RTC.get);		//  this function get the time from the RTC
@@ -458,7 +458,7 @@ void setup()
 		Serial.println();
 		SDexist = 1;
 	}
-	Serial.println(SDexist);
+
 	//	CREATE A NEW FILE
 	if (SDexist == 1)
 	{
