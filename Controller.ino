@@ -1,11 +1,12 @@
-#include <SPI.h>
-#include <SD.h>
-#include <Time.h>               //Time Library
+//#include <SPI.h>
+//#include <SD.h>
+#include <Wire.h>               //I2C Wire library
+#include <Time.h>	            //Time Library
+#include <TimeLib.h>
 #include <TimeAlarms.h>			//TimeAlarms Library
-#include <DS1307RTC.h>          //DS RTC library
+//#include <DS1307RTC.h>          //DS RTC library
 #include <OneWire.h>            //OneWire Library for the DS Sensors
 #include <DallasTemperature.h>  //Dallas Temperature library
-#include <Wire.h>               //I2C Wire library
 #include <LiquidCrystal_I2C.h>  //LCD I2C library
 //#include <Alarms.h>
 
@@ -17,7 +18,7 @@
 #define DS1307RTC 0x68			//	Set the address of the DS1307 RTC
 #define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
 
-int eePointer = 0;			//  Sets the pointer location to 0 initially
+uint16_t eePointer = 0;			//  Sets the pointer location to 0 initially
 byte data = 0;				//  Sets the value of data to be written to 0 initially
 
 
@@ -33,7 +34,7 @@ byte backlightTimeout;		//  initializes the byte backlighttimeout;
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
 byte build = 35;			//  Sets the build number for the current program
-byte subbuild = 0;
+byte subbuild = 1;
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -49,7 +50,8 @@ byte today = 0;				//  Sets the today to the current date to display on the RTC
 #define D5 5
 #define D6 6
 #define D7 7
-LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
+// old line of code LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
+LiquidCrystal_I2C lcd(0x3F);
 const int backlight = 8;		//	variable used to store the pin for the backlight
 
 //  SETUP CUSTOM CHARACTERS
@@ -69,9 +71,9 @@ byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};	//  set th
 #define rightButton 47		//  set the left button to pin 51  Green
 #define downButton 46		//  set the down button to pin 50  Blue
 
-volatile int menuMode = 0;	//  set the variable that will be change to enable the menu in the interrupt
+volatile uint8_t menuMode = 0;	//  set the variable that will be change to enable the menu in the interrupt
 
-//const int button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - button 7 respectively
+//const uint16_t button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - button 7 respectively
 
 
 //  INITIALIZE THE MENU VARIABLES
@@ -142,38 +144,38 @@ float tempReadF[4];		//	array to hold the temperature readings taken
 
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
-
-byte AlarmEnable;			//  byte for storing all 8 alarm's enable flags as bits
-byte AlarmState;			//  byte for storing all 8 alarm's state flags as bits
-byte AlarmType[8];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
-byte AlarmRelay[8];			//  # of the relay this alarm will trigger
-byte AlarmHourOn[8];		//  hour time the alarm will come on at
-byte AlarmMinOn[8];			//	minute time the alarm will come on at
-byte AlarmHourOff[8];		//	hour time the alarm will go off at
-byte AlarmMinOff[8];		//  minute time the alarm will go off at
+//
+//byte AlarmEnable;			//  byte for storing all 8 alarm's enable flags as bits
+//byte AlarmState;			//  byte for storing all 8 alarm's state flags as bits
+//byte AlarmType[8];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
+//byte AlarmRelay[8];			//  # of the relay this alarm will trigger
+//byte AlarmHourOn[8];		//  hour time the alarm will come on at
+//byte AlarmMinOn[8];			//	minute time the alarm will come on at
+//byte AlarmHourOff[8];		//	hour time the alarm will go off at
+//byte AlarmMinOff[8];		//  minute time the alarm will go off at
 byte RelayState;			//	byte for storing the state of all 8 relays
-
-AlarmID_t tempReadID;		//  delay between reading the temperature sensors
-AlarmID_t flowReadID;		//	delay between reading the flow sensor
-AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
-AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
+//
+//AlarmID_t tempReadID;		//  delay between reading the temperature sensors
+//AlarmID_t flowReadID;		//	delay between reading the flow sensor
+//AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
+//AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
 
 //  INITIALIZE THE FLOW SENSOR
 //  ***********************************************
 
-byte flowSensorInterrupt = 5;		//	interrupt to trigger for the flow sensor
-byte flowSensorIntPin = 18;			//	pin on the arduino to use for the interrupt
-byte flowSensorEnable;				//	initializes the byte flowSensorEnable
-byte flowReadDelay = 30;				//	initializes the byte flowReadDelay (currently in seconds)
-
-volatile int flowPulseCount = 0;	//	number of pulses trigger in the interrupt
-		
-int flowRateMax;					//	maximum flow rate as calibrated by the user
-int flowRateMin;					//  minimum flow rate before an alarm is triggered, this is a percentage of flowRateMax
-
-int	flowPulseReading[5];			//	the array to store the last 5 flow pulse readings in
-byte flowPulseIndex = 0;			//	the number that selects the number of the flowPulseReadings array to write to
-int flowPulseTotal;					//	the variable used to store the running total of the last 5 flowPulseCount samples
+//byte flowSensorInterrupt = 5;		//	interrupt to trigger for the flow sensor
+//byte flowSensorIntPin = 18;			//	pin on the arduino to use for the interrupt
+//byte flowSensorEnable;				//	initializes the byte flowSensorEnable
+//byte flowReadDelay = 30;				//	initializes the byte flowReadDelay (currently in seconds)
+//
+//volatile int flowPulseCount = 0;	//	number of pulses trigger in the interrupt
+//		
+//int flowRateMax;					//	maximum flow rate as calibrated by the user
+//int flowRateMin;					//  minimum flow rate before an alarm is triggered, this is a percentage of flowRateMax
+//
+//int	flowPulseReading[5];			//	the array to store the last 5 flow pulse readings in
+//byte flowPulseIndex = 0;			//	the number that selects the number of the flowPulseReadings array to write to
+//int flowPulseTotal;					//	the variable used to store the running total of the last 5 flowPulseCount samples
 
 //  INITIALIZE THE RELAYS
 //  ***********************************************
@@ -183,13 +185,13 @@ byte relayCount = 7;		//  Set the number of relays
 
 //  INITIALIZE THE SD CARD
 //  ***********************************************
-#define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
-uint32_t syncTime = 0;					//	time of the last sync
-
-const int chipSelect = 53;				//	pin for the chip select line on the SD Card
-int SDexist = 0;						//	variable to determine if there is a problem with the sd card.  If there is then dont use the SD card.
-
-File logfile;							//	initialize the file to log to
+//#define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
+//uint32_t syncTime = 0;					//	time of the last sync
+//
+//const int chipSelect = 53;				//	pin for the chip select line on the SD Card
+//int SDexist = 0;						//	variable to determine if there is a problem with the sd card.  If there is then dont use the SD card.
+//
+//File logfile;							//	initialize the file to log to
 
 //  INITIALIZE THE LEDS
 //  ***********************************************
@@ -209,14 +211,23 @@ void setup()
 	//Serial.println("Compiled: " __DATE__ ", " __TIME__ ", " __AVR_LIBC_VERSION_STRING__);
 
 	//  SETUP THE RTC
-	setSyncProvider(RTC.get);		//  this function get the time from the RTC
-	if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
-	{
+	//setSyncProvider(RTC.get);   // the function to get the time from the RTC
+	if (timeStatus() != timeSet)
+	{	
 		RTC_Status = 0;
-		Serial.println("Unable to get the RTC");
-		Serial.println();
+		Serial.println("Unable to sync with the RTC");
 	}
-	else{ Serial.println("RTC system time"); }
+	else
+		Serial.println("RTC has set the system time");
+
+	//setSyncProvider(RTC.get);		//  this function get the time from the RTC
+	//if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
+	//{
+	//	RTC_Status = 0;
+	//	Serial.println("Unable to get the RTC");
+	//	Serial.println();
+	//}
+	//else{ Serial.println("RTC has system time"); }
 
 	//  READ THE VARIABLES OUT OF THE EEPROM
 
@@ -233,16 +244,16 @@ void setup()
 	secondsDisplay = readEEPROM(24);	//	reads out user setting to display seconds 0 = No and 1 = Yes
 	backlightLevel = readEEPROM(25);	//	reads out the user setting to control the backlight level
 	backlightTimeout = readEEPROM(26);	//	reads out the user setting to control when the backlight level times out
-	flowSensorEnable = readEEPROM(27);	//	reads out the user setting to determine if the flow sensor is enabled
-	flowRateMax = (readEEPROM(28));		//	reads out the user setting that is set for the max flow rate as an integer
-	flowRateMin = readEEPROM(29);		//	reads out the user setting for the minimum flow rate
+	//flowSensorEnable = readEEPROM(27);	//	reads out the user setting to determine if the flow sensor is enabled
+	//flowRateMax = (readEEPROM(28));		//	reads out the user setting that is set for the max flow rate as an integer
+	//flowRateMin = readEEPROM(29);		//	reads out the user setting for the minimum flow rate
 
 	//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
 
-	tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
-	AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
-	AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
-	RelayState = readEEPROM(150);
+	//tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
+	//AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
+	//AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
+	//RelayState = readEEPROM(150);
 
 	if ((serialDebug & 4) == 4)
 	{
@@ -251,95 +262,95 @@ void setup()
 		Serial.println("ID ON OFF  En  Typ  ON     OFF   Relay");
 	}
 
-	for (int id = 0; id <= relayCount; id++)		//  read each of the alarms values out of the EEPROM
-	{
-		if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
-		AlarmType[id] = readEEPROM(102 + (id * 6));
-		AlarmRelay[id] = readEEPROM(103 + (id * 6));
-		AlarmHourOn[id] = readEEPROM(104 + (id * 6));
-		AlarmMinOn[id] = readEEPROM(105 + (id * 6));
-		AlarmHourOff[id] = readEEPROM(106 + (id * 6));
-		AlarmMinOff[id] = readEEPROM(107 + (id * 6));
-		AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmON);
-		AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmOFF);
+	//for (int id = 0; id <= relayCount; id++)		//  read each of the alarms values out of the EEPROM
+	//{
+	//	if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
+	//	AlarmType[id] = readEEPROM(102 + (id * 6));
+	//	AlarmRelay[id] = readEEPROM(103 + (id * 6));
+	//	AlarmHourOn[id] = readEEPROM(104 + (id * 6));
+	//	AlarmMinOn[id] = readEEPROM(105 + (id * 6));
+	//	AlarmHourOff[id] = readEEPROM(106 + (id * 6));
+	//	AlarmMinOff[id] = readEEPROM(107 + (id * 6));
+	//	AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmON);
+	//	AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmOFF);
 
-		if ((serialDebug & 4) == 4)
-		{
-			Serial.print(id);
-			Serial.print("  ");
-			Serial.print(AlarmIDOn[id]);
-			if (AlarmIDOn[id] >= 10){ Serial.print("  "); }
-			else { Serial.print("   "); }
-			Serial.print(AlarmIDOff[id]);
-			if (AlarmIDOff[id] >= 10){ Serial.print(" "); }
-			else { Serial.print("  "); }
-			if ((AlarmEnable & (1 << id)) == (1 << id)){ Serial.print(" ON   "); }
-			else{ Serial.print(" OFF  "); }
-			Serial.print(AlarmType[id]);
-			Serial.print("  ");
+	//	if ((serialDebug & 4) == 4)
+	//	{
+	//		Serial.print(id);
+	//		Serial.print("  ");
+	//		Serial.print(AlarmIDOn[id]);
+	//		if (AlarmIDOn[id] >= 10){ Serial.print("  "); }
+	//		else { Serial.print("   "); }
+	//		Serial.print(AlarmIDOff[id]);
+	//		if (AlarmIDOff[id] >= 10){ Serial.print(" "); }
+	//		else { Serial.print("  "); }
+	//		if ((AlarmEnable & (1 << id)) == (1 << id)){ Serial.print(" ON   "); }
+	//		else{ Serial.print(" OFF  "); }
+	//		Serial.print(AlarmType[id]);
+	//		Serial.print("  ");
 
-			if (AlarmHourOn[id] < 10){ Serial.print(" "); }
-			Serial.print(AlarmHourOn[id]);
-			Serial.print(":");
-			if (AlarmMinOn[id] < 10){
-				Serial.print("0");
-				Serial.print(AlarmMinOn[id]);
-			}
-			else{ Serial.print(AlarmMinOn[id]); }
-			Serial.print("  ");
-			if (AlarmHourOff[id] < 10){ Serial.print(" "); }
-			Serial.print(AlarmHourOff[id]);
-			Serial.print(":");
-			if (AlarmMinOff[id] < 10){
-				Serial.print("0");
-				Serial.print(AlarmMinOff[id]);
-			}
-			else{ Serial.print(AlarmMinOff[id]); }
-			Serial.print("  ");
-			Serial.println(AlarmRelay[id], BIN);
-		}
-	}
+	//		if (AlarmHourOn[id] < 10){ Serial.print(" "); }
+	//		Serial.print(AlarmHourOn[id]);
+	//		Serial.print(":");
+	//		if (AlarmMinOn[id] < 10){
+	//			Serial.print("0");
+	//			Serial.print(AlarmMinOn[id]);
+	//		}
+	//		else{ Serial.print(AlarmMinOn[id]); }
+	//		Serial.print("  ");
+	//		if (AlarmHourOff[id] < 10){ Serial.print(" "); }
+	//		Serial.print(AlarmHourOff[id]);
+	//		Serial.print(":");
+	//		if (AlarmMinOff[id] < 10){
+	//			Serial.print("0");
+	//			Serial.print(AlarmMinOff[id]);
+	//		}
+	//		else{ Serial.print(AlarmMinOff[id]); }
+	//		Serial.print("  ");
+	//		Serial.println(AlarmRelay[id], BIN);
+	//	}
+	//}
 
-	flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_IS to flowReadID
-	if (flowSensorEnable == 0)
-	{
-		Alarm.disable(flowReadID);
-		Serial.println("Flow Readings Disabled");
-	}
-	else
-	{
-		Alarm.enable(flowReadID);
-		Serial.println("Flow Readings Enabled");
-	}
+	//flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_IS to flowReadID
+	//if (flowSensorEnable == 0)
+	//{
+	//	Alarm.disable(flowReadID);
+	//	Serial.println("Flow Readings Disabled");
+	//}
+	//else
+	//{
+	//	Alarm.enable(flowReadID);
+	//	Serial.println("Flow Readings Enabled");
+	//}
 
 	serialDebug = readEEPROM(5);		//	read out the serial debug again in case it was disable during the alarm print
 
-	if ((serialDebug & 4) == 4)
-	{
-		int rd;
-		Serial.println();
-		Serial.print("AlarmEnable ");
-		Serial.println(AlarmEnable, BIN);
-		Serial.print("AlarmState ");
-		Serial.println(AlarmState, BIN);
-		Serial.print("RelayState ");
-		Serial.println(RelayState, BIN);
-		Serial.print("# of Alarms ");
-		rd = Alarm.count();
-		Serial.println(rd);
-		Serial.print("tempReadID ");
-		Serial.print(tempReadID);
-		Serial.print(",");
-		rd = Alarm.read(tempReadID);
-		Serial.println(rd);
-		Serial.print("flowReadID ");
-		Serial.print(flowReadID);
-		Serial.print(",");
-		rd = Alarm.read(flowReadID);
-		Serial.println(rd);
+	//if ((serialDebug & 4) == 4)
+	//{
+	//	int rd;
+	//	Serial.println();
+	//	Serial.print("AlarmEnable ");
+	//	Serial.println(AlarmEnable, BIN);
+	//	Serial.print("AlarmState ");
+	//	Serial.println(AlarmState, BIN);
+	//	Serial.print("RelayState ");
+	//	Serial.println(RelayState, BIN);
+	//	Serial.print("# of Alarms ");
+	//	rd = Alarm.count();
+	//	Serial.println(rd);
+	//	Serial.print("tempReadID ");
+	//	Serial.print(tempReadID);
+	//	Serial.print(",");
+	//	rd = Alarm.read(tempReadID);
+	//	Serial.println(rd);
+	//	Serial.print("flowReadID ");
+	//	Serial.print(flowReadID);
+	//	Serial.print(",");
+	//	rd = Alarm.read(flowReadID);
+	//	Serial.println(rd);
 
-		Serial.println();
-	}
+	//	Serial.println();
+	//}
 
 	//  SETUP THE BUTTONS
 	pinMode(upButton, INPUT);		//  sets the UpButton to an input
@@ -353,8 +364,8 @@ void setup()
 
 	//  SETUP THE FLOW SENSOR
 
-	pinMode(flowSensorIntPin, INPUT);				//	set the flow sensor as an input to the pin number in the variable
-	digitalWrite(flowSensorIntPin, HIGH);			//	write the pin high to be active low
+	//pinMode(flowSensorIntPin, INPUT);				//	set the flow sensor as an input to the pin number in the variable
+	//digitalWrite(flowSensorIntPin, HIGH);			//	write the pin high to be active low
 
 	//  SETUP THE RELAYS OUTPUTS
 	for (int relay = 0; relay <= relayCount; relay++){ pinMode(relayPins[relay], OUTPUT); }
@@ -446,43 +457,43 @@ void setup()
 	Serial.println("Initializing the SD Card...");
 	pinMode(53, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
 
-	if (!SD.begin(chipSelect))
-	{
-		Serial.println("Card Failed, or Card is not present");
-		SDexist = 0;
-		digitalWrite(redledpin, HIGH);
-	}
-	else
-	{
-		Serial.println("SD card initialized.");
-		Serial.println();
-		SDexist = 1;
-	}
+	//if (!SD.begin(chipSelect))
+	//{
+	//	Serial.println("Card Failed, or Card is not present");
+	//	SDexist = 0;
+	//	digitalWrite(redledpin, HIGH);
+	//}
+	//else
+	//{
+	//	Serial.println("SD card initialized.");
+	//	Serial.println();
+	//	SDexist = 1;
+	//}
 
-	//	CREATE A NEW FILE
-	if (SDexist == 1)
-	{
-		char filename[] = "LOGGER00.CSV";
-		for (uint8_t i = 0; i < 100; i++)
-		{
-			filename[6] = i / 10 + '0';
-			filename[7] = i % 10 + '0';
-			if (!SD.exists(filename))
-			{
-				logfile = SD.open(filename, FILE_WRITE);	//	only open a new file if it doesn't exist
-				break;
-			}
-		}
-		if (!logfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
+	////	CREATE A NEW FILE
+	//if (SDexist == 1)
+	//{
+	//	char filename[] = "LOGGER00.CSV";
+	//	for (uint8_t i = 0; i < 100; i++)
+	//	{
+	//		filename[6] = i / 10 + '0';
+	//		filename[7] = i % 10 + '0';
+	//		if (!SD.exists(filename))
+	//		{
+	//			logfile = SD.open(filename, FILE_WRITE);	//	only open a new file if it doesn't exist
+	//			break;
+	//		}
+	//	}
+	//	if (!logfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
 
-		//	print the filename that was created in the code above
-		Serial.print("Logging to: ");
-		Serial.println(filename);
-		Serial.println();
+	//	//	print the filename that was created in the code above
+	//	Serial.print("Logging to: ");
+	//	Serial.println(filename);
+	//	Serial.println();
 
-		//	CREATE A HEADER FOR THE LOGFILE
-		logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
-	}
+	//	//	CREATE A HEADER FOR THE LOGFILE
+	//	logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
+	//}
 		//	TAKE A TEMP READING AND START THE LOOP
 		if ((serialDebug & 1) == 1){ Serial.println(); }
 		DS18B20_Read();
@@ -519,58 +530,58 @@ void loop()
 	}
 
 	//	delay for the ammount of time selected between readings
-	Alarm.delay(((LOOP_INTERVAL - 1) - (millis() % LOOP_INTERVAL)));	//  uses the Alarm.delay to use the timer
+	//Alarm.delay(((LOOP_INTERVAL - 1) - (millis() % LOOP_INTERVAL)));	//  uses the Alarm.delay to use the timer
 }
 
-void AlarmON()
-{
-	int id;
-	id = Alarm.getTriggeredAlarmId();
-	id = ((id - 1) / 2);
-	Serial.print("Alarm ");
-	Serial.print(id);
-	Serial.print(" ON @ ");
-	Serial.print(hour());
-	Serial.print(":");
-	Serial.println(minute());
-
-	RelayToggle(AlarmRelay[id], 1);
-
-	if ((serialDebug & 4) == 4)
-	{
-		int trigger;
-		trigger = Alarm.getNextTrigger();
-		Serial.print("Next ");
-		Serial.println(trigger);
-		Serial.print("Alarm State ");
-		Serial.println(AlarmState, BIN);
-		Serial.println();
-	}
-}
-void AlarmOFF()
-{
-	int id;
-	id = Alarm.getTriggeredAlarmId();
-	id = ((id - 2) / 2);
-	Serial.print("Alarm ");
-	Serial.print(id);
-	Serial.print(" OFF @ ");
-	Serial.print(hour());
-	Serial.print(":");
-	Serial.println(minute());
-	RelayToggle(AlarmRelay[id], 0);
-
-	if ((serialDebug & 4) == 4)
-	{
-		int trigger;
-		trigger = Alarm.getNextTrigger();
-		Serial.print("Next ");
-		Serial.println(trigger);
-		Serial.print("Alarm State ");
-		Serial.println(AlarmState, BIN);
-		Serial.println();
-	}
-}
+//void AlarmON()
+//{
+//	int id;
+//	id = Alarm.getTriggeredAlarmId();
+//	id = ((id - 1) / 2);
+//	Serial.print("Alarm ");
+//	Serial.print(id);
+//	Serial.print(" ON @ ");
+//	Serial.print(hour());
+//	Serial.print(":");
+//	Serial.println(minute());
+//
+//	RelayToggle(AlarmRelay[id], 1);
+//
+//	if ((serialDebug & 4) == 4)
+//	{
+//		int trigger;
+//		trigger = Alarm.getNextTrigger();
+//		Serial.print("Next ");
+//		Serial.println(trigger);
+//		Serial.print("Alarm State ");
+//		Serial.println(AlarmState, BIN);
+//		Serial.println();
+//	}
+//}
+//void AlarmOFF()
+//{
+//	int id;
+//	id = Alarm.getTriggeredAlarmId();
+//	id = ((id - 2) / 2);
+//	Serial.print("Alarm ");
+//	Serial.print(id);
+//	Serial.print(" OFF @ ");
+//	Serial.print(hour());
+//	Serial.print(":");
+//	Serial.println(minute());
+//	RelayToggle(AlarmRelay[id], 0);
+//
+//	if ((serialDebug & 4) == 4)
+//	{
+//		int trigger;
+//		trigger = Alarm.getNextTrigger();
+//		Serial.print("Next ");
+//		Serial.println(trigger);
+//		Serial.print("Alarm State ");
+//		Serial.println(AlarmState, BIN);
+//		Serial.println();
+//	}
+//}
 void RelayToggleALL()
 {
 	for (int relay = 0; relay <= relayCount; relay++)
@@ -859,233 +870,233 @@ void DS18B20_Read()
 		}
 		if ((serialDebug & 1) == 1){ Serial.println(); }
 	}
-	if(SDexist == 1){ logger(); }
+//	if(SDexist == 1){ logger(); }
 }
 
-void logger()
-{
-	time_t t;
-
-	digitalWrite(greenledpin, HIGH);
-
-	if ((serialDebug & 1) == 1)
-	{Serial.println("Preparing Data");}
-
-	// log the millis since starting
-	uint32_t m = millis();
-	logfile.print(m);
-	logfile.print(", ");
-
-	if ((serialDebug & 1) == 1)
-	{
-		Serial.print(m);
-		Serial.print(", ");
-	}
-
-	t = now();		//	fetch the current time
-
-	//	print the log time
-	logfile.print(t);
-	logfile.print(", ");
-	logfile.print(year(t), DEC);
-	logfile.print("/");
-	logfile.print(month(t), DEC);
-	logfile.print("/");
-	logfile.print(day(t), DEC);
-	logfile.print(" ");
-	logfile.print(hour(t), DEC);
-	logfile.print(":");
-	logfile.print(minute(t), DEC);
-	logfile.print(":");
-	logfile.print(second(t), DEC);
-	//	echo to the serial port
-	if ((serialDebug & 1) == 1)
-	{
-		Serial.print(t);
-		Serial.print(", ");
-		Serial.print(year(t), DEC);
-		Serial.print("/");
-		Serial.print(month(t), DEC);
-		Serial.print("/");
-		Serial.print(day(t), DEC);
-		Serial.print(" ");
-		Serial.print(hour(t), DEC);
-		Serial.print(":");
-		Serial.print(minute(t), DEC);
-		Serial.print(":");
-		Serial.print(second(t), DEC);
-	}
-	//	log the data
-	switch (tempType)
-	{
-	case 0:
-		logfile.print(", ");
-		logfile.print("C");
-		logfile.print(", ");
-		logfile.print(tempReadC[0], 2);
-		logfile.print(", ");
-		logfile.print(tempReadC[1], 2);
-		logfile.print(", ");
-		logfile.print(tempReadC[2], 2);
-		logfile.print(", ");
-		logfile.print(tempReadC[3], 2);
-		logfile.print(", ");
-		logfile.println(RelayState, BIN);
-		if ((serialDebug & 1) == 1)
-		{
-			Serial.print(", ");
-			Serial.print("C");
-			Serial.print(", ");
-			Serial.print(tempReadC[0], 2);
-			Serial.print(", ");
-			Serial.print(tempReadC[1], 2);
-			Serial.print(", ");
-			Serial.print(tempReadC[2], 2);
-			Serial.print(", ");
-			Serial.print(tempReadC[3], 2);
-			Serial.print(",");
-			Serial.println(RelayState, BIN);
-		}
-		break;
-	case 1:
-		logfile.print(", ");
-		logfile.print("F");
-		logfile.print(", ");
-		logfile.print(tempReadF[0], 2);
-		logfile.print(", ");
-		logfile.print(tempReadF[1], 2);
-		logfile.print(", ");
-		logfile.print(tempReadF[2], 2);
-		logfile.print(", ");
-		logfile.print(tempReadF[3], 2);
-		logfile.print(", ");
-		logfile.println(RelayState, BIN);
-		if ((serialDebug & 1) == 1)
-		{
-			Serial.print(", ");
-			Serial.print("F");
-			Serial.print(", ");
-			Serial.print(tempReadF[0], 2);
-			Serial.print(", ");
-			Serial.print(tempReadF[1], 2);
-			Serial.print(", ");
-			Serial.print(tempReadF[2], 2);
-			Serial.print(", ");
-			Serial.print(tempReadF[3], 2);
-			Serial.print(",");
-			Serial.println(RelayState, BIN);
-		}
-		break;
-	}
-
-	digitalWrite(greenledpin, LOW);
-
-	//  Write the data to disk if the millis are more than the write interval
-	if ((millis() - syncTime) < SDCARD_WRITE_INTERVAL) { return; }
-	syncTime = millis();
-
-	//	write the logfiles data to the SD Card
-	if ((serialDebug & 1) == 1)
-	{
-		Serial.println("Writing log to the SD Card");
-		Serial.println("");
-	}
-	digitalWrite(blueledpin, HIGH);
-	logfile.flush();
-	digitalWrite(blueledpin, LOW);
-}
-
-void FlowSensorRead()
-{
-	float flowRate = 0;					//	calculated flow rate of the sensor
-	byte flowReadTime = 1;				//	time to read the flow sensor in ms
-	float flowPulseFactor = 2.25;		//	number to multiply the number of pulses by to get the flow rate
-	unsigned long flowStartTime;		//	time in millis that the flow rate sample started
-	unsigned long flowEndTime;			//	time in millis that the flow rate sample ended
-
-	//	convert the flowReadTime stored in the EEPROM to milliseconds
-	int rdtime = ((flowReadTime * 1000) - 1);
-
-	//	turn on the flow sensor, take the flow reading, and turn off the flow sensor
-	Serial.print("Flow ON @ ");
-	Serial.println(now());
-	flowStartTime = millis();											//	set the current millis to the start time
-	attachInterrupt(flowSensorInterrupt, FlowSensorCounter, FALLING);	//	enable the interrupt to start the reading
-	Alarm.delay(rdtime);												//	delay for the ammount of time in millis
-	detachInterrupt(flowSensorInterrupt);								//	disable the interrupt for the flow sensor
-	flowEndTime = millis();												//	set the current millis to the end time
-	Serial.print("Flow OFF @ ");
-	Serial.println(now());
-	Serial.println();
-
-	//	store and calculate the average of the last 5 variables
-	flowPulseTotal = flowPulseTotal - flowPulseReading[flowPulseIndex];	//	Subtract the array position to be added to below
-	flowPulseReading[flowPulseIndex] = flowPulseCount;					//	set the current reading to the array variable
-	flowPulseTotal += flowPulseReading[flowPulseIndex];					//  add the current reading to the total
-	flowPulseIndex++;													//	increase the index by 1
-	if (flowPulseIndex > 4) { flowPulseIndex = 0; }						//	if index is at the 5th variable, reset to 0
-
-	//	print the flow status to the LCD
-	//	can use this area to determine an alarm alert to the user.
-	if (flowRateMax > 0)
-	{
-		lcd.setCursor(0, 2);
-		if (flowPulseTotal / 5 <= flowRateMax * (0.01 * flowRateMin)) { lcd.print("Flow Alarm"); }
-		else lcd.print("Flow Good ");
-	}
-	//	in case the millis counter overflows to 0 after approx 50 days, recalculate the time for the next flow reading
-	if (flowEndTime < flowStartTime)
-	{
-		flowEndTime = (4294967295 - flowStartTime) + 1 + flowEndTime;	//	set flowEndTime to the total duration
-		flowStartTime = 0;												//	set the start time to 0 so that the endtime is the total duration
-	}
-
-	//	calculate the flow rate in mL based on the flowPulseCounter
-	flowRate = (flowPulseFactor * flowPulseCount) / ((flowEndTime - flowStartTime) / 1000);		//	in mL
-
-	//	print the stats to the Serial port
-	if ((serialDebug & 64) == 64)
-	{
-		Serial.print("Duration ");
-		Serial.print(flowEndTime);
-		Serial.print("-");
-		Serial.print(flowStartTime);
-		Serial.print("=");
-		Serial.println(flowEndTime - flowStartTime);
-		Serial.print("PulseCount ");
-		Serial.println(flowPulseCount);
-		Serial.print("PulseTotal ");
-		Serial.print(flowPulseTotal);
-		Serial.print(", Avg ");
-		Serial.println(flowPulseTotal / 5);
-		Serial.print("Rate ");
-		Serial.println(flowRate);
-
-		//  print the flow rate in L/h and G/h
-		unsigned int frac;
-
-		flowRate = flowRate / 10;
-
-		Serial.print("Rate ");
-		Serial.print(flowRate * 60);
-		Serial.print("L/h");
-
-		flowRate = flowRate * 0.264172;		//	convert to gallons
-
-		Serial.print(", ");
-		Serial.print(flowRate * 60);
-		Serial.println("G/h");
-		Serial.println();
-	}
-
-	//	reset the pulse counter
-	flowPulseCount = 0;
-}
-
-void FlowSensorCounter()
-{
-	flowPulseCount++;
-}
+//void logger()
+//{
+//	time_t t;
+//
+//	digitalWrite(greenledpin, HIGH);
+//
+//	if ((serialDebug & 1) == 1)
+//	{Serial.println("Preparing Data");}
+//
+//	// log the millis since starting
+//	uint32_t m = millis();
+//	logfile.print(m);
+//	logfile.print(", ");
+//
+//	if ((serialDebug & 1) == 1)
+//	{
+//		Serial.print(m);
+//		Serial.print(", ");
+//	}
+//
+//	t = now();		//	fetch the current time
+//
+//	//	print the log time
+//	logfile.print(t);
+//	logfile.print(", ");
+//	logfile.print(year(t), DEC);
+//	logfile.print("/");
+//	logfile.print(month(t), DEC);
+//	logfile.print("/");
+//	logfile.print(day(t), DEC);
+//	logfile.print(" ");
+//	logfile.print(hour(t), DEC);
+//	logfile.print(":");
+//	logfile.print(minute(t), DEC);
+//	logfile.print(":");
+//	logfile.print(second(t), DEC);
+//	//	echo to the serial port
+//	if ((serialDebug & 1) == 1)
+//	{
+//		Serial.print(t);
+//		Serial.print(", ");
+//		Serial.print(year(t), DEC);
+//		Serial.print("/");
+//		Serial.print(month(t), DEC);
+//		Serial.print("/");
+//		Serial.print(day(t), DEC);
+//		Serial.print(" ");
+//		Serial.print(hour(t), DEC);
+//		Serial.print(":");
+//		Serial.print(minute(t), DEC);
+//		Serial.print(":");
+//		Serial.print(second(t), DEC);
+//	}
+//	//	log the data
+//	switch (tempType)
+//	{
+//	case 0:
+//		logfile.print(", ");
+//		logfile.print("C");
+//		logfile.print(", ");
+//		logfile.print(tempReadC[0], 2);
+//		logfile.print(", ");
+//		logfile.print(tempReadC[1], 2);
+//		logfile.print(", ");
+//		logfile.print(tempReadC[2], 2);
+//		logfile.print(", ");
+//		logfile.print(tempReadC[3], 2);
+//		logfile.print(", ");
+//		logfile.println(RelayState, BIN);
+//		if ((serialDebug & 1) == 1)
+//		{
+//			Serial.print(", ");
+//			Serial.print("C");
+//			Serial.print(", ");
+//			Serial.print(tempReadC[0], 2);
+//			Serial.print(", ");
+//			Serial.print(tempReadC[1], 2);
+//			Serial.print(", ");
+//			Serial.print(tempReadC[2], 2);
+//			Serial.print(", ");
+//			Serial.print(tempReadC[3], 2);
+//			Serial.print(",");
+//			Serial.println(RelayState, BIN);
+//		}
+//		break;
+//	case 1:
+//		logfile.print(", ");
+//		logfile.print("F");
+//		logfile.print(", ");
+//		logfile.print(tempReadF[0], 2);
+//		logfile.print(", ");
+//		logfile.print(tempReadF[1], 2);
+//		logfile.print(", ");
+//		logfile.print(tempReadF[2], 2);
+//		logfile.print(", ");
+//		logfile.print(tempReadF[3], 2);
+//		logfile.print(", ");
+//		logfile.println(RelayState, BIN);
+//		if ((serialDebug & 1) == 1)
+//		{
+//			Serial.print(", ");
+//			Serial.print("F");
+//			Serial.print(", ");
+//			Serial.print(tempReadF[0], 2);
+//			Serial.print(", ");
+//			Serial.print(tempReadF[1], 2);
+//			Serial.print(", ");
+//			Serial.print(tempReadF[2], 2);
+//			Serial.print(", ");
+//			Serial.print(tempReadF[3], 2);
+//			Serial.print(",");
+//			Serial.println(RelayState, BIN);
+//		}
+//		break;
+//	}
+//
+//	digitalWrite(greenledpin, LOW);
+//
+//	//  Write the data to disk if the millis are more than the write interval
+//	if ((millis() - syncTime) < SDCARD_WRITE_INTERVAL) { return; }
+//	syncTime = millis();
+//
+//	//	write the logfiles data to the SD Card
+//	if ((serialDebug & 1) == 1)
+//	{
+//		Serial.println("Writing log to the SD Card");
+//		Serial.println("");
+//	}
+//	digitalWrite(blueledpin, HIGH);
+//	logfile.flush();
+//	digitalWrite(blueledpin, LOW);
+//}
+//
+//void FlowSensorRead()
+//{
+//	float flowRate = 0;					//	calculated flow rate of the sensor
+//	byte flowReadTime = 1;				//	time to read the flow sensor in ms
+//	float flowPulseFactor = 2.25;		//	number to multiply the number of pulses by to get the flow rate
+//	unsigned long flowStartTime;		//	time in millis that the flow rate sample started
+//	unsigned long flowEndTime;			//	time in millis that the flow rate sample ended
+//
+//	//	convert the flowReadTime stored in the EEPROM to milliseconds
+//	int rdtime = ((flowReadTime * 1000) - 1);
+//
+//	//	turn on the flow sensor, take the flow reading, and turn off the flow sensor
+//	Serial.print("Flow ON @ ");
+//	Serial.println(now());
+//	flowStartTime = millis();											//	set the current millis to the start time
+//	attachInterrupt(flowSensorInterrupt, FlowSensorCounter, FALLING);	//	enable the interrupt to start the reading
+//	Alarm.delay(rdtime);												//	delay for the ammount of time in millis
+//	detachInterrupt(flowSensorInterrupt);								//	disable the interrupt for the flow sensor
+//	flowEndTime = millis();												//	set the current millis to the end time
+//	Serial.print("Flow OFF @ ");
+//	Serial.println(now());
+//	Serial.println();
+//
+//	//	store and calculate the average of the last 5 variables
+//	flowPulseTotal = flowPulseTotal - flowPulseReading[flowPulseIndex];	//	Subtract the array position to be added to below
+//	flowPulseReading[flowPulseIndex] = flowPulseCount;					//	set the current reading to the array variable
+//	flowPulseTotal += flowPulseReading[flowPulseIndex];					//  add the current reading to the total
+//	flowPulseIndex++;													//	increase the index by 1
+//	if (flowPulseIndex > 4) { flowPulseIndex = 0; }						//	if index is at the 5th variable, reset to 0
+//
+//	//	print the flow status to the LCD
+//	//	can use this area to determine an alarm alert to the user.
+//	if (flowRateMax > 0)
+//	{
+//		lcd.setCursor(0, 2);
+//		if (flowPulseTotal / 5 <= flowRateMax * (0.01 * flowRateMin)) { lcd.print("Flow Alarm"); }
+//		else lcd.print("Flow Good ");
+//	}
+//	//	in case the millis counter overflows to 0 after approx 50 days, recalculate the time for the next flow reading
+//	if (flowEndTime < flowStartTime)
+//	{
+//		flowEndTime = (4294967295 - flowStartTime) + 1 + flowEndTime;	//	set flowEndTime to the total duration
+//		flowStartTime = 0;												//	set the start time to 0 so that the endtime is the total duration
+//	}
+//
+//	//	calculate the flow rate in mL based on the flowPulseCounter
+//	flowRate = (flowPulseFactor * flowPulseCount) / ((flowEndTime - flowStartTime) / 1000);		//	in mL
+//
+//	//	print the stats to the Serial port
+//	if ((serialDebug & 64) == 64)
+//	{
+//		Serial.print("Duration ");
+//		Serial.print(flowEndTime);
+//		Serial.print("-");
+//		Serial.print(flowStartTime);
+//		Serial.print("=");
+//		Serial.println(flowEndTime - flowStartTime);
+//		Serial.print("PulseCount ");
+//		Serial.println(flowPulseCount);
+//		Serial.print("PulseTotal ");
+//		Serial.print(flowPulseTotal);
+//		Serial.print(", Avg ");
+//		Serial.println(flowPulseTotal / 5);
+//		Serial.print("Rate ");
+//		Serial.println(flowRate);
+//
+//		//  print the flow rate in L/h and G/h
+//		unsigned int frac;
+//
+//		flowRate = flowRate / 10;
+//
+//		Serial.print("Rate ");
+//		Serial.print(flowRate * 60);
+//		Serial.print("L/h");
+//
+//		flowRate = flowRate * 0.264172;		//	convert to gallons
+//
+//		Serial.print(", ");
+//		Serial.print(flowRate * 60);
+//		Serial.println("G/h");
+//		Serial.println();
+//	}
+//
+//	//	reset the pulse counter
+//	flowPulseCount = 0;
+//}
+//
+//void FlowSensorCounter()
+//{
+//	flowPulseCount++;
+//}
 
 void printAddress(DeviceAddress deviceAddress)
 {
