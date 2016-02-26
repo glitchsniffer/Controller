@@ -104,7 +104,7 @@ void MenuTitle()
 				break;
 			case 1:
 				//	its going to call the same function no matter what case, so no switch is needed
-				//AlarmSetDisplay(m2Sel);
+				AlarmSetDisplay(m2Sel);
 				break;
 			case 2:
 				switch (m2Sel)
@@ -210,7 +210,7 @@ void MenuTitle()
 			break;
 	}
 
-	int mmax = 1;			//	sets mmax = 1 for use to only print 3 lines.
+	uint8_t mmax = 1;		//	sets mmax = 1 for use to only print 3 lines.
 	mPoint = mStart;		//	set the starting position of the pointer
 	mmax = mPoint+3;		//  sets the ending position of the pointer to only print 3 lines
 	lcd.setCursor(0, 2);	//  moves the lcd cursor to line 3
@@ -236,8 +236,8 @@ void MenuTitle()
 						break;
 					case 1:								//	prints 2nd level Timer Setup items
 						lcd.print(m1Items1[mPoint]);
-						//LCDTimeDisplay(1, 13, 1, AlarmHourOn[mPoint-2], AlarmMinOn[mPoint-2], 0, 0);			//	prints the alarms on time
-						//LCDTimeDisplay(1, 13, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 0, 0);	//	prints the alarms off time
+						LCDTimeDisplay(1, 13, 1, AlarmHourOn[mPoint-2], AlarmMinOn[mPoint-2], 0, 0);			//	prints the alarms on time
+						LCDTimeDisplay(1, 13, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 0, 0);	//	prints the alarms off time
 						break;
 					case 2:								//	prints 2nd level Sensor Addr Config items
 						lcd.print(m1Items2[mPoint]);
@@ -296,8 +296,8 @@ void MenuTitle()
 							case 7:
 								lcd.print(m2Items07[mPoint]);
 								lcd.setCursor(12, 1);
-								//if (flowSensorEnable == 0){ lcd.print("Disabled"); }
-								//else { lcd.print(" Enabled"); }
+								if (flowSensorEnable == 0){ lcd.print("Disabled"); }
+								else { lcd.print(" Enabled"); }
 								break;
 							case 8:
 								break;
@@ -394,10 +394,10 @@ void MenuLoop()
 {
 	while (menuMode == 1)		//  scans for a button press to do the appropriate action
 	{
-		int Down = digitalRead(downButton);
-		int Up = digitalRead(upButton);
-		int Right = digitalRead(rightButton);
-		int Left = digitalRead(leftButton);
+		uint8_t Down = digitalRead(downButton);
+		uint8_t Up = digitalRead(upButton);
+		uint8_t Right = digitalRead(rightButton);
+		uint8_t Left = digitalRead(leftButton);
 		
 		if (Up == 1){MenuUp();}
 		if (Down == 1){MenuDown();}
@@ -556,9 +556,9 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						to = MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
 						if (to == 32767){ return; }
 						tempReadDelay = readEEPROM(22);
-						/*Alarm.write(tempReadID, tempReadDelay);
+						Alarm.write(tempReadID, tempReadDelay);
 						Alarm.disable(tempReadID);
-						Alarm.enable(tempReadID);*/
+						Alarm.enable(tempReadID);
 						break;
 					}
 					break;
@@ -628,15 +628,15 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.print((String)strExiting);
 							break;
 						case 1:
-							int setyear;
-							int setmonth;
-							int setday;
-							int setweekday;
-							int sethour;
-							int setminutes;
-							int setseconds;
-							int tmp = 99;
-							int column;
+							uint8_t setyear;
+							uint8_t setmonth;
+							uint8_t setday;
+							uint8_t setweekday;
+							uint8_t sethour;
+							uint8_t setminutes;
+							uint8_t setseconds;
+							uint8_t tmp = 99;
+							uint8_t column;
 
 							//	set up the lcd screen for setting the date
 							lcd.clear();
@@ -794,15 +794,15 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 								Wire.write(byte(0));
 								Wire.endTransmission();
 
-								//  GET THE TIME FROM THE RTC
+								////  GET THE TIME FROM THE RTC
 								//setSyncProvider(RTC.get);		//  this function get the time from the RTC
-								if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
-								{
-									RTC_Status = 0;
-									Serial.println("Unable to get the RTC");
-									Serial.println();
-								}
-								else{ Serial.println("RTC system time"); }
+								//if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
+								//{
+								//	RTC_Status = 0;
+								//	Serial.println("Unable to get the RTC");
+								//	Serial.println();
+								//}
+								//else{ Serial.println("RTC system time"); }
 							}
 							break;
 					}
@@ -815,14 +815,14 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 					case 0:
 						writeEEPROM(27, 0);
-						/*flowSensorEnable = readEEPROM(27);
-						Alarm.disable(flowReadID);*/
+						flowSensorEnable = readEEPROM(27);
+						Alarm.disable(flowReadID);
 						lcd.print("Flow Sensor Disabled");
 						break;
 					case 1:
 						writeEEPROM(27, 1);
-						/*flowSensorEnable = readEEPROM(27);
-						Alarm.enable(flowReadID);*/
+						flowSensorEnable = readEEPROM(27);
+						Alarm.enable(flowReadID);
 						lcd.print("Flow Sensor Enabled");
 						break;
 					}
@@ -838,7 +838,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 						case 0:
-							//AlarmSet(0);
+							AlarmSet(0);
 							break;
 						case 1:
 							lcd.setCursor(6, 1);
@@ -850,7 +850,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						//AlarmSet(1);
+						AlarmSet(1);
 						break;
 					case 1:
 						lcd.setCursor(6, 1);
@@ -862,7 +862,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						//AlarmSet(2);
+						AlarmSet(2);
 						break;
 					case 1:
 						lcd.setCursor(6, 1);
@@ -874,7 +874,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						//AlarmSet(3);
+						AlarmSet(3);
 						break;
 					case 1:
 						lcd.setCursor(6, 1);
@@ -886,7 +886,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						//AlarmSet(4);
+						AlarmSet(4);
 						break;
 					case 1:
 						lcd.setCursor(6, 1);
@@ -898,7 +898,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						//AlarmSet(5);
+						AlarmSet(5);
 						break;
 					case 1:
 						lcd.setCursor(6, 1);
@@ -910,7 +910,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						//AlarmSet(6);
+						AlarmSet(6);
 						break;
 					case 1:
 						lcd.setCursor(6, 1);
@@ -922,7 +922,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						//AlarmSet(7);
+						AlarmSet(7);
 						break;
 					case 1:
 						lcd.setCursor(6, 1);
@@ -941,56 +941,56 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 				switch (m2Start)
 				{
 				case 0:
-					//int rd;
-					//lcd.setCursor(0, 1);
-					//lcd.print("Calibrate Flow Sens");
-					//rd = MenuNumSel(66, 28, 0, 0, 1, 1, 8, 3, 250);
-					//if (rd == 0){ break; }
-					//Alarm.disable(tempReadID);
-					//Alarm.disable(flowReadID);
-					//lcd.clear();
-					//lcd.setCursor(2, 0);
-					//lcd.print("Taking Readings");
-					//lcd.setCursor(1, 2);
-					//lcd.print("Sensor Reading #");
-					//for (int i = 0; i <= 4; i++)
-					//{
-					//	flowRateMax = 0;		//	using this variable to supress the LCD display for Flow Good/Alarm
-					//	FlowSensorRead();
-					//	lcd.setCursor(17, 2);
-					//	lcd.print(i+1);
-					//	delay(1500);
-					//}
-					//lcd.clear();
-					//lcd.setCursor(2, 0);
-					//lcd.print("Avg Flow = ");
-					//lcd.print(flowPulseTotal / 5);
-					//lcd.setCursor(0, 1);
-					//lcd.print("Set As Normal Flow?");
-					//rd = MenuNumSel(66, 28, 0, 0, 1, 1, 8, 2, 250);
-					//if (rd == 0)
-					//{
-					//	lcd.clear();
-					//	lcd.setCursor(5, 1);
-					//	lcd.print("Not Saving");
-					//}
-					//else
-					//{
-					//	writeEEPROM(28, (flowPulseTotal / 5));
-					//	flowRateMax = readEEPROM(28);
-					//	writeEEPROM(27, 1);
-					//	flowSensorEnable = readEEPROM(27);
-					//	lcd.clear();
-					//	lcd.setCursor(2, 1);
-					//	lcd.print("Flow Rate Normal");
-					//	lcd.setCursor(7, 2);
-					//	lcd.print("Saved");
-					//}
-					//Alarm.enable(tempReadID);
-					//Alarm.enable(flowReadID);
+					uint8_t rd;
+					lcd.setCursor(0, 1);
+					lcd.print("Calibrate Flow Sens");
+					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 8, 3, 250);
+					if (rd == 0){ break; }
+					Alarm.disable(tempReadID);
+					Alarm.disable(flowReadID);
+					lcd.clear();
+					lcd.setCursor(2, 0);
+					lcd.print("Taking Readings");
+					lcd.setCursor(1, 2);
+					lcd.print("Sensor Reading #");
+					for (uint8_t i = 0; i <= 4; i++)
+					{
+						flowRateMax = 0;		//	using this variable to supress the LCD display for Flow Good/Alarm
+						FlowSensorRead();
+						lcd.setCursor(17, 2);
+						lcd.print(i+1);
+						delay(1500);
+					}
+					lcd.clear();
+					lcd.setCursor(2, 0);
+					lcd.print("Avg Flow = ");
+					lcd.print(flowPulseTotal / 5);
+					lcd.setCursor(0, 1);
+					lcd.print("Set As Normal Flow?");
+					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 8, 2, 250);
+					if (rd == 0)
+					{
+						lcd.clear();
+						lcd.setCursor(5, 1);
+						lcd.print("Not Saving");
+					}
+					else
+					{
+						writeEEPROM(28, (flowPulseTotal / 5));
+						flowRateMax = readEEPROM(28);
+						writeEEPROM(27, 1);
+						flowSensorEnable = readEEPROM(27);
+						lcd.clear();
+						lcd.setCursor(2, 1);
+						lcd.print("Flow Rate Normal");
+						lcd.setCursor(7, 2);
+						lcd.print("Saved");
+					}
+					Alarm.enable(tempReadID);
+					Alarm.enable(flowReadID);
 					break;
 				case 1:
-					/*lcd.setCursor(2, 1);
+					lcd.setCursor(2, 1);
 					lcd.print("Set Minimum Flow");
 					flowRateMin = readEEPROM(29);
 					lcd.setCursor(11, 2);
@@ -998,12 +998,12 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					to = MenuNumSel(0, 29, flowRateMin, 5, 100, 5, 8, 2, 250);
 					if (to == 32767){ return; }
 					flowRateMin = readEEPROM(29);
-					break;*/
+					break;
 				case 2:
-					/*writeEEPROM(27, 0);
+					writeEEPROM(27, 0);
 					flowSensorEnable = readEEPROM(27);
 					lcd.print("Flow Sensor Disabled");
-					break;*/
+					break;
 				case 3:
 					lcd.print("      Exiting");
 					break;
@@ -1191,7 +1191,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 	MenuTitle();
 	return;
 }
-int MenuNumSel(int type, int addr, int start, int min, int max, int step, int col, int row, int dmicro)
+uint16_t MenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t min, uint16_t max, uint16_t step, uint16_t col, uint16_t row, uint16_t dmicro)
 //  type of display, EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
 //  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
 //  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours
@@ -1199,8 +1199,8 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 //	*** if time type and enable/disable setting are both set, this will force AM/PM to be displayed as if seconds were enabled.
 //	If you are only displaying 1 digit, you need to set the col to -1 because all displays in this function are set to the 10's digit
 {
-	int loopNumSel = 1;		//	variable to stay in the loop
-	int apm = 0;			//	variable for storing whether or not am or pm has rolled over
+	uint8_t loopNumSel = 1;		//	variable to stay in the loop
+	uint8_t apm = 0;			//	variable for storing whether or not am or pm has rolled over
 
 	delay(250);
 
@@ -1233,10 +1233,10 @@ int MenuNumSel(int type, int addr, int start, int min, int max, int step, int co
 	//  Main loop for all of the buttons
 	while (loopNumSel == 1)
 	{
-		int Down = digitalRead(downButton);
-		int Up = digitalRead(upButton);
-		int Right = digitalRead(rightButton);
-		int Left = digitalRead(leftButton);
+		uint8_t Down = digitalRead(downButton);
+		uint8_t Up = digitalRead(upButton);
+		uint8_t Right = digitalRead(rightButton);
+		uint8_t Left = digitalRead(leftButton);
 
 		//  gets rid of leading digits for the below cases
 
