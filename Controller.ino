@@ -1,14 +1,17 @@
 
 //#include <SPI.h>
 //#include <SD.h>
+
 #include <TimeLib.h>
 #include <Time.h>               //Time Library
 #include <TimeAlarms.h>			//TimeAlarms Library
-//#include <DS1307RTC.h>          //DS RTC library
 #include <OneWire.h>            //OneWire Library for the DS Sensors
 #include <DallasTemperature.h>  //Dallas Temperature library
 #include <Wire.h>               //I2C Wire library
 #include <LiquidCrystal_I2C.h>  //LCD I2C library
+#include <DS1307RTC.h>
+
+
 //#include <Alarms.h>
 
 #define LOOP_INTERVAL 1000				//	millis between log readings
@@ -35,7 +38,7 @@ byte backlightTimeout;		//  initializes the byte backlighttimeout
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
 byte build = 35;			//  Sets the build number for the current program
-byte subbuild = 2;			//	Sets the sub build number between major version releases
+byte subbuild = 3;			//	Sets the sub build number between major version releases
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -70,6 +73,9 @@ byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};	//  set th
 #define leftButton 48		//  set the right button to pin 52  Yellow
 #define rightButton 47		//  set the left button to pin 51  Green
 #define downButton 46		//  set the down button to pin 50  Blue
+
+byte menuEnterInterrupt = 4;		//	interrupt to trigger for the flow sensor
+byte menuEnterIntPin = 19;			//	pin on the arduino to use for the interrupt
 
 volatile int8_t menuMode = 0;	//  set the variable that will be change to enable the menu in the interrupt
 
@@ -213,14 +219,14 @@ void setup()
 	//Serial.println("Compiled: " __DATE__ ", " __TIME__ ", " __AVR_LIBC_VERSION_STRING__);
 
 	//  SETUP THE RTC
-	//setSyncProvider(RTC.get);		//  this function get the time from the RTC
-	//if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
-	//{
-	//	RTC_Status = 0;
-	//	Serial.println("Unable to get the RTC");
-	//	Serial.println();
-	//}
-	//else{ Serial.println("RTC system time"); }
+	setSyncProvider(RTC.get);		//  this function get the time from the RTC
+	if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
+	{
+		RTC_Status = 0;
+		Serial.println("Unable to get the RTC");
+		Serial.println();
+	}
+	else{ Serial.println("RTC system time"); }
 
 	//  READ THE VARIABLES OUT OF THE EEPROM
 
@@ -345,7 +351,7 @@ void setup()
 
 		Serial.println();
 	}
-////////////////////
+
 	//  SETUP THE BUTTONS
 	pinMode(upButton, INPUT);		//  sets the UpButton to an input
 	pinMode(downButton, INPUT);		//  sets the DownButton to an input
@@ -354,7 +360,8 @@ void setup()
 
 	//for(uint8_t b = 0; b < 8; b++){pinMode(button[b], INPUT);}	//  sets Button0-7 pins as inputs
 
-	attachInterrupt(4, MenuButtonPress, RISING);		//  Attaches int.4, pin 19(RX1) and sets it to trigger on a low input from the menu button
+	pinMode(menuEnterIntPin, INPUT);
+	attachInterrupt(digitalPinToInterrupt(menuEnterIntPin), MenuButtonPress, RISING);		//  Attaches int.4, pin 19(RX1) on the Mega and Due and sets it to trigger on a low input from the menu button
 
 	//  SETUP THE FLOW SENSOR
 
@@ -370,8 +377,8 @@ void setup()
 	lcd.createChar(1, degree);				//  init custom characters as numbers
 	lcd.createChar(2, rarrow);				//  init custom characters as numbers
 	lcd.createChar(3, uarrow);				//  init custom characters as numbers
-	//lcd.createChar(4, larrow);				//  init custom characters as numbers
-	//lcd.createChar(5, darrow);				//  init custom characters as numbers
+	//lcd.createChar(4, larrow);			//  init custom characters as numbers
+	//lcd.createChar(5, darrow);			//  init custom characters as numbers
 	//lcd.createChar(6, bell);				//  init custom characters as numbers
 	//lcd.createChar(7, relon);				//  init custom characters as numbers
 	lcd.setBacklightPin(B_Light, POSITIVE);  //  set the backlight pin and polarity
@@ -383,19 +390,6 @@ void setup()
 
 	RelayStatusDisplay(0, 3);				//	call the relay status display function
 	RelayToggle(RelayState, 1);				//	Turn on the relays according to the AlarmState byte
-
-	//Serial.println("Checking EEPROM");
-	//eraseEEPROM();
-	//int wait = 0;
-	//while (!wait);
-
-	/*lcd.setCursor(0,2);
-	lcd.write(byte(2));
-	lcd.write(byte(3));
-	lcd.write(byte(4));
-	lcd.write(byte(5));
-	lcd.write(byte(6));
-	lcd.write(byte(7));*/
 
 	//  SETUP THE DS18B20 SENSORS
 	//  Check to see how many sensors are on the busses
@@ -497,6 +491,7 @@ void setup()
 	//	//	CREATE A HEADER FOR THE LOGFILE
 	//	logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
 	//}
+
 		//	TAKE A TEMP READING AND START THE LOOP
 		if ((serialDebug & 1) == 1){ Serial.println(); }
 		DS18B20_Read();
@@ -504,7 +499,6 @@ void setup()
 		Serial.print(millis());
 		Serial.println();
 		//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
-//////////
 }
 
 void loop()
@@ -587,19 +581,21 @@ void AlarmOFF()
 }
 void RelayToggleALL()
 {
+	//	NOTE THAT THIS WILL NOT TOGGLE THE RELAY DISPLAY ON THE LCD BECAUSE I DO NOT WRITE TO THE RELAYSTATE
+
 	for (uint8_t relay = 0; relay <= relayCount; relay++)
 	{
 		digitalWrite(relayPins[relay], LOW);
 		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
 		RelayStatusDisplay(0, 3);
-		delay(500);
+		delay(200);
 	}
 	for (uint8_t relay = 0; relay <= relayCount; relay++)
 	{		
 		digitalWrite(relayPins[relay], HIGH);
 		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
 		RelayStatusDisplay(0, 3);
-		delay(500);
+		delay(200);
 	}
 }
 void RelayToggle(uint8_t state, uint8_t onoff)
@@ -671,7 +667,7 @@ void START_SCREEN()
 	lcd.print("AQUARIUM");
 	lcd.setCursor(5,2);
 	lcd.print("CONTROLLER");
-	lcd.setCursor(4,3);
+	lcd.setCursor(3,3);
 	lcd.print("VERSION ");
 	lcd.print(version);
 	lcd.print(".");

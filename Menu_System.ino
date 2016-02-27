@@ -794,15 +794,15 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 								Wire.write(byte(0));
 								Wire.endTransmission();
 
-								////  GET THE TIME FROM THE RTC
-								//setSyncProvider(RTC.get);		//  this function get the time from the RTC
-								//if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
-								//{
-								//	RTC_Status = 0;
-								//	Serial.println("Unable to get the RTC");
-								//	Serial.println();
-								//}
-								//else{ Serial.println("RTC system time"); }
+								//  GET THE TIME FROM THE RTC
+								setSyncProvider(RTC.get);		//  this function get the time from the RTC
+								if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
+								{
+									RTC_Status = 0;
+									Serial.println("Unable to get the RTC");
+									Serial.println();
+								}
+								else{ Serial.println("RTC system time"); }
 							}
 							break;
 					}
