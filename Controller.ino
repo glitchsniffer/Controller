@@ -1,7 +1,6 @@
 
-//#include <SPI.h>
-//#include <SD.h>
-
+#include <SD.h>
+#include <SPI.h>
 #include <TimeLib.h>
 #include <Time.h>               //Time Library
 #include <TimeAlarms.h>			//TimeAlarms Library
@@ -10,9 +9,6 @@
 #include <Wire.h>               //I2C Wire library
 #include <LiquidCrystal_I2C.h>  //LCD I2C library
 #include <DS1307RTC.h>
-
-
-//#include <Alarms.h>
 
 #define LOOP_INTERVAL 1000				//	millis between log readings
 
@@ -38,7 +34,7 @@ byte backlightTimeout;		//  initializes the byte backlighttimeout
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte version = 0;			//  Sets the version number for the current program
 byte build = 35;			//  Sets the build number for the current program
-byte subbuild = 3;			//	Sets the sub build number between major version releases
+byte subbuild = 4;			//	Sets the sub build number between major version releases
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 //  INITIALIZE THE LCD
@@ -58,9 +54,9 @@ LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins 
 const int16_t backlight = 8;		//	variable used to store the pin for the backlight
 
 //  SETUP CUSTOM CHARACTERS
-byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};	//  set the lcd char for the degree symbol
-byte rarrow[8] = {B00000,B01000,B01100,B01110,B01100,B01000,B00000,};	//  set the lcd char for the right arrow symbol
-byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};	//  set the lcd char for the up arrow symbol
+byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};		//  set the lcd char for the degree symbol
+byte rarrow[8] = {B00000,B01000,B01100,B01110,B01100,B01000,B00000,};		//  set the lcd char for the right arrow symbol
+byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};		//  set the lcd char for the up arrow symbol
 //byte larrow[8] = {B00000,B00010,B00110,B01110,B00110,B00010,B00000,};		//  set the lcd char for the left arrow symbol
 //byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};		//  set the lcd char for the down arrow symbol
 //byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};		//  set the lcd char for the timer bell symbol
@@ -191,13 +187,13 @@ byte relayCount = 7;		//  Set the number of relays
 
 //  INITIALIZE THE SD CARD
 //  ***********************************************
-//#define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
-//uint32_t syncTime = 0;					//	time of the last sync
-//
-//const uint8_t chipSelect = 53;			//	pin for the chip select line on the SD Card
+#define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
+uint32_t syncTime = 0;					//	time of the last sync
+
+const uint8_t chipSelect = 53;			//	pin for the chip select line on the SD Card
 uint8_t SDexist = 0;					//	variable to determine if there is a problem with the sd card.  If there is then dont use the SD card.
-//
-//File logfile;							//	initialize the file to log to
+
+File logfile;							//	initialize the file to log to
 
 //  INITIALIZE THE LEDS
 //  ***********************************************
@@ -446,51 +442,59 @@ void setup()
 	pinMode(greenledpin, OUTPUT);
 	pinMode(blueledpin, OUTPUT);
 
+	//	TEST THE LEDS
+	//digitalWrite(redledpin, HIGH);
+	//digitalWrite(greenledpin, HIGH);
+	//digitalWrite(blueledpin, HIGH);
+	//delay(1000);
+
 	digitalWrite(redledpin, LOW);
 	digitalWrite(greenledpin, LOW);
 	digitalWrite(blueledpin, LOW);
 
+
+
 	//	INITIALIZE THE SD CARD
-	//Serial.println("Initializing the SD Card...");
-	//pinMode(53, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
+	Serial.println("Initializing the SD Card...");
+	pinMode(53, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
 
-	//if (!SD.begin(chipSelect))
-	//{
-	//	Serial.println("Card Failed, or Card is not present");
-	//	SDexist = 0;
-	//	digitalWrite(redledpin, HIGH);
-	//}
-	//else
-	//{
-	//	Serial.println("SD card initialized.");
-	//	Serial.println();
-	//	SDexist = 1;
-	//}
-	//Serial.println(SDexist);
-	////	CREATE A NEW FILE
-	//if (SDexist == 1)
-	//{
-	//	char filename[] = "LOGGER00.CSV";
-	//	for (uint8_t i = 0; i < 100; i++)
-	//	{
-	//		filename[6] = i / 10 + '0';
-	//		filename[7] = i % 10 + '0';
-	//		if (!SD.exists(filename))
-	//		{
-	//			logfile = SD.open(filename, FILE_WRITE);	//	only open a new file if it doesn't exist
-	//			break;
-	//		}
-	//	}
-	//	if (!logfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
+	if (!SD.begin(chipSelect))
+	{
+		Serial.println("Card Failed, or Card is not present");
+		SDexist = 0;
+		digitalWrite(redledpin, HIGH);
+	}
+	else
+	{
+		Serial.println("SD card initialized.");
+		Serial.println();
+		SDexist = 1;
+	}
+	Serial.println(SDexist);
+	//	CREATE A NEW FILE
+	if (SDexist == 1)
+	{
+		char filename[] = "LOGGER00.CSV";
+		for (uint8_t i = 0; i < 100; i++)
+		{
+			filename[6] = i / 10 + '0';
+			filename[7] = i % 10 + '0';
+			if (!SD.exists(filename))
+			{
+				logfile = SD.open(filename, FILE_WRITE);	//	only open a new file if it doesn't exist
+				break;
+			}
+		}
+		if (!logfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
 
-	//	//	print the filename that was created in the code above
-	//	Serial.print("Logging to: ");
-	//	Serial.println(filename);
-	//	Serial.println();
+		//	print the filename that was created in the code above
+		Serial.print("Logging to: ");
+		Serial.println(filename);
+		Serial.println();
 
-	//	//	CREATE A HEADER FOR THE LOGFILE
-	//	logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
-	//}
+		//	CREATE A HEADER FOR THE LOGFILE
+		logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
+	}
 
 		//	TAKE A TEMP READING AND START THE LOOP
 		if ((serialDebug & 1) == 1){ Serial.println(); }
@@ -869,141 +873,141 @@ void DS18B20_Read()
 		}
 		if ((serialDebug & 1) == 1){ Serial.println(); }
 	}
-	//if(SDexist == 1){ logger(); }
+	if(SDexist == 1){ logger(); }
 }
 
-//void logger()
-//{
-//	time_t t;
-//
-//	digitalWrite(greenledpin, HIGH);
-//
-//	if ((serialDebug & 1) == 1)
-//	{Serial.println("Preparing Data");}
-//
-//	// log the millis since starting
-//	uint32_t m = millis();
-//	logfile.print(m);
-//	logfile.print(", ");
-//
-//	if ((serialDebug & 1) == 1)
-//	{
-//		Serial.print(m);
-//		Serial.print(", ");
-//	}
-//
-//	t = now();		//	fetch the current time
-//
-//	//	print the log time
-//	logfile.print(t);
-//	logfile.print(", ");
-//	logfile.print(year(t), DEC);
-//	logfile.print("/");
-//	logfile.print(month(t), DEC);
-//	logfile.print("/");
-//	logfile.print(day(t), DEC);
-//	logfile.print(" ");
-//	logfile.print(hour(t), DEC);
-//	logfile.print(":");
-//	logfile.print(minute(t), DEC);
-//	logfile.print(":");
-//	logfile.print(second(t), DEC);
-//	//	echo to the serial port
-//	if ((serialDebug & 1) == 1)
-//	{
-//		Serial.print(t);
-//		Serial.print(", ");
-//		Serial.print(year(t), DEC);
-//		Serial.print("/");
-//		Serial.print(month(t), DEC);
-//		Serial.print("/");
-//		Serial.print(day(t), DEC);
-//		Serial.print(" ");
-//		Serial.print(hour(t), DEC);
-//		Serial.print(":");
-//		Serial.print(minute(t), DEC);
-//		Serial.print(":");
-//		Serial.print(second(t), DEC);
-//	}
-//	//	log the data
-//	switch (tempType)
-//	{
-//	case 0:
-//		logfile.print(", ");
-//		logfile.print("C");
-//		logfile.print(", ");
-//		logfile.print(tempReadC[0], 2);
-//		logfile.print(", ");
-//		logfile.print(tempReadC[1], 2);
-//		logfile.print(", ");
-//		logfile.print(tempReadC[2], 2);
-//		logfile.print(", ");
-//		logfile.print(tempReadC[3], 2);
-//		logfile.print(", ");
-//		logfile.println(RelayState, BIN);
-//		if ((serialDebug & 1) == 1)
-//		{
-//			Serial.print(", ");
-//			Serial.print("C");
-//			Serial.print(", ");
-//			Serial.print(tempReadC[0], 2);
-//			Serial.print(", ");
-//			Serial.print(tempReadC[1], 2);
-//			Serial.print(", ");
-//			Serial.print(tempReadC[2], 2);
-//			Serial.print(", ");
-//			Serial.print(tempReadC[3], 2);
-//			Serial.print(",");
-//			Serial.println(RelayState, BIN);
-//		}
-//		break;
-//	case 1:
-//		logfile.print(", ");
-//		logfile.print("F");
-//		logfile.print(", ");
-//		logfile.print(tempReadF[0], 2);
-//		logfile.print(", ");
-//		logfile.print(tempReadF[1], 2);
-//		logfile.print(", ");
-//		logfile.print(tempReadF[2], 2);
-//		logfile.print(", ");
-//		logfile.print(tempReadF[3], 2);
-//		logfile.print(", ");
-//		logfile.println(RelayState, BIN);
-//		if ((serialDebug & 1) == 1)
-//		{
-//			Serial.print(", ");
-//			Serial.print("F");
-//			Serial.print(", ");
-//			Serial.print(tempReadF[0], 2);
-//			Serial.print(", ");
-//			Serial.print(tempReadF[1], 2);
-//			Serial.print(", ");
-//			Serial.print(tempReadF[2], 2);
-//			Serial.print(", ");
-//			Serial.print(tempReadF[3], 2);
-//			Serial.print(",");
-//			Serial.println(RelayState, BIN);
-//		}
-//		break;
-//	}
-//
-//	digitalWrite(greenledpin, LOW);
-//
-//	//  Write the data to disk if the millis are more than the write interval
-//	if ((millis() - syncTime) < SDCARD_WRITE_INTERVAL) { return; }
-//	syncTime = millis();
-//
-//	//	write the logfiles data to the SD Card
-//	if ((serialDebug & 1) == 1)
-//	{
-//		Serial.println("Writing log to the SD Card");
-//		Serial.println("");
-//	}
-//	digitalWrite(blueledpin, HIGH);
-//	logfile.flush();
-//	digitalWrite(blueledpin, LOW);
-//}
+void logger()
+{
+	time_t t;
+
+	digitalWrite(greenledpin, HIGH);
+
+	if ((serialDebug & 1) == 1)
+	{Serial.println("Preparing Data");}
+
+	// log the millis since starting
+	uint32_t m = millis();
+	logfile.print(m);
+	logfile.print(", ");
+
+	if ((serialDebug & 1) == 1)
+	{
+		Serial.print(m);
+		Serial.print(", ");
+	}
+
+	t = now();		//	fetch the current time
+
+	//	print the log time
+	logfile.print(t);
+	logfile.print(", ");
+	logfile.print(year(t), DEC);
+	logfile.print("/");
+	logfile.print(month(t), DEC);
+	logfile.print("/");
+	logfile.print(day(t), DEC);
+	logfile.print(" ");
+	logfile.print(hour(t), DEC);
+	logfile.print(":");
+	logfile.print(minute(t), DEC);
+	logfile.print(":");
+	logfile.print(second(t), DEC);
+	//	echo to the serial port
+	if ((serialDebug & 1) == 1)
+	{
+		Serial.print(t);
+		Serial.print(", ");
+		Serial.print(year(t), DEC);
+		Serial.print("/");
+		Serial.print(month(t), DEC);
+		Serial.print("/");
+		Serial.print(day(t), DEC);
+		Serial.print(" ");
+		Serial.print(hour(t), DEC);
+		Serial.print(":");
+		Serial.print(minute(t), DEC);
+		Serial.print(":");
+		Serial.print(second(t), DEC);
+	}
+	//	log the data
+	switch (tempType)
+	{
+	case 0:
+		logfile.print(", ");
+		logfile.print("C");
+		logfile.print(", ");
+		logfile.print(tempReadC[0], 2);
+		logfile.print(", ");
+		logfile.print(tempReadC[1], 2);
+		logfile.print(", ");
+		logfile.print(tempReadC[2], 2);
+		logfile.print(", ");
+		logfile.print(tempReadC[3], 2);
+		logfile.print(", ");
+		logfile.println(RelayState, BIN);
+		if ((serialDebug & 1) == 1)
+		{
+			Serial.print(", ");
+			Serial.print("C");
+			Serial.print(", ");
+			Serial.print(tempReadC[0], 2);
+			Serial.print(", ");
+			Serial.print(tempReadC[1], 2);
+			Serial.print(", ");
+			Serial.print(tempReadC[2], 2);
+			Serial.print(", ");
+			Serial.print(tempReadC[3], 2);
+			Serial.print(",");
+			Serial.println(RelayState, BIN);
+		}
+		break;
+	case 1:
+		logfile.print(", ");
+		logfile.print("F");
+		logfile.print(", ");
+		logfile.print(tempReadF[0], 2);
+		logfile.print(", ");
+		logfile.print(tempReadF[1], 2);
+		logfile.print(", ");
+		logfile.print(tempReadF[2], 2);
+		logfile.print(", ");
+		logfile.print(tempReadF[3], 2);
+		logfile.print(", ");
+		logfile.println(RelayState, BIN);
+		if ((serialDebug & 1) == 1)
+		{
+			Serial.print(", ");
+			Serial.print("F");
+			Serial.print(", ");
+			Serial.print(tempReadF[0], 2);
+			Serial.print(", ");
+			Serial.print(tempReadF[1], 2);
+			Serial.print(", ");
+			Serial.print(tempReadF[2], 2);
+			Serial.print(", ");
+			Serial.print(tempReadF[3], 2);
+			Serial.print(",");
+			Serial.println(RelayState, BIN);
+		}
+		break;
+	}
+
+	digitalWrite(greenledpin, LOW);
+
+	//  Write the data to disk if the millis are more than the write interval
+	if ((millis() - syncTime) < SDCARD_WRITE_INTERVAL) { return; }
+	syncTime = millis();
+
+	//	write the logfiles data to the SD Card
+	if ((serialDebug & 1) == 1)
+	{
+		Serial.println("Writing log to the SD Card");
+		Serial.println("");
+	}
+	digitalWrite(blueledpin, HIGH);
+	logfile.flush();
+	digitalWrite(blueledpin, LOW);
+}
 
 void FlowSensorRead()
 {
@@ -1183,10 +1187,10 @@ void factoryDefaultset()
 		writeEEPROM(102 + (i * 6), 0);			//  writes the alarm type to 0, Day Lights
 		int bit = 1 << i;
 		writeEEPROM(103 + (i * 6), (0 ^ bit));	//	writes the relay trigger to relay to match the id
-		writeEEPROM(104 + (i * 6), 0+i);		//  writes the alarm on hour 12
-		writeEEPROM(105 + (i * 6), 29+i);		//  writes the alarm on minute 1
-		writeEEPROM(106 + (i * 6), 0+i);		//  writes the alarm off hour 23
-		writeEEPROM(107 + (i * 6), 31+i);		//  writes the alarm off minute 11
+		writeEEPROM(104 + (i * 6), 12);		//  writes the alarm on hour 12
+		writeEEPROM(105 + (i * 6), 1+i);		//  writes the alarm on minute 1
+		writeEEPROM(106 + (i * 6), 12);		//  writes the alarm off hour 23
+		writeEEPROM(107 + (i * 6), 2+i);		//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");
 }
@@ -1232,5 +1236,4 @@ void error(char*str)
 	Serial.print("Error: ");
 	Serial.println(str);
 	digitalWrite(redledpin, HIGH);
-	//while (1);
 }
