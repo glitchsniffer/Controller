@@ -14,55 +14,70 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="_core">
-      <UniqueIdentifier>{19bbbf43-e85b-48d3-aae7-0d7e244b13a6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_core\avr">
-      <UniqueIdentifier>{f5eeb058-3161-4379-9bd3-74d4257e5d84}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_core\USB">
-      <UniqueIdentifier>{0a06eb1a-0f35-4e7f-b152-2794507579a2}</UniqueIdentifier>
+      <UniqueIdentifier>{32036318-e6b2-487f-9e7b-3cd8d54fe2b3}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries">
-      <UniqueIdentifier>{9c7f7f18-92c8-45de-8786-78e42a48c401}</UniqueIdentifier>
+      <UniqueIdentifier>{e06f4b26-2394-4b09-9f02-3456dd6a8e19}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\DallasTemperature">
-      <UniqueIdentifier>{3ce726ef-1dc1-4313-900d-7a0b3cf97fee}</UniqueIdentifier>
+      <UniqueIdentifier>{4d8ba6cc-015c-4736-8a5b-20647d9ee62b}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\DS1307RTC-master">
-      <UniqueIdentifier>{4e7fbf45-45f7-432a-bb21-3ae85b931ccd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_libraries\LiquidCrystal">
-      <UniqueIdentifier>{eb6016d8-64dc-418f-8e91-e21a66f03da5}</UniqueIdentifier>
+      <UniqueIdentifier>{184b201f-d12a-4952-a5e0-3bdd209826f6}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\OneWire">
-      <UniqueIdentifier>{c8139733-f6f7-4f65-b559-1069552b48e9}</UniqueIdentifier>
+      <UniqueIdentifier>{67d65e27-63a5-4c4f-9e12-76405b8f4947}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SD">
-      <UniqueIdentifier>{8662efc0-c701-4dbd-adb4-44eac385e613}</UniqueIdentifier>
+      <UniqueIdentifier>{426d533b-77c5-4658-ab6a-f49d1762a582}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SD\src">
-      <UniqueIdentifier>{3e5a35fc-3287-4e66-8555-7adadb6af550}</UniqueIdentifier>
+      <UniqueIdentifier>{d66d4117-1865-433f-8a34-d04fcb176cce}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SD\src\utility">
-      <UniqueIdentifier>{d37a4fa7-41de-419d-b94e-75730c17ebc4}</UniqueIdentifier>
+      <UniqueIdentifier>{12ad97dc-b4f4-4c1c-ba5b-99057bde706d}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SPI">
-      <UniqueIdentifier>{58e533e9-3284-4e94-aaa1-40036f1c103b}</UniqueIdentifier>
+      <UniqueIdentifier>{3c95b0f1-f28a-453a-a49b-6e32466ca44a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\SPI\src">
+      <UniqueIdentifier>{90b27fcc-36b9-4697-b191-880c36b5b37d}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\TimeAlarms-master">
-      <UniqueIdentifier>{773b0dff-bc88-4269-8883-73abc084353f}</UniqueIdentifier>
+      <UniqueIdentifier>{b0c34263-9029-4dde-ab8b-6aef42a9e3f6}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\Time-master">
-      <UniqueIdentifier>{0780df99-b108-4d54-9f89-2a32e3cdc2da}</UniqueIdentifier>
+      <UniqueIdentifier>{9fc9b796-288e-4157-90fd-a22969b60bc0}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\Wire">
-      <UniqueIdentifier>{bbb548b8-6f35-4eeb-9037-7f015fd2e0e3}</UniqueIdentifier>
+      <UniqueIdentifier>{048aabc5-8859-4029-8ae2-d41828776f03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\Wire\src">
+      <UniqueIdentifier>{f2ec00c9-c3f9-4543-a804-5dcfcab4085c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\Wire\src\utility">
+      <UniqueIdentifier>{7ec717ad-314f-4d5e-a0d2-5d0d5eae220c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\HID">
+      <UniqueIdentifier>{b9e8745e-d011-4023-af4b-08a1b1c4fd15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\HID\src">
+      <UniqueIdentifier>{8553ff58-3e98-4450-9554-264b7788b83c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\LiquidCrystal">
+      <UniqueIdentifier>{04b9d869-281c-4bf3-99bc-1340655cb780}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\LiquidCrystal\src">
+      <UniqueIdentifier>{b18df2c8-60ba-49d0-9007-ce152f949e5f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Controller.ino" />
     <None Include="Menu_System.ino" />
     <None Include="Alarms.ino" />
+    <None Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\wiring_pulse.S">
+      <Filter>_core</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Visual Micro\.Controller.vsarduino.h">
@@ -74,112 +89,64 @@
     <ClInclude Include="__vm\.Controller.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Arduino.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Arduino.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\binary.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\binary.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Client.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Client.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\HardwareSerial.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\HardwareSerial.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\IPAddress.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\HardwareSerial_private.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\itoa.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\IPAddress.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Print.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\new.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Printable.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\PluggableUSB.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Reset.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Print.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\RingBuffer.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Printable.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Server.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Server.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Stream.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Stream.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\syscalls.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Udp.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Tone.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\USBAPI.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\UARTClass.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\USBCore.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Udp.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\USBDesc.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\USARTClass.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\WCharacter.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\WCharacter.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\wiring_private.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\WInterrupts.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\WString.h">
       <Filter>_core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_analog.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_constants.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_digital.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_private.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_pulse.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_shift.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\WMath.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\WString.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\avr\dtostrf.h">
-      <Filter>_core\avr</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\avr\interrupt.h">
-      <Filter>_core\avr</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\avr\pgmspace.h">
-      <Filter>_core\avr</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\USB\USBAPI.h">
-      <Filter>_core\USB</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\USB\USBCore.h">
-      <Filter>_core\USB</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\USB\USBDesc.h">
-      <Filter>_core\USB</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\variants\arduino_due_x\pins_arduino.h">
-      <Filter>_core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\variants\arduino_due_x\variant.h">
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\variants\mega\pins_arduino.h">
       <Filter>_core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Arduino\libraries\DallasTemperature\DallasTemperature.h">
@@ -188,59 +155,35 @@
     <ClInclude Include="..\..\Arduino\libraries\DS1307RTC-master\DS1307RTC.h">
       <Filter>_libraries\DS1307RTC-master</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Arduino\libraries\LiquidCrystal\FastIO.h">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Arduino\libraries\LiquidCrystal\I2CIO.h">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Arduino\libraries\LiquidCrystal\LCD.h">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal.h">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal_I2C.h">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal_SR.h">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal_SR2W.h">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal_SR3W.h">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Arduino\libraries\OneWire\OneWire.h">
       <Filter>_libraries\OneWire</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\SD.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\SD.h">
       <Filter>_libraries\SD\src</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\FatStructs.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\FatStructs.h">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\Sd2Card.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\Sd2Card.h">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\Sd2PinMap.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\Sd2PinMap.h">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\SdFat.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\SdFat.h">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\SdFatmainpage.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\SdFatmainpage.h">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\SdFatUtil.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\SdFatUtil.h">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\SdInfo.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\SdInfo.h">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\libraries\SPI\SPI.h">
-      <Filter>_libraries\SPI</Filter>
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\libraries\SPI\src\SPI.h">
+      <Filter>_libraries\SPI\src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Arduino\libraries\TimeAlarms-master\TimeAlarms.h">
       <Filter>_libraries\TimeAlarms-master</Filter>
@@ -251,91 +194,91 @@
     <ClInclude Include="..\..\Arduino\libraries\Time-master\TimeLib.h">
       <Filter>_libraries\Time-master</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\libraries\Wire\Wire.h">
-      <Filter>_libraries\Wire</Filter>
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\libraries\Wire\src\Wire.h">
+      <Filter>_libraries\Wire\src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\libraries\Wire\src\utility\twi.h">
+      <Filter>_libraries\Wire\src\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\libraries\HID\src\HID.h">
+      <Filter>_libraries\HID\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.h">
+      <Filter>_libraries\LiquidCrystal\src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\abi.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\abi.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\cortex_handlers.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\CDC.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\hooks.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\HardwareSerial.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\iar_calls_sam3.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\HardwareSerial0.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\IPAddress.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\HardwareSerial1.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\itoa.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\HardwareSerial2.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\main.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\HardwareSerial3.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\new.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\hooks.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Print.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\IPAddress.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Reset.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\main.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\RingBuffer.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\new.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\Stream.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\PluggableUSB.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\syscalls_sam3.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Print.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\UARTClass.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Stream.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\USARTClass.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\Tone.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\WInterrupts.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\USBCore.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\WInterrupts.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_analog.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\wiring.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_digital.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\wiring_analog.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_pulse.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\wiring_digital.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\wiring_shift.c">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\wiring_pulse.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\WMath.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\wiring_shift.c">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\WString.cpp">
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\WMath.cpp">
       <Filter>_core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\avr\dtostrf.c">
-      <Filter>_core\avr</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\USB\CDC.cpp">
-      <Filter>_core\USB</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\USB\HID.cpp">
-      <Filter>_core\USB</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\cores\arduino\USB\USBCore.cpp">
-      <Filter>_core\USB</Filter>
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\cores\arduino\WString.cpp">
+      <Filter>_core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Arduino\libraries\DallasTemperature\DallasTemperature.cpp">
       <Filter>_libraries\DallasTemperature</Filter>
@@ -343,50 +286,26 @@
     <ClCompile Include="..\..\Arduino\libraries\DS1307RTC-master\DS1307RTC.cpp">
       <Filter>_libraries\DS1307RTC-master</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Arduino\libraries\LiquidCrystal\FastIO.cpp">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Arduino\libraries\LiquidCrystal\I2CIO.cpp">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Arduino\libraries\LiquidCrystal\LCD.cpp">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal.cpp">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal_I2C.cpp">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal_SR.cpp">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal_SR2W.cpp">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Arduino\libraries\LiquidCrystal\LiquidCrystal_SR3W.cpp">
-      <Filter>_libraries\LiquidCrystal</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Arduino\libraries\OneWire\OneWire.cpp">
       <Filter>_libraries\OneWire</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\File.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\libraries\SD\src\File.cpp">
       <Filter>_libraries\SD\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\SD.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\libraries\SD\src\SD.cpp">
       <Filter>_libraries\SD\src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\Sd2Card.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\Sd2Card.cpp">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\SdFile.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\SdFile.cpp">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\libraries\SD\src\utility\SdVolume.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\SdVolume.cpp">
       <Filter>_libraries\SD\src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\libraries\SPI\SPI.cpp">
-      <Filter>_libraries\SPI</Filter>
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\libraries\SPI\src\SPI.cpp">
+      <Filter>_libraries\SPI\src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Arduino\libraries\TimeAlarms-master\TimeAlarms.cpp">
       <Filter>_libraries\TimeAlarms-master</Filter>
@@ -397,8 +316,17 @@
     <ClCompile Include="..\..\Arduino\libraries\Time-master\Time.cpp">
       <Filter>_libraries\Time-master</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Program Files (x86)\Arduino158\hardware\arduino\sam\libraries\Wire\Wire.cpp">
-      <Filter>_libraries\Wire</Filter>
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\libraries\Wire\src\Wire.cpp">
+      <Filter>_libraries\Wire\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\libraries\Wire\src\utility\twi.c">
+      <Filter>_libraries\Wire\src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.10\libraries\HID\src\HID.cpp">
+      <Filter>_libraries\HID\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Arduino\libraries\LiquidCrystal\src\LiquidCrystal.cpp">
+      <Filter>_libraries\LiquidCrystal\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
