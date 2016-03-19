@@ -392,12 +392,14 @@ void MenuTitle()
 }
 void MenuLoop()
 {
+	MCPRead(MCP17A, GPIOA);		//	clear the interrupt from the MCP
+
 	while (menuMode == 1)		//  scans for a button press to do the appropriate action
 	{
-		uint8_t Down = digitalRead(downButton);
-		uint8_t Up = digitalRead(upButton);
-		uint8_t Right = digitalRead(rightButton);
-		uint8_t Left = digitalRead(leftButton);
+		uint8_t Down = MCPReadBit(MCP17A, menubuttonbank, downButton);
+		uint8_t Up = MCPReadBit(MCP17A, menubuttonbank, upButton);
+		uint8_t Right = MCPReadBit(MCP17A, menubuttonbank, rightButton);
+		uint8_t Left = MCPReadBit(MCP17A, menubuttonbank, leftButton);
 		
 		if (Up == 1){MenuUp();}
 		if (Down == 1){MenuDown();}
@@ -405,9 +407,9 @@ void MenuLoop()
 		if (Left == 1){MenuBack();}
 		
 		menuTimeout++;
-		if (menuTimeout == 50){ menuMode = 0; }		//	this will exit the menu system after approx 30 seconds after a button has not been pushed
-		
-	delay(200);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
+		Serial.println(menuTimeout);
+		if (menuTimeout == 10000){ menuMode = 0; }		//	this will exit the menu system after approx 20 seconds after a button has not been pushed
+	//delay(200);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
 	}
 	//	reset all pointers to 0 in preparation for the next time the menu is run
 	mLevel = 0;
@@ -417,6 +419,7 @@ void MenuLoop()
 	mRet = 0;
 	lcd.clear();			//  clear the screen
 	today = 0;				//  set today to 0 so that the date function gets called
+	MCPRead(MCP17A, GPIOA);	//	clear the interrupt from MCP
 	RelayStatusDisplay(0, 3);
 	DS18B20_Read();			//  read the temp sensors so that the display has them
 }
@@ -482,7 +485,7 @@ void MenuSelect()
 
 void MenuBack()	//  function for going back 1 level in the menu system
 {
-	mLevel--;	//  decrements the menu level back 1 level
+	if (mLevel > 0) { mLevel--; }	//  decrements the menu level back 1 level if the level isnt 0 already.
 	MenuTitle();
 }
 
@@ -1233,10 +1236,10 @@ uint16_t MenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t min, 
 	//  Main loop for all of the buttons
 	while (loopNumSel == 1)
 	{
-		uint8_t Down = digitalRead(downButton);
-		uint8_t Up = digitalRead(upButton);
-		uint8_t Right = digitalRead(rightButton);
-		uint8_t Left = digitalRead(leftButton);
+		uint8_t Down = MCPReadBit(MCP17A, menubuttonbank, downButton);
+		uint8_t Up = MCPReadBit(MCP17A, menubuttonbank, upButton);
+		uint8_t Right = MCPReadBit(MCP17A, menubuttonbank, rightButton);
+		uint8_t Left = MCPReadBit(MCP17A, menubuttonbank, leftButton);
 
 		//  gets rid of leading digits for the below cases
 
