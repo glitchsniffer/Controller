@@ -13,7 +13,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 36;			//  Sets the build number for the current program
-byte subbuild = 2;			//	Sets the sub build number between major version releases
+byte subbuild = 3;			//	Sets the sub build number between major version releases
 
 #define LOOP_INTERVAL 1000		//	millis between log readings
 

@@ -407,9 +407,7 @@ void MenuLoop()
 		if (Left == 1){MenuBack();}
 		
 		menuTimeout++;
-		Serial.println(menuTimeout);
 		if (menuTimeout == 10000){ menuMode = 0; }		//	this will exit the menu system after approx 20 seconds after a button has not been pushed
-	//delay(200);		//	small delay for debounce.  will get rid of this when I have a hardware debounce in place
 	}
 	//	reset all pointers to 0 in preparation for the next time the menu is run
 	mLevel = 0;
