@@ -13,7 +13,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 36;			//  Sets the build number for the current program
-byte subbuild = 3;			//	Sets the sub build number between major version releases
+byte subbuild = 4;			//	Sets the sub build number between major version releases
 
 #define LOOP_INTERVAL 1000		//	millis between log readings
 
@@ -162,7 +162,7 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
 // define the DS18B20 global variables
-const uint8_t ONE_WIRE_BUS[]={42};		// the array to define which pins you will use for the busses ie {2,3,4,5};
+const uint8_t ONE_WIRE_BUS[]={4};		// the array to define which pins you will use for the busses ie {2,3,4,5};
 
 #define TEMPERATURE_PRECISION 10
 #define NUMBER_OF_BUS 1				// how many busses will you use for the sensors
@@ -227,7 +227,7 @@ byte relayCount = 7;		//  Set the number of relays
 //  ***********************************************
 #define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
 uint32_t syncTime = 0;					//	time of the last sync
-const uint8_t chipSelect = 53;			//	pin for the chip select line on the SD Card
+const uint8_t chipSelect = 5;			//	pin for the chip select line on the SD Card
 uint8_t SDexist = 0;					//	variable to determine if there is a problem with the sd card.  If there is then dont use the SD card.
 File logfile;							//	initialize the file to log to
 
