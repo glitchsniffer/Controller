@@ -392,6 +392,7 @@ void MenuTitle()
 }
 void MenuLoop()
 {
+	Alarm.delay(100);
 	MCPRead(MCP17A, GPIOA);		//	clear the interrupt from the MCP
 
 	while (menuMode == 1)		//  scans for a button press to do the appropriate action
@@ -417,6 +418,7 @@ void MenuLoop()
 	mRet = 0;
 	lcd.clear();			//  clear the screen
 	today = 0;				//  set today to 0 so that the date function gets called
+	Alarm.delay(100);
 	MCPRead(MCP17A, GPIOA);	//	clear the interrupt from MCP
 	RelayStatusDisplay(0, 3);
 	DS18B20_Read();			//  read the temp sensors so that the display has them
