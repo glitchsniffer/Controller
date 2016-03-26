@@ -13,7 +13,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 36;			//  Sets the build number for the current program
-byte subbuild = 5;			//	Sets the sub build number between major version releases
+byte subbuild = 7;			//	Sets the sub build number between major version releases
 
 #define LOOP_INTERVAL 1000		//	millis between log readings
 
@@ -465,7 +465,7 @@ void setup()
 
 	//	INITIALIZE THE SD CARD
 	Serial.println("Initializing the SD Card...");
-	pinMode(53, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
+	pinMode(chipSelect, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
 
 	if (!SD.begin(chipSelect))
 	{
