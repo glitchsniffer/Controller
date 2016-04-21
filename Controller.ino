@@ -1,4 +1,3 @@
-
 #include <SD.h>
 #include <SPI.h>
 #include <TimeLib.h>
@@ -7,14 +6,20 @@
 #include <OneWire.h>            //OneWire Library for the DS Sensors
 #include <DallasTemperature.h>  //Dallas Temperature library
 #include <Wire.h>               //I2C Wire library
-#include <LiquidCrystal_I2C.h>  //LCD I2C library
+#include <LiquidCrystal_I2C.h>		//LCD I2C library
 #include <DS1307RTC.h>
 
-#define LOOP_INTERVAL 1000				//	millis between log readings
+//	VERSIONING VARIABLES
+//	***********************************************
+byte version = 0;			//  Sets the version number for the current program
+byte build = 36;			//  Sets the build number for the current program
+byte subbuild = 7;			//	Sets the sub build number between major version releases
+
+#define LOOP_INTERVAL 1000		//	millis between log readings
+
 
 //  INITIALIZE THE EEPROM & RTC
 //  ***********************************************
-
 #define DS1307RTC 0x68			//	Set the address of the DS1307 RTC
 #define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
 
@@ -24,18 +29,16 @@ byte data = 0;					//  Sets the value of data to be written to 0 initially
 
 //  CONFIGURATION SETUP
 //  ***********************************************
-byte e2Empty;				//	initializes the byte e2Emtpy
+byte e2Empty;				//	initializes the byte e2Emtpy to determine if factory defaults are ran at startup
 byte configID;				//  initializes the byte configID
 byte serialDebug;			//	initializes the byte serialDebug
 byte timeFormat;			//	initializes the byte timeFormat
-byte RTC_Status = 1;		//	initializes teh byte for the RTC status
+byte RTC_Status = 1;		//	initializes the byte for the RTC status
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout
 byte secondsDisplay;		//	initializes the byte secondsDisplay
-byte version = 0;			//  Sets the version number for the current program
-byte build = 35;			//  Sets the build number for the current program
-byte subbuild = 4;			//	Sets the sub build number between major version releases
 byte today = 0;				//  Sets the today to the current date to display on the RTC
+
 
 //  INITIALIZE THE LCD
 //  ***********************************************
@@ -61,21 +64,55 @@ byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};		//  set t
 //byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};		//  set the lcd char for the down arrow symbol
 //byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};		//  set the lcd char for the timer bell symbol
 //byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};		//  set the lcd char for the relay on symbol
+byte clock[8] = {B00000,B01110,B10101,B10111,B10001,B01110,B00000,};			//	set the lcd char for the clock symbol
+
+
+//  DEFINE THE MCP23017 IO EXPANDER
+//  ***********************************************
+#define MCP17A 0x20
+
+// MCP2308 or 17 Control Registers  IOCON BANK set to 1
+#define IOCON 0x0A		//	IOCON register address before switching it to BANK = 1 to allow the same registers to be used for the 23008 and 23017
+#define IODIRA 0x00		//  I/O Direction register 1 = input, 0 = output
+#define IODIRB 0x10		//  I/O Direction register 1 = input, 0 = output
+#define IPOLA 0x01		//  Input Polarity register 1 = GPIO register bit will be inverted from the input pin.  0 = non inverted.
+#define IPOLB 0x11		//  Input Polarity register 1 = GPIO register bit will be inverted from the input pin.  0 = non inverted.
+#define GPINTENA 0x02	//	Interrupt on change control register 1 = enable 0 = disable GPIO input pin for interrupt
+#define GPINTENB 0x12	//	Interrupt on change control register 1 = enable 0 = disable GPIO input pin for interrupt
+#define DEFVALA 0x03	//	Default compare register for int on change. Defines the default value of the interrupts.
+#define DEFVALB 0x13	//	Default compare register for int on change. Defines the default value of the interrupts.
+#define INTCONA 0x04	//	Interrupt Control register 1 = pin is compared to DEFVAL 0 = pin is compared to the previous value
+#define INTCONB 0x14	//	Interrupt Control register 1 = pin is compared to DEFVAL 0 = pin is compared to the previous value
+#define IOCONA 0x05		//	bit2: 1=Open drain output 0=active driver output(INTPOL sets the polarity. bit1: 1=active high 0=active low for the interrupt pin
+#define IOCONB 0x15		//	bit2: 1=Open drain output 0=active driver output(INTPOL sets the polarity. bit1: 1=active high 0=active low for the interrupt pin
+#define GPPUA 0x06		//	Pull-up Resistor configuration.  1 = PU enabled, 0 = PU disabled.  100k
+#define GPPUB 0x16		//	Pull-up Resistor configuration.  1 = PU enabled, 0 = PU disabled.  100k
+#define INTFA 0x07		//	Interrupt Flag register. read only. 1 = pin caused interrupt, 0 = interrupt not pending
+#define INTFB 0x17		//	Interrupt Flag register. read only. 1 = pin caused interrupt, 0 = interrupt not pending
+#define INTCAPA 0x08	//	Interrupt catpure register.  captures the GPIO port value when an interrupt occures.  1=high, 0=low
+#define INTCAPB 0x18	//	Interrupt catpure register.  captures the GPIO port value when an interrupt occures.  1=high, 0=low
+#define GPIOA 0x09		//	Port GPIO register.  Writing 1=high, 0=low modifies the OLAT register
+#define GPIOB 0x19		//	Port GPIO register.  Writing 1=high, 0=low modifies the OLAT register
+#define OLATA 0x0A		//	Output Latch register.  1=high, 0=low writing to this register modifies the output latches.  reading, reads the output latches.
+#define OLATB 0x1A		//	Output Latch register.  1=high, 0=low writing to this register modifies the output latches.  reading, reads the output latches.
+
+uint32_t debouncing_time = 250;		//	debouncing time in millis
+volatile uint32_t last_micros;
 
 
 //  DEFINE BUTTON PINS
 //  ***********************************************
-#define upButton 49			//  set the up button to pin 53  Orange
-#define leftButton 48		//  set the right button to pin 52  Yellow
-#define rightButton 47		//  set the left button to pin 51  Green
-#define downButton 46		//  set the down button to pin 50  Blue
+#define menubuttonbank 0		//	this is the bank of ports that the switches are on
+#define upButton 5			//  set the up button to port 0.5
+#define leftButton 6		//  set the right button to port 0.6
+#define rightButton 3		//  set the left button to port 0.3
+#define downButton 4		//  set the down button to port 0.4
+#define menuenterbutton 7	//	set the menu enter button to port 0.7
 
-byte menuEnterInterrupt = 4;		//	interrupt to trigger for the flow sensor
-byte menuEnterIntPin = 19;			//	pin on the arduino to use for the interrupt
+byte menuEnterInterrupt = 4;	//	interrupt to trigger to enter the menu
+byte menuEnterIntPin = 19;		//	pin on the arduino to use for the interrupt
 
 volatile int8_t menuMode = 0;	//  set the variable that will be change to enable the menu in the interrupt
-
-//const uint8_t button[]={42,43,44,45,46,47,48,49};	//  sets the pins for Button0 - button 7 respectively
 
 
 //  INITIALIZE THE MENU VARIABLES
@@ -83,7 +120,7 @@ volatile int8_t menuMode = 0;	//  set the variable that will be change to enable
 byte mPoint = 0;		//  current main menu pointer position
 byte mCur = 1;			//  current position of the main menu cursor
 byte mStart = 0;		//  current starting cursor
-int mLevel = 0;		//  current menu level.  main menu level=0, menu items=1, menu item selected=2
+uint8_t mLevel = 0;		//  current menu level.  main menu level=0, menu items=1, menu item selected=2
 byte m1Sel = 0;			//  current selection for menu level 1
 byte m2Sel = 0;			//	current selection for menu level 2
 byte m3Sel = 0;			//  current selection for menu level 3
@@ -93,8 +130,8 @@ byte m2Start = 0;		//  starting cursor position for mLevel2
 byte m3Start = 0;		//  starting cursor position for mLevel3
 byte miMax = 0;			//  current selected menu item for purposes of up and down movement
 byte mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
-int menuTimeout;	//	variable to count for a menu system timeout
-int to = 0;		//	generic variable to determine if the menu system needs to time out
+uint16_t menuTimeout;	//	variable to count for a menu system timeout
+uint8_t to = 0;		//	generic variable to determine if the menu system needs to time out
 
 char* m0Items[] = { "", "User Setup", "Timers Setup", "Sensor Addr Setup","Sensor Setup","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
 char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "Flow Sensor On/Off", "XXXX", "" };  //  setup menu item 1 for System Config Min 0 Max 8
@@ -114,18 +151,18 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 	char* m1Items3[] = { "", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Sensor Calibration Min 0 Max 4
 		char* m2Items30[] = { "", "Calibrate Sensor ", "Exit", ""};
 		char* m2Items34[] = { "", "Calibrate Flow Sens", "Set Min Flow", "Disable Flow Sensor", "Exit", "" };
-	char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults" };	//	setup menu item 4 for System Setup
+	char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults", "" };	//	setup menu item 4 for System Setup
 		char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "Relays", "System", "Flow Sensor", "" };
 		char* m2Items41[] = { "", "Exit Erase EEPROM", "Erase EEPROM", "" };
 		char* m2Items42[] = { "", "Exit", "Restore Defaults", "" };
 
 	String strExiting = "Exiting";
 
+
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
-
 // define the DS18B20 global variables
-const uint8_t ONE_WIRE_BUS[]={42};		// the array to define which pins you will use for the busses ie {2,3,4,5};
+const uint8_t ONE_WIRE_BUS[]={4};		// the array to define which pins you will use for the busses ie {2,3,4,5};
 
 #define TEMPERATURE_PRECISION 10
 #define NUMBER_OF_BUS 1				// how many busses will you use for the sensors
@@ -144,9 +181,9 @@ byte tempReadDelay;			//	initializes the byte tempReadDelay
 float tempReadC[4];		//	array to hold the temperature readings taken
 float tempReadF[4];		//	array to hold the temperature readings taken
 
+
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
-
 byte AlarmEnable;			//  byte for storing all 8 alarm's enable flags as bits
 byte AlarmState;			//  byte for storing all 8 alarm's state flags as bits
 byte AlarmType[8];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
@@ -162,9 +199,9 @@ AlarmID_t flowReadID;		//	delay between reading the flow sensor
 AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
 AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
 
+
 //  INITIALIZE THE FLOW SENSOR
 //  ***********************************************
-
 byte flowSensorInterrupt = 5;		//	interrupt to trigger for the flow sensor
 byte flowSensorIntPin = 18;			//	pin on the arduino to use for the interrupt
 byte flowSensorEnable;				//	initializes the byte flowSensorEnable
@@ -175,31 +212,32 @@ volatile uint16_t flowPulseCount = 0;	//	number of pulses trigger in the interru
 uint16_t flowRateMax;					//	maximum flow rate as calibrated by the user
 uint16_t flowRateMin;					//  minimum flow rate before an alarm is triggered, this is a percentage of flowRateMax
 
-uint16_t	flowPulseReading[5];		//	the array to store the last 5 flow pulse readings in
+uint16_t flowPulseReading[5];		//	the array to store the last 5 flow pulse readings in
 byte flowPulseIndex = 0;				//	the number that selects the number of the flowPulseReadings array to write to
 uint16_t flowPulseTotal;				//	the variable used to store the running total of the last 5 flowPulseCount samples
 
+
 //  INITIALIZE THE RELAYS
 //  ***********************************************
-
 byte relayPins[] = { 22, 23, 24, 25, 26, 27, 28, 29 };		//  Initialize the relay pins
 byte relayCount = 7;		//  Set the number of relays
+
 
 //  INITIALIZE THE SD CARD
 //  ***********************************************
 #define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
 uint32_t syncTime = 0;					//	time of the last sync
-
-const uint8_t chipSelect = 53;			//	pin for the chip select line on the SD Card
+const uint8_t chipSelect = 5;			//	pin for the chip select line on the SD Card
 uint8_t SDexist = 0;					//	variable to determine if there is a problem with the sd card.  If there is then dont use the SD card.
-
 File logfile;							//	initialize the file to log to
+
 
 //  INITIALIZE THE LEDS
 //  ***********************************************
-#define redledpin 44
-#define greenledpin 45
-#define blueledpin 43
+#define sdledbank	0		//	the sdcard leds are on bank 0 of the MCP23017
+#define redledpin 0			//  located on port 0.0 of the MCP23017
+#define greenledpin 1		//  located on port 0.1 of the MCP23017
+#define blueledpin 2		//  located on port 0.2 of the MCP23017
 
 
 void setup()
@@ -210,9 +248,6 @@ void setup()
 	Serial.begin(115200);				//  start the serial port if debugging is on
 	Serial.println();
 	serialDebug = readEEPROM(5);		//	reads out user setting to turn serial debugging on for each type of debugging
-
-	//  SHOW THE COMPILE DATE AND TIME	
-	//Serial.println("Compiled: " __DATE__ ", " __TIME__ ", " __AVR_LIBC_VERSION_STRING__);
 
 	//  SETUP THE RTC
 	setSyncProvider(RTC.get);		//  this function get the time from the RTC
@@ -227,7 +262,6 @@ void setup()
 	//  READ THE VARIABLES OUT OF THE EEPROM
 
 	//  READ NON USER SETTINGS FROM EEPROM
-
 	e2Empty = readEEPROM(0);			//	reads the e2Empty out to determine if it needs to set defaults
 	if (e2Empty == 0){ factoryDefaultset(); }
 	configID = readEEPROM(0);			//  reads the configID out
@@ -245,7 +279,6 @@ void setup()
 	flowRateMin = readEEPROM(29);		//	reads out the user setting for the minimum flow rate
 
 	//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
-
 	tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
 	AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
 	AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
@@ -348,35 +381,28 @@ void setup()
 		Serial.println();
 	}
 
-	//  SETUP THE BUTTONS
-	pinMode(upButton, INPUT);		//  sets the UpButton to an input
-	pinMode(downButton, INPUT);		//  sets the DownButton to an input
-	pinMode(leftButton, INPUT);		//  sets the LeftButton to an input
-	pinMode(rightButton, INPUT);	//  sets the RightButton to an input
+	//	SETUP THE MCP23017 PINS
+	MCPWrite(MCP17A, IOCON, 0x80);		//	Switches the IOCON to use BANK = 1 register addresses
+	MCPWrite(MCP17A, IODIRA, 0xF8);		//	configure the pins for A0-2 (SD card LEDs) as outputs and A3-7 (Menu Buttons) as inputs.
+	MCPWrite(MCP17A, IODIRB, 0x00);		//	configure the pins for B0-7 as outputs  This is for the Relays
+	MCPWrite(MCP17A, GPPUA, 0xF8);		//	turn on the 100k pullups
+	MCPWrite(MCP17A, GPINTENA, 0x80);	//	enable the interrupt on GPIO pin
+	MCPWrite(MCP17A, DEFVALA, 0x80);	//	set the default value of the interrupt pin to be high
+	MCPWrite(MCP17A, INTCONA, 0x80);	//	set the interrupt to use the value of DEFVAL
+	MCPWrite(MCP17A, GPIOB, 0xFF);		//	write the relays to off
 
-	//for(uint8_t b = 0; b < 8; b++){pinMode(button[b], INPUT);}	//  sets Button0-7 pins as inputs
-
-	pinMode(menuEnterIntPin, INPUT);
-	attachInterrupt(digitalPinToInterrupt(menuEnterIntPin), MenuButtonPress, RISING);		//  Attaches int.4, pin 19(RX1) on the Mega and Due and sets it to trigger on a low input from the menu button
+	pinMode(menuEnterIntPin, INPUT_PULLUP);
+	attachInterrupt(digitalPinToInterrupt(menuEnterIntPin), MenuButtonPress, FALLING);		//  Attaches int.4, pin 19(RX1) on the Mega and Due and sets it to trigger on a low input from the menu button
 
 	//  SETUP THE FLOW SENSOR
-
 	pinMode(flowSensorIntPin, INPUT);				//	set the flow sensor as an input to the pin number in the variable
 	digitalWrite(flowSensorIntPin, HIGH);			//	write the pin high to be active low
-
-	//  SETUP THE RELAYS OUTPUTS
-	for (uint8_t relay = 0; relay <= relayCount; relay++){ pinMode(relayPins[relay], OUTPUT); }
-	for (uint8_t relay = 0; relay <= relayCount; relay++){ digitalWrite(relayPins[relay], HIGH); }
 
 	//  SETUP THE LCD SCREEN
 	lcd.begin(20, 4);						//  setup the LCD's number of columns and rows
 	lcd.createChar(1, degree);				//  init custom characters as numbers
 	lcd.createChar(2, rarrow);				//  init custom characters as numbers
 	lcd.createChar(3, uarrow);				//  init custom characters as numbers
-	//lcd.createChar(4, larrow);			//  init custom characters as numbers
-	//lcd.createChar(5, darrow);			//  init custom characters as numbers
-	//lcd.createChar(6, bell);				//  init custom characters as numbers
-	//lcd.createChar(7, relon);				//  init custom characters as numbers
 	lcd.setBacklightPin(B_Light, POSITIVE);  //  set the backlight pin and polarity
 	lcd.setBacklight(HIGH);					//  toggle the backlight on
 	pinMode(backlight, OUTPUT);				//	set the pin for the backlight as an output
@@ -437,26 +463,9 @@ void setup()
 		delay(200);
 	}
 
-	//	INITIALIZE THE LEDS
-	pinMode(redledpin, OUTPUT);
-	pinMode(greenledpin, OUTPUT);
-	pinMode(blueledpin, OUTPUT);
-
-	//	TEST THE LEDS
-	//digitalWrite(redledpin, HIGH);
-	//digitalWrite(greenledpin, HIGH);
-	//digitalWrite(blueledpin, HIGH);
-	//delay(1000);
-
-	digitalWrite(redledpin, LOW);
-	digitalWrite(greenledpin, LOW);
-	digitalWrite(blueledpin, LOW);
-
-
-
 	//	INITIALIZE THE SD CARD
 	Serial.println("Initializing the SD Card...");
-	pinMode(53, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
+	pinMode(chipSelect, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
 
 	if (!SD.begin(chipSelect))
 	{
@@ -503,6 +512,7 @@ void setup()
 		Serial.print(millis());
 		Serial.println();
 		//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
+		//TestSDLEDS();			//**********NICE SPOT TO TEST SDLEDS**************
 }
 
 void loop()
@@ -586,19 +596,16 @@ void AlarmOFF()
 void RelayToggleALL()
 {
 	//	NOTE THAT THIS WILL NOT TOGGLE THE RELAY DISPLAY ON THE LCD BECAUSE I DO NOT WRITE TO THE RELAYSTATE
+	int read = 5;
 
-	for (uint8_t relay = 0; relay <= relayCount; relay++)
+	for (uint8_t relay = 0; relay <= relayCount; relay++)	//	loop through the relays and turn each one on
 	{
-		digitalWrite(relayPins[relay], LOW);
-		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
-		RelayStatusDisplay(0, 3);
+		MCPWriteBit(MCP17A, 1, relay, 0);			//	writes the selected port low to turn the relay on
 		delay(200);
 	}
-	for (uint8_t relay = 0; relay <= relayCount; relay++)
-	{		
-		digitalWrite(relayPins[relay], HIGH);
-		byte bit = 1 << relay;						//	sets bit for the correct id's bit position
-		RelayStatusDisplay(0, 3);
+	for (uint8_t relay = 0; relay <= relayCount; relay++)	//	loop through the relays and turn each one off
+	{	
+		MCPWriteBit(MCP17A, 1, relay, 1);			//	writes the selected port low to turn the relay off
 		delay(200);
 	}
 }
@@ -611,7 +618,7 @@ void RelayToggle(uint8_t state, uint8_t onoff)
 
 	for (uint8_t i = 0; i <= relayCount; i++)
 	{
-		byte rl;
+		uint8_t rl;
 		rl = (state & (1 << i));		//	isolate a single relay to see if its bit is set to 1 or 0
 		lcd.setCursor(i, 3);			//	set the cursor position to the current relay to print a + or -
 		
@@ -621,22 +628,22 @@ void RelayToggle(uint8_t state, uint8_t onoff)
 		case 0:			//  turns off the relay
 			if (rl > 0)
 			{
-				if ((RelayState & (1 << i)) != 0)	//	Only changes if there is not a 0 for that bit.  this prevents changing the relaystate if there it is alread on
+				if ((RelayState & (1 << i)) != 0)		//	Only changes if there is not a 0 for that bit.  this prevents changing the relaystate if there it is alread on
 				{
-					RelayState = RelayState ^ (1 << i);		//	toggles the bit held in RelayState
+					RelayState = RelayState ^ (1 << i);	//	toggles the bit held in RelayState
 				}
-				digitalWrite(relayPins[i], HIGH);		//	turns the relay off
+				MCPWriteBit(MCP17A, 1, i, 1);			//	turns the relay off
 				lcd.print("-");							//	sets the relay to display a - on the LCD screen
 			}
 			break;
 		case 1:
 			if (rl > 0)
 			{
-				if ((RelayState & (1 << i)) != (1 << i))	//	Only changes if there is not a 1 for that bit.  this prevents changing the relaystate if there it is alread on
+				if ((RelayState & (1 << i)) != (1 << i))//	Only changes if there is not a 1 for that bit.  this prevents changing the relaystate if there it is alread on
 				{
-					RelayState = RelayState ^ (1 << i);		//	toggles the bit held in RelayState
+					RelayState = RelayState ^ (1 << i);	//	toggles the bit held in RelayState
 				}
-				digitalWrite(relayPins[i], LOW);		//	turns the relay on
+				MCPWriteBit(MCP17A, 1, i, 0);			//	turns the relay on
 				lcd.print("+");							//	sets the relay to display a - on the LCD screen
 			}
 			break;
@@ -880,7 +887,7 @@ void logger()
 {
 	time_t t;
 
-	digitalWrite(greenledpin, HIGH);
+	MCPWriteBit(MCP17A, sdledbank,greenledpin, 1);
 
 	if ((serialDebug & 1) == 1)
 	{Serial.println("Preparing Data");}
@@ -992,7 +999,7 @@ void logger()
 		break;
 	}
 
-	digitalWrite(greenledpin, LOW);
+	MCPWriteBit(MCP17A, sdledbank, greenledpin, 0);
 
 	//  Write the data to disk if the millis are more than the write interval
 	if ((millis() - syncTime) < SDCARD_WRITE_INTERVAL) { return; }
@@ -1004,9 +1011,9 @@ void logger()
 		Serial.println("Writing log to the SD Card");
 		Serial.println("");
 	}
-	digitalWrite(blueledpin, HIGH);
+	MCPWriteBit(MCP17A, sdledbank, blueledpin, 1);
 	logfile.flush();
-	digitalWrite(blueledpin, LOW);
+	MCPWriteBit(MCP17A, sdledbank, blueledpin, 1);
 }
 
 void FlowSensorRead()
@@ -1112,7 +1119,11 @@ void printAddress(DeviceAddress deviceAddress)
 
 void MenuButtonPress()
 {
-	menuMode = !menuMode;		//  handler toggle for the menuMode after a button press interrupt
+	if ((long)(micros() - last_micros) >= debouncing_time * 1000)
+	{
+		menuMode = !menuMode;		//  handler toggle for the menuMode after a button press interrupt
+		last_micros = micros();
+	}
 }
 
 void writeEEPROM(uint16_t address, byte data)
@@ -1187,10 +1198,10 @@ void factoryDefaultset()
 		writeEEPROM(102 + (i * 6), 0);			//  writes the alarm type to 0, Day Lights
 		int bit = 1 << i;
 		writeEEPROM(103 + (i * 6), (0 ^ bit));	//	writes the relay trigger to relay to match the id
-		writeEEPROM(104 + (i * 6), 12);		//  writes the alarm on hour 12
-		writeEEPROM(105 + (i * 6), 1+i);		//  writes the alarm on minute 1
-		writeEEPROM(106 + (i * 6), 12);		//  writes the alarm off hour 23
-		writeEEPROM(107 + (i * 6), 2+i);		//  writes the alarm off minute 11
+		writeEEPROM(104 + (i * 6), 18);		//  writes the alarm on hour 12
+		writeEEPROM(105 + (i * 6), 00+i);		//  writes the alarm on minute 1
+		writeEEPROM(106 + (i * 6), 18);		//  writes the alarm off hour 23
+		writeEEPROM(107 + (i * 6), 9+i);		//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");
 }
@@ -1214,6 +1225,102 @@ void eraseEEPROM()
 	}
 }
 
+void MCPWrite(uint8_t address, uint8_t reg, uint8_t data)
+{
+	//  Send data to the address and register of the I2C device
+	Wire.beginTransmission(address);    //  begin the transmission of data
+	Wire.write(reg);                    //  write to the specific register
+	Wire.write(data);                   //  write the data byte
+	Wire.endTransmission();             //  end the transmission of the data
+}
+
+uint8_t MCPRead(int8_t address, uint8_t reg)
+{
+	uint8_t data = 0;
+
+	//  Start by sending the register address
+	Wire.beginTransmission(address);
+	Wire.write(reg);
+	Wire.endTransmission();
+
+	//  request 1 bytes from the device
+	Wire.requestFrom(address, 1);		//	initiate the request for , x bytes from the I2C device
+	if (!Wire.available()) {}			//  wait until data is received
+	data = Wire.read();					//	write the bytes to data once it is done receiving
+
+	return data;						//	return the data as a byte
+}
+
+uint8_t MCPWriteBit(uint8_t address, uint8_t bank, uint8_t port, uint8_t state)
+{
+	//  address = the address of the MCP to write to
+	//  bank = is the GPIO bank A or B that you want to write to
+	//  port = is the port on the bank that you want to write to 0 - 7
+	//  state = is the bit you want to write to that port 0 or 1
+
+	//  will return the last reading from the port
+
+	uint8_t read = 0;
+
+	//  read the current setting IO port bank
+	if (bank == 0)
+	{
+		read = MCPRead(address, GPIOA);						//	read the GPIO ports from the MCP
+		MCPWrite(address, GPIOA, read ^ (1 << port));		//	write the specific port back to the MCP either turning it off
+		read = MCPRead(address, GPIOB);						//	read back the GPIO port to be able to print out what the final result is
+	}
+	else if (bank == 1)
+	{
+		read = MCPRead(address, GPIOB);						//	read the GPIO ports from the MCP
+		MCPWrite(address, GPIOB, read ^ (1 << port));		//	write the specific port back to the MCP either turning it on
+		read = MCPRead(address, GPIOB);						//	read back the GPIO port to be able to print out what the final result is
+	}
+	else { Serial.println("Incorrect bank selection"); }
+
+	return read;		//	return what was the final read was
+	
+}
+
+uint8_t MCPReadBit(uint8_t address, uint8_t bank, uint8_t port)
+{
+	//  address = the address of the MCP to read from
+	//  bank = is the GPIO bank A or B that you want to read from
+	//  port = is the port on the bank that you want to read from to 0 - 7
+
+	//	will return the current bit of the port selected as a 1 or 0
+
+	uint8_t read = 0;
+
+	//  read the current setting IO port bank
+	if (bank == 0)
+	{
+		read = MCPRead(address, GPIOA);
+	}
+	else if (bank == 1)
+	{
+		read = MCPRead(address, GPIOB);
+	}
+	else { Serial.println("Incorrect bank selection"); }
+
+	//	this will take the reading and shift it in and out to isolate the bit
+
+	read = (read ^ (1 << port));
+	read = (read << (7 - port));
+	read = (read >> 7);
+
+	//	evaluate the bit selected and return the proper value
+	switch (read)
+	{
+	case 0:
+		return 0;
+	case 1:
+		return 1;
+	default:
+		return 2;
+	}
+}
+
+
 uint16_t freeRam()
 {
 	extern int32_t __heap_start, *__brkval;
@@ -1235,5 +1342,22 @@ void error(char*str)
 {
 	Serial.print("Error: ");
 	Serial.println(str);
-	digitalWrite(redledpin, HIGH);
+	MCPWriteBit(MCP17A, sdledbank, redledpin, 1);
+}
+
+void TestSDLEDS()
+{
+	//TEST THE LEDS
+	MCPWriteBit(MCP17A, sdledbank, redledpin, 1);
+	delay(500);
+	MCPWriteBit(MCP17A, sdledbank, greenledpin, 1);
+	delay(500);
+	MCPWriteBit(MCP17A, sdledbank, blueledpin, 1);
+	delay(500);
+	MCPWriteBit(MCP17A, sdledbank, redledpin, 0);
+	delay(500);
+	MCPWriteBit(MCP17A, sdledbank, greenledpin, 0);
+	delay(500);
+	MCPWriteBit(MCP17A, sdledbank, blueledpin, 0);
+	delay(500);
 }
