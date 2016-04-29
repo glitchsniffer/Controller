@@ -12,7 +12,7 @@
 #define _VSARDUINO_H_
 #define printf iprintf
 #define F_CPU 84000000L
-#define ARDUINO 10607
+#define ARDUINO 10608
 #define ARDUINO_SAM_DUE
 #define ARDUINO_ARCH_SAM
 #define __SAM3X8E__
@@ -105,5 +105,9 @@ extern "C" void __cxa_pure_virtual() {;}
 #include <..\Controller\Controller.ino>
 #include <..\Controller\Alarms.h>
 #include <..\Controller\Alarms.ino>
+#include <..\Controller\EEprom.cpp>
+#include <..\Controller\EEprom.h>
+#include <..\Controller\GroteskBold16x32.c>
+#include <..\Controller\GroteskBold24x48.c>
 #include <..\Controller\Menu_System.ino>
 #endif

@@ -14,55 +14,61 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="_core">
-      <UniqueIdentifier>{e67b15bd-1427-4277-ad35-273b522ebeeb}</UniqueIdentifier>
+      <UniqueIdentifier>{a8af6787-1b8b-4990-a1fc-e0318c81d61f}</UniqueIdentifier>
     </Filter>
     <Filter Include="_core\avr">
-      <UniqueIdentifier>{b8c93511-e2e8-4f30-bced-f967711f22e3}</UniqueIdentifier>
+      <UniqueIdentifier>{348fcaf2-0738-4751-a829-be60524d8442}</UniqueIdentifier>
     </Filter>
     <Filter Include="_core\USB">
-      <UniqueIdentifier>{5dcfed52-0ed9-4d77-b270-2298342986a6}</UniqueIdentifier>
+      <UniqueIdentifier>{c4c110ad-ec4c-4aa1-8df3-fe2dee9941a6}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries">
-      <UniqueIdentifier>{21eca673-46a5-4bb8-a64c-5ce930f22d1d}</UniqueIdentifier>
+      <UniqueIdentifier>{3030ee0e-cfe8-493f-a89a-1ae8e46624fd}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\DallasTemperature">
-      <UniqueIdentifier>{a6824fac-2aaf-4967-b03c-4e3f4d9146d5}</UniqueIdentifier>
+      <UniqueIdentifier>{c9180356-e952-4b29-97e9-611fae9f0507}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\DS1307RTC-master">
-      <UniqueIdentifier>{063e3b49-e9af-4d6b-a38c-bc932365f2b7}</UniqueIdentifier>
+      <UniqueIdentifier>{03697815-79a3-4dbb-b7e7-52493628e4c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\LiquidCrystal">
-      <UniqueIdentifier>{d958d451-114b-4e3e-b2b2-f6692268d241}</UniqueIdentifier>
+      <UniqueIdentifier>{2f136ba5-b67f-4232-b8ee-e781792a52fb}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\OneWire">
-      <UniqueIdentifier>{8cd1199e-7378-46ab-b5e4-2dabb217dee9}</UniqueIdentifier>
+      <UniqueIdentifier>{34e328a6-f1d3-446d-ba1a-b6123c9647d0}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SD">
-      <UniqueIdentifier>{0f28f3cd-6c9a-4898-8477-677bba55802a}</UniqueIdentifier>
+      <UniqueIdentifier>{884954c9-4087-413d-bbcf-e46032dbb986}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SD\src">
-      <UniqueIdentifier>{c031a75e-bf56-4538-b5b0-b6d833253798}</UniqueIdentifier>
+      <UniqueIdentifier>{61476c3b-093d-412b-8d3d-e8cd569de117}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SD\src\utility">
-      <UniqueIdentifier>{c7765999-6d64-4897-ad3b-5f68b1d1cf22}</UniqueIdentifier>
+      <UniqueIdentifier>{68832d16-ed2d-47ca-bf86-1e7303e69135}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SPI">
-      <UniqueIdentifier>{09330800-6e65-4960-81fc-ae5396480657}</UniqueIdentifier>
+      <UniqueIdentifier>{248cf297-f923-4403-be0e-2eaca60f2df7}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SPI\src">
-      <UniqueIdentifier>{1b4ebc46-b772-4da2-93d0-4381b20590db}</UniqueIdentifier>
+      <UniqueIdentifier>{0502b358-ea42-41d0-88cd-b741d8a2df6b}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\TimeAlarms-master">
-      <UniqueIdentifier>{7c525ebc-be4f-463c-a6f5-c7efba0539d6}</UniqueIdentifier>
+      <UniqueIdentifier>{83f59df7-5ba8-44f5-be8e-60d76ab47669}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\Time-master">
-      <UniqueIdentifier>{39a4efdc-2e50-4feb-a8c1-a5650d6c75a3}</UniqueIdentifier>
+      <UniqueIdentifier>{f4847285-96bd-44d1-a87f-3f6ac812a7ee}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\Wire">
-      <UniqueIdentifier>{c3a463e4-03d2-4da2-9a89-69a73eafb920}</UniqueIdentifier>
+      <UniqueIdentifier>{30fde35a-132d-4dc3-9e72-6d6172ecb511}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\Wire\src">
-      <UniqueIdentifier>{bb1eb73d-f189-4690-b891-469263d5701f}</UniqueIdentifier>
+      <UniqueIdentifier>{db0007a0-392d-48ed-a7d7-a123fda26e7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\UTFT">
+      <UniqueIdentifier>{52e35249-2b98-4bc2-8178-14e13b7d61b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\UTouch">
+      <UniqueIdentifier>{8e28dcec-8217-4646-8a76-be709663b866}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="__vm\.Controller.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EEprom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.7\cores\arduino\Arduino.h">
@@ -269,8 +278,23 @@
     <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.7\libraries\Wire\src\Wire.h">
       <Filter>_libraries\Wire\src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Arduino\libraries\UTFT\memorysaver.h">
+      <Filter>_libraries\UTFT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Arduino\libraries\UTFT\UTFT.h">
+      <Filter>_libraries\UTFT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Arduino\libraries\UTouch\UTouch.h">
+      <Filter>_libraries\UTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Arduino\libraries\UTouch\UTouchCD.h">
+      <Filter>_libraries\UTouch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="EEprom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.7\cores\arduino\abi.cpp">
       <Filter>_core</Filter>
     </ClCompile>
@@ -417,6 +441,21 @@
     </ClCompile>
     <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.7\libraries\Wire\src\Wire.cpp">
       <Filter>_libraries\Wire\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Arduino\libraries\UTFT\DefaultFonts.c">
+      <Filter>_libraries\UTFT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Arduino\libraries\UTFT\UTFT.cpp">
+      <Filter>_libraries\UTFT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Arduino\libraries\UTouch\UTouch.cpp">
+      <Filter>_libraries\UTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="GroteskBold16x32.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GroteskBold24x48.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

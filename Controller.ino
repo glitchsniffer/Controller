@@ -1,3 +1,5 @@
+#include <UTFT.h>
+#include <UTouch.h>
 #include <SD.h>
 #include <SPI.h>
 #include <TimeLib.h>
@@ -12,8 +14,8 @@
 //	VERSIONING VARIABLES
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
-byte build = 36;			//  Sets the build number for the current program
-byte subbuild = 7;			//	Sets the sub build number between major version releases
+byte build = 37;			//  Sets the build number for the current program
+byte subbuild = 0;			//	Sets the sub build number between major version releases
 
 #define LOOP_INTERVAL 1000		//	millis between log readings
 
@@ -55,6 +57,17 @@ byte today = 0;				//  Sets the today to the current date to display on the RTC
 #define D7 7
 LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
 const int16_t backlight = 8;		//	variable used to store the pin for the backlight
+
+//  INITIALIZE THE LCD TOUCHSCREEN
+//  ***********************************************
+UTFT myGLCD(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
+UTouch myTouch(6, 5, 32, 3, 2);			//	start an instance of the UTouch class using the pins used
+
+//	set the fonts that we will be using
+extern uint8_t BigFont[];				
+extern uint8_t SevenSegNumFont[];
+extern uint8_t GroteskBold16x32[];
+extern uint8_t GroteskBold24x48[];
 
 //  SETUP CUSTOM CHARACTERS
 byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};		//  set the lcd char for the degree symbol
@@ -162,7 +175,7 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
 // define the DS18B20 global variables
-const uint8_t ONE_WIRE_BUS[]={4};		// the array to define which pins you will use for the busses ie {2,3,4,5};
+const uint8_t ONE_WIRE_BUS[]={8};		// the array to define which pins you will use for the busses ie {2,3,4,5};
 
 #define TEMPERATURE_PRECISION 10
 #define NUMBER_OF_BUS 1				// how many busses will you use for the sensors
@@ -227,7 +240,7 @@ byte relayCount = 7;		//  Set the number of relays
 //  ***********************************************
 #define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
 uint32_t syncTime = 0;					//	time of the last sync
-const uint8_t chipSelect = 5;			//	pin for the chip select line on the SD Card
+const uint8_t chipSelect = 9;			//	pin for the chip select line on the SD Card
 uint8_t SDexist = 0;					//	variable to determine if there is a problem with the sd card.  If there is then dont use the SD card.
 File logfile;							//	initialize the file to log to
 
@@ -407,6 +420,14 @@ void setup()
 	lcd.setBacklight(HIGH);					//  toggle the backlight on
 	pinMode(backlight, OUTPUT);				//	set the pin for the backlight as an output
 	analogWrite(backlight, backlightLevel);	//	write the backlightlevel to the pin for the backlight
+
+	//	SETUP THE TFT LCD
+	myGLCD.InitLCD();
+	myGLCD.clrScr();
+	myGLCD.setFont(BigFont);
+	myGLCD.fillScr(VGA_BLUE);
+	myGLCD.setBackColor(VGA_BLUE);
+	myGLCD.setColor(VGA_SILVER);
 
 	START_SCREEN();		//  call the start up screen function
 
@@ -672,6 +693,9 @@ void RelayStatusDisplay(uint8_t col, uint8_t row)
 
 void START_SCREEN()
 {
+	int c = 0;	//	keeps a running total for the cursor
+	int y = 0;	//	y variable for rows
+
 	lcd.setCursor(3,0);
 	lcd.print("GLITCHSNIFFER'S");
 	lcd.setCursor(6,1);
@@ -689,6 +713,24 @@ void START_SCREEN()
 	delay(1000);
 	lcd.setCursor(0,0);
 	lcd.clear();
+
+	myGLCD.setFont(GroteskBold24x48);
+	y = 55;
+	myGLCD.print("GLITCHSNIFFER'S", CENTER, 5, 0);
+	myGLCD.print("AQUARIUM", CENTER, y * 1, 0);
+	myGLCD.print("CONTROLLER", CENTER, y * 2, 0);
+	myGLCD.print("Version", CENTER, y * 3, 0);
+	c = 144;
+	myGLCD.printNumI(version, c, y*4, 2, '0');
+	c = c + (24 * 2);
+	myGLCD.print(".", c, y * 4);
+	c = c + 24;
+	myGLCD.printNumI(build, c, y * 4, 2, '0');
+	c = c + (24 * 2);
+	myGLCD.print(".", c, y * 4, 0);
+	c = c + 24;
+	myGLCD.printNumI(subbuild, c, y * 4, 2, '0');
+
 }
 	
 void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space)
