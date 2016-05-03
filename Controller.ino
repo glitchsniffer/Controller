@@ -10,24 +10,25 @@
 #include <Wire.h>               //I2C Wire library
 #include <LiquidCrystal_I2C.h>		//LCD I2C library
 #include <DS1307RTC.h>
+#include "EEprom.h"
 
 //	VERSIONING VARIABLES
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
-byte build = 37;			//  Sets the build number for the current program
-byte subbuild = 0;			//	Sets the sub build number between major version releases
+byte build = 38;			//  Sets the build number for the current program
+byte subbuild = 1;			//	Sets the sub build number between major version releases
 
 #define LOOP_INTERVAL 1000		//	millis between log readings
 
 
-//  INITIALIZE THE EEPROM & RTC
+//  INITIALIZE THE EEPROM
+//  ***********************************************
+#define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
+EEprom eeprom(EEPROM_DEV_ADDR);
+
+//  INITIALIZE THE RTC
 //  ***********************************************
 #define DS1307RTC 0x68			//	Set the address of the DS1307 RTC
-#define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
-
-uint16_t eePointer = 0;			//  Sets the pointer location to 0 initially
-byte data = 0;					//  Sets the value of data to be written to 0 initially
-
 
 //  CONFIGURATION SETUP
 //  ***********************************************
@@ -259,9 +260,7 @@ void setup()
 	Wire.begin();
 	delay(250);
 	Serial.begin(115200);				//  start the serial port if debugging is on
-	Serial.println();
-	serialDebug = readEEPROM(5);		//	reads out user setting to turn serial debugging on for each type of debugging
-
+	
 	//  SETUP THE RTC
 	setSyncProvider(RTC.get);		//  this function get the time from the RTC
 	if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
@@ -275,27 +274,29 @@ void setup()
 	//  READ THE VARIABLES OUT OF THE EEPROM
 
 	//  READ NON USER SETTINGS FROM EEPROM
-	e2Empty = readEEPROM(0);			//	reads the e2Empty out to determine if it needs to set defaults
+	e2Empty = eeprom.read(0);			//	reads the e2Empty out to determine if it needs to set defaults
 	if (e2Empty == 0){ factoryDefaultset(); }
-	configID = readEEPROM(0);			//  reads the configID out
+	configID = eeprom.read(0);			//  reads the configID out
+
+	serialDebug = eeprom.read(5);		//	reads out user setting to turn serial debugging on for each type of debugging
 
 	//  READ USER SETTINGS FROM EEPROM
-	tempType = readEEPROM(20);			//  reads out user setting to selects between 0 = Celsius or 1 = Fahrenheit
-	tempPrecision = readEEPROM(21);		//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
-	tempReadDelay = readEEPROM(22);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
-	timeFormat = readEEPROM(23);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
-	secondsDisplay = readEEPROM(24);	//	reads out user setting to display seconds 0 = No and 1 = Yes
-	backlightLevel = readEEPROM(25);	//	reads out the user setting to control the backlight level
-	backlightTimeout = readEEPROM(26);	//	reads out the user setting to control when the backlight level times out
-	flowSensorEnable = readEEPROM(27);	//	reads out the user setting to determine if the flow sensor is enabled
-	flowRateMax = (readEEPROM(28));		//	reads out the user setting that is set for the max flow rate as an integer
-	flowRateMin = readEEPROM(29);		//	reads out the user setting for the minimum flow rate
+	tempType = eeprom.read(20);			//  reads out user setting to selects between 0 = Celsius or 1 = Fahrenheit
+	tempPrecision = eeprom.read(21);		//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
+	tempReadDelay = eeprom.read(22);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
+	timeFormat = eeprom.read(23);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
+	secondsDisplay = eeprom.read(24);	//	reads out user setting to display seconds 0 = No and 1 = Yes
+	backlightLevel = eeprom.read(25);	//	reads out the user setting to control the backlight level
+	backlightTimeout = eeprom.read(26);	//	reads out the user setting to control when the backlight level times out
+	flowSensorEnable = eeprom.read(27);	//	reads out the user setting to determine if the flow sensor is enabled
+	flowRateMax = eeprom.read(28);		//	reads out the user setting that is set for the max flow rate as an integer
+	flowRateMin = eeprom.read(29);		//	reads out the user setting for the minimum flow rate
 
 	//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
 	tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
-	AlarmEnable = readEEPROM(100);		//	reads out the byte for the enable flags for all 8 alarms
-	AlarmState = readEEPROM(101);		//	reads out the byte for the state flags for all 8 alarms
-	RelayState = readEEPROM(150);
+	AlarmEnable = eeprom.read(100);		//	reads out the byte for the enable flags for all 8 alarms
+	AlarmState = eeprom.read(101);		//	reads out the byte for the state flags for all 8 alarms
+	RelayState = eeprom.read(150);
 
 	if ((serialDebug & 4) == 4)
 	{
@@ -307,12 +308,12 @@ void setup()
 	for (uint8_t id = 0; id <= relayCount; id++)		//  read each of the alarms values out of the EEPROM
 	{
 		if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
-		AlarmType[id] = readEEPROM(102 + (id * 6));
-		AlarmRelay[id] = readEEPROM(103 + (id * 6));
-		AlarmHourOn[id] = readEEPROM(104 + (id * 6));
-		AlarmMinOn[id] = readEEPROM(105 + (id * 6));
-		AlarmHourOff[id] = readEEPROM(106 + (id * 6));
-		AlarmMinOff[id] = readEEPROM(107 + (id * 6));
+		AlarmType[id] = eeprom.read(102 + (id * 6));
+		AlarmRelay[id] = eeprom.read(103 + (id * 6));
+		AlarmHourOn[id] = eeprom.read(104 + (id * 6));
+		AlarmMinOn[id] = eeprom.read(105 + (id * 6));
+		AlarmHourOff[id] = eeprom.read(106 + (id * 6));
+		AlarmMinOff[id] = eeprom.read(107 + (id * 6));
 		AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmON);
 		AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmOFF);
 
@@ -365,7 +366,7 @@ void setup()
 		Serial.println("Flow Readings Enabled");
 	}
 
-	serialDebug = readEEPROM(5);		//	read out the serial debug again in case it was disable during the alarm print
+	serialDebug = eeprom.read(5);		//	read out the serial debug again in case it was disable during the alarm print
 
 	if ((serialDebug & 4) == 4)
 	{
@@ -676,8 +677,8 @@ void RelayToggle(uint8_t state, uint8_t onoff)
 	Serial.print(" RelayState ");
 	Serial.println(RelayState, BIN);
 
-	writeEEPROM(150, RelayState);
-	RelayState = readEEPROM(150);
+	eeprom.write(150, RelayState);
+	RelayState = eeprom.read(150);
 }
 
 void RelayStatusDisplay(uint8_t col, uint8_t row)
@@ -1168,103 +1169,48 @@ void MenuButtonPress()
 	}
 }
 
-void writeEEPROM(uint16_t address, byte data)
-{
-	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
-	Wire.write((uint16_t)(address >> 8));		//  writes the first byte of the pointer address to the device
-	Wire.write((uint16_t)(address & 0xFF));		//  writes the second byte of the pointer address to the device
-	Wire.write(data);							//  writes the byte data to the EEPROM at the address specified above
-	Wire.endTransmission();						//  stops the write communication on the I2C
-	delay(10);
-	if ((serialDebug & 8) == 8)
-	{
-		Serial.print("Write ");
-		Serial.print(address);
-		Serial.print(",");
-		Serial.println(data);
-	}
-}
-
-byte readEEPROM(uint16_t address)
-{
-	byte result;									//  returned value
-	Wire.beginTransmission(EEPROM_DEV_ADDR);	//  starts communication of the I2C to the I2c device address
-	Wire.write((uint16_t)(address >> 8));		//  writes the first byte of the pointer address to the device
-	Wire.write((uint16_t)(address & 0xFF));		//  writes the second byte of the pointer address to the device
-	Wire.endTransmission(); 					//  stops the write communication on the I2C
-	Wire.requestFrom(EEPROM_DEV_ADDR, 1);		//  gets 1 byte of data from the device
-	result = Wire.read();							//  sets the value read to data
-	if ((serialDebug & 8) == 8)
-	{
-		Serial.print("Read ");
-		Serial.print(address);
-		Serial.print(",");
-		Serial.println(result);
-	}
-	return result;								//  returns data to the previous call
-}
-
 void factoryDefaultset()
 {
 	Serial.println("Writing Factory Defaults to EEPROM");
 
 	//  Non User Settings
-	writeEEPROM(0, 1);		//	writes the e2Empty value = 1 or Set
-	writeEEPROM(1, 1);		//  determines if this is the first run or not
-	writeEEPROM(2, 14);		//  writes the build year
-	writeEEPROM(3, 10);		//  writes the build month
-	writeEEPROM(4, 12);		//  writes the build day
-	writeEEPROM(5, 76);		//	writes the serialDebug value = 1 or OFF
+	eeprom.write(0, 1);		//	writes the e2Empty value = 1 or Set
+	eeprom.write(1, 1);		//  determines if this is the first run or not
+	eeprom.write(2, 14);		//  writes the build year
+	eeprom.write(3, 10);		//  writes the build month
+	eeprom.write(4, 12);		//  writes the build day
+	eeprom.write(5, 76);		//	writes the serialDebug value = 1 or OFF
 
 	//  User Settings
-	writeEEPROM(20, 1);		//  writes the tempType value = 1 or Fahrenheit
-	writeEEPROM(21, 1);		//	writes the tempPrecision value = 0 or No Decimal
-	writeEEPROM(22, 10);	//	writes the tempReadDelay value = 10 or 10 Seconds
-	writeEEPROM(23, 1);		//	writes the timeFormat value =  1 or 12 hour
-	writeEEPROM(24, 1);		//	writes the secondsDisplay value to 1 or Display seconds
-	writeEEPROM(25, 100);	//	writes the backlightLevel value = 100 or half
-	writeEEPROM(26, 30);	//  writes the backlightTimeout to be 30 seconds
-	writeEEPROM(27, 0);		//	writes the flowSensorEnable to be disabled
-	writeEEPROM(28, 55);	//	writes the 1st bit of the flow sensor 100% value to 0
-	writeEEPROM(29, 75);	//  writes the flow sensor user level to 75 or 75% 
-	writeEEPROM(30, 0);
-	writeEEPROM(32, 0);
+	eeprom.write(20, 1);		//  writes the tempType value = 1 or Fahrenheit
+	eeprom.write(21, 1);		//	writes the tempPrecision value = 0 or No Decimal
+	eeprom.write(22, 10);	//	writes the tempReadDelay value = 10 or 10 Seconds
+	eeprom.write(23, 1);		//	writes the timeFormat value =  1 or 12 hour
+	eeprom.write(24, 1);		//	writes the secondsDisplay value to 1 or Display seconds
+	eeprom.write(25, 100);	//	writes the backlightLevel value = 100 or half
+	eeprom.write(26, 30);	//  writes the backlightTimeout to be 30 seconds
+	eeprom.write(27, 0);		//	writes the flowSensorEnable to be disabled
+	eeprom.write(28, 55);	//	writes the 1st bit of the flow sensor 100% value to 0
+	eeprom.write(29, 75);	//  writes the flow sensor user level to 75 or 75% 
+	eeprom.write(30, 0);
+	eeprom.write(32, 0);
 
 	//  Alarm Settings
-	writeEEPROM(100, 255);	//  writes alarms enable flag to off
-	writeEEPROM(101, 0);	//  writes the alarm state flag to 0 or Off
-	writeEEPROM(150, 0);	//	writes the relayState flag to all 0's or OFF
+	eeprom.write(100, 255);	//  writes alarms enable flag to off
+	eeprom.write(101, 0);	//  writes the alarm state flag to 0 or Off
+	eeprom.write(150, 0);	//	writes the relayState flag to all 0's or OFF
 
 	for (int i = 0; i <= relayCount; i++)	//	loop through all 8 alarms
 	{
-		writeEEPROM(102 + (i * 6), 0);			//  writes the alarm type to 0, Day Lights
+		eeprom.write(102 + (i * 6), 0);			//  writes the alarm type to 0, Day Lights
 		int bit = 1 << i;
-		writeEEPROM(103 + (i * 6), (0 ^ bit));	//	writes the relay trigger to relay to match the id
-		writeEEPROM(104 + (i * 6), 18);		//  writes the alarm on hour 12
-		writeEEPROM(105 + (i * 6), 00+i);		//  writes the alarm on minute 1
-		writeEEPROM(106 + (i * 6), 18);		//  writes the alarm off hour 23
-		writeEEPROM(107 + (i * 6), 9+i);		//  writes the alarm off minute 11
+		eeprom.write(103 + (i * 6), (0 ^ bit));	//	writes the relay trigger to relay to match the id
+		eeprom.write(104 + (i * 6), 18);		//  writes the alarm on hour 12
+		eeprom.write(105 + (i * 6), 00+i);		//  writes the alarm on minute 1
+		eeprom.write(106 + (i * 6), 18);		//  writes the alarm off hour 23
+		eeprom.write(107 + (i * 6), 9+i);		//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");
-}
-
-void eraseEEPROM()
-{
-	Serial.println("Erasing EE2");
-	uint16_t address = 0;
-	data = 0;
-	while (address < 256)
-	{
-		writeEEPROM(address, 0);
-		address++;
-	}
-	Serial.println("Reading EE2");
-	address = 0;
-	while (address < 256)
-	{
-		readEEPROM(address);
-		address++;
-	}
 }
 
 void MCPWrite(uint8_t address, uint8_t reg, uint8_t data)

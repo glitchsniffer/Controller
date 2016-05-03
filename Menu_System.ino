@@ -515,14 +515,14 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 						case 0:
-							writeEEPROM(20,0);
-							tempType = readEEPROM(20);
+							eeprom.write(20,0);
+							tempType = eeprom.read(20);
 							lcd.setCursor(3, 0);
 							lcd.print("Set to Celsius");
 							break;
 						case 1:
-							writeEEPROM(20,1);
-							tempType = readEEPROM(20);
+							eeprom.write(20,1);
+							tempType = eeprom.read(20);
 							lcd.setCursor(2, 0);
 							lcd.print("Set to Fahrenheit");
 							break;
@@ -535,14 +535,14 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 						case 0:
-							writeEEPROM(21,0);
-							tempPrecision = readEEPROM(21);
+							eeprom.write(21,0);
+							tempPrecision = eeprom.read(21);
 							lcd.setCursor(1, 0);
 							lcd.print("Set to No Decimal");
 							break;
 						case 1:
-							writeEEPROM(21,1);
-							tempPrecision = readEEPROM(21);
+							eeprom.write(21,1);
+							tempPrecision = eeprom.read(21);
 							lcd.setCursor(2, 0);
 							lcd.print("Set to 1 Decimal");
 							break;
@@ -555,10 +555,10 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						tempReadDelay = readEEPROM(22);
+						tempReadDelay = eeprom.read(22);
 						to = MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
 						if (to == 32767){ return; }
-						tempReadDelay = readEEPROM(22);
+						tempReadDelay = eeprom.read(22);
 						Alarm.write(tempReadID, tempReadDelay);
 						Alarm.disable(tempReadID);
 						Alarm.enable(tempReadID);
@@ -571,10 +571,10 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						backlightLevel = readEEPROM(25);
+						backlightLevel = eeprom.read(25);
 						to = MenuNumSel(0, 25, backlightLevel, 0, 255, 5, 9, 2, 250);
 						if (to == 32767){ return; }
-						backlightLevel = readEEPROM(25);
+						backlightLevel = eeprom.read(25);
 						analogWrite(backlight, backlightLevel);
 						break;
 					}
@@ -586,14 +586,14 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 						case 0:
-							writeEEPROM(23,0);
-							timeFormat = readEEPROM(23);
+							eeprom.write(23,0);
+							timeFormat = eeprom.read(23);
 							lcd.setCursor(3, 0);
 							lcd.print("Set to 24 Hour");
 							break;
 						case 1:
-							writeEEPROM(23,1);
-							timeFormat = readEEPROM(23);
+							eeprom.write(23,1);
+							timeFormat = eeprom.read(23);
 							lcd.setCursor(3, 0);
 							lcd.print("Set to 12 Hour");
 							break;
@@ -607,14 +607,14 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						writeEEPROM(24, 0);
-						secondsDisplay = readEEPROM(24);
+						eeprom.write(24, 0);
+						secondsDisplay = eeprom.read(24);
 						lcd.setCursor(1, 0);
 						lcd.print("Display Seconds Off");
 						break;
 					case 1:
-						writeEEPROM(24, 1);
-						secondsDisplay = readEEPROM(24);
+						eeprom.write(24, 1);
+						secondsDisplay = eeprom.read(24);
 						lcd.setCursor(1, 0);
 						lcd.print("Display Seconds On");
 						break;
@@ -817,14 +817,14 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					switch (m2Start)
 					{
 					case 0:
-						writeEEPROM(27, 0);
-						flowSensorEnable = readEEPROM(27);
+						eeprom.write(27, 0);
+						flowSensorEnable = eeprom.read(27);
 						Alarm.disable(flowReadID);
 						lcd.print("Flow Sensor Disabled");
 						break;
 					case 1:
-						writeEEPROM(27, 1);
-						flowSensorEnable = readEEPROM(27);
+						eeprom.write(27, 1);
+						flowSensorEnable = eeprom.read(27);
 						Alarm.enable(flowReadID);
 						lcd.print("Flow Sensor Enabled");
 						break;
@@ -979,10 +979,10 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					}
 					else
 					{
-						writeEEPROM(28, (flowPulseTotal / 5));
-						flowRateMax = readEEPROM(28);
-						writeEEPROM(27, 1);
-						flowSensorEnable = readEEPROM(27);
+						eeprom.write(28, (flowPulseTotal / 5));
+						flowRateMax = eeprom.read(28);
+						eeprom.write(27, 1);
+						flowSensorEnable = eeprom.read(27);
 						lcd.clear();
 						lcd.setCursor(2, 1);
 						lcd.print("Flow Rate Normal");
@@ -995,16 +995,16 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 				case 1:
 					lcd.setCursor(2, 1);
 					lcd.print("Set Minimum Flow");
-					flowRateMin = readEEPROM(29);
+					flowRateMin = eeprom.read(29);
 					lcd.setCursor(11, 2);
 					lcd.print("%");
 					to = MenuNumSel(0, 29, flowRateMin, 5, 100, 5, 8, 2, 250);
 					if (to == 32767){ return; }
-					flowRateMin = readEEPROM(29);
+					flowRateMin = eeprom.read(29);
 					break;
 				case 2:
-					writeEEPROM(27, 0);
-					flowSensorEnable = readEEPROM(27);
+					eeprom.write(27, 0);
+					flowSensorEnable = eeprom.read(27);
 					lcd.print("Flow Sensor Disabled");
 					break;
 				case 3:
@@ -1026,19 +1026,19 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					byte readee;
 
 				case 0:
-					writeEEPROM(5, 0);
-					serialDebug = readEEPROM(5);
+					eeprom.write(5, 0);
+					serialDebug = eeprom.read(5);
 					lcd.setCursor(2, 2);
 					lcd.print("All Debugging OFF");
 					break;
 				case 1:
-					writeEEPROM(5, 255);
-					serialDebug = readEEPROM(5);
+					eeprom.write(5, 255);
+					serialDebug = eeprom.read(5);
 					lcd.setCursor(2, 2);
 					lcd.print("ALL Debugging ON");
 					break;
 				case 2:
-					readee = readEEPROM(5);
+					readee = eeprom.read(5);
 					if ((readee & 1) == 1)			//  see if the 1st bit flag is set.
 					{
 						readee = readee - 1;		//  if it is set, turn it off
@@ -1049,11 +1049,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						readee = readee + 1;		//  if it is not set, turn it on
 						lcd.print("Enabled Tmp Sns Dbg");
 					}
-					writeEEPROM(5, readee);
-					serialDebug = readEEPROM(5);
+					eeprom.write(5, readee);
+					serialDebug = eeprom.read(5);
 					break;
 				case 3:
-					readee = readEEPROM(5);
+					readee = eeprom.read(5);
 					if ((readee & 2) == 2)			//  see if the 2nd bit flag is set.
 					{
 						readee = readee - 2;		//  if it is set, turn it off
@@ -1064,11 +1064,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						readee = readee + 2;		//  if it is not set, turn it on
 						lcd.print("Enabled Menu Dbg");
 					}
-					writeEEPROM(5, readee);
-					serialDebug = readEEPROM(5);
+					eeprom.write(5, readee);
+					serialDebug = eeprom.read(5);
 					break;
 				case 4:
-					readee = readEEPROM(5);
+					readee = eeprom.read(5);
 					if ((readee & 4) == 4)			//  see if the 3rd bit flag is set.
 					{
 						readee = readee - 4;		//  if it is set, turn it off
@@ -1080,11 +1080,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 
 						lcd.print("Enabled Alarm Dbg");
 					}
-					writeEEPROM(5, readee);
-					serialDebug = readEEPROM(5);
+					eeprom.write(5, readee);
+					serialDebug = eeprom.read(5);
 					break;
 				case 5:
-					readee = readEEPROM(5);
+					readee = eeprom.read(5);
 					if ((readee & 8) == 8)			//  see if the 4th bit flag is set.
 					{
 						readee = readee - 8;		//  if it is set, turn it off
@@ -1095,11 +1095,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						readee = readee + 8;		//  if it is not set, turn it on
 						lcd.print("Enabled EEPROM Dbg");
 					}
-					writeEEPROM(5, readee);
-					serialDebug = readEEPROM(5);
+					eeprom.write(5, readee);
+					serialDebug = eeprom.read(5);
 					break;
 				case 6:
-					readee = readEEPROM(5);
+					readee = eeprom.read(5);
 					if ((readee & 16) == 16)			//  see if the 4th bit flag is set.
 					{
 						readee = readee - 16;		//  if it is set, turn it off
@@ -1110,11 +1110,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						readee = readee + 16;		//  if it is not set, turn it on
 						lcd.print("Enabled Relay Dbg");
 					}
-					writeEEPROM(5, readee);
-					serialDebug = readEEPROM(5);
+					eeprom.write(5, readee);
+					serialDebug = eeprom.read(5);
 					break;
 				case 7:
-					readee = readEEPROM(5);
+					readee = eeprom.read(5);
 					if ((readee & 16) == 16)		//  see if the 5th bit flag is set.
 					{
 						readee = readee - 16;		//  if it is set, turn it off
@@ -1125,11 +1125,11 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						readee = readee + 16;		//  if it is not set, turn it on
 						lcd.print("Enabled System Dbg");
 					}
-					writeEEPROM(5, readee);
-					serialDebug = readEEPROM(5);
+					eeprom.write(5, readee);
+					serialDebug = eeprom.read(5);
 					break;
 				case 8:
-					readee = readEEPROM(5);
+					readee = eeprom.read(5);
 					if ((readee & 64) == 64)			//  see if the 4th bit flag is set.
 					{
 						readee = readee - 64;		//  if it is set, turn it off
@@ -1140,8 +1140,8 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 						readee = readee + 64;		//  if it is not set, turn it on
 						lcd.print("Enabled Flow Dbg");
 					}
-					writeEEPROM(5, readee);
-					serialDebug = readEEPROM(5);
+					eeprom.write(5, readee);
+					serialDebug = eeprom.read(5);
 					break;
 				}
 				break;
@@ -1159,7 +1159,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 				case 1:
 					lcd.setCursor(3, 2);
 					lcd.print("Erasing EEPROM");
-					eraseEEPROM();
+					eeprom.eraseAll();
 					lcd.clear();
 					lcd.setCursor(3, 2);
 					lcd.print("Erase Complete");
@@ -1480,7 +1480,7 @@ uint16_t MenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t min, 
 					lcd.setCursor(0, 3);
 					lcd.print("       Saving       ");
 				}
-				if ((type & 128) != 128){ writeEEPROM(addr, start); }	//	doesnt write to EEPROM if the 8th bit of type is set
+				if ((type & 128) != 128){ eeprom.write(addr, start); }	//	doesnt write to EEPROM if the 8th bit of type is set
 					delay(50);
 					loopNumSel = 0;
 			}

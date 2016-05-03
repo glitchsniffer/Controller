@@ -102,12 +102,12 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portOutputRegister(P)
 #define portInputRegister(P)
 #define portModeRegister(P)
-#include <..\Controller\Controller.ino>
-#include <..\Controller\Alarms.h>
-#include <..\Controller\Alarms.ino>
-#include <..\Controller\EEprom.cpp>
-#include <..\Controller\EEprom.h>
-#include <..\Controller\GroteskBold16x32.c>
-#include <..\Controller\GroteskBold24x48.c>
-#include <..\Controller\Menu_System.ino>
+#include <Controller.ino>
+#include <Alarms.h>
+#include <Alarms.ino>
+#include <EEprom.cpp>
+#include <EEprom.h>
+#include <GroteskBold16x32.c>
+#include <GroteskBold24x48.c>
+#include <Menu_System.ino>
 #endif
