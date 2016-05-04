@@ -393,14 +393,14 @@ void MenuTitle()
 void MenuLoop()
 {
 	Alarm.delay(100);
-	MCPRead(MCP17A, GPIOA);		//	clear the interrupt from the MCP
+	mcpA.readByte(GPIOA);		//	clear the interrupt from the MCP
 
 	while (menuMode == 1)		//  scans for a button press to do the appropriate action
 	{
-		uint8_t Down = MCPReadBit(MCP17A, menubuttonbank, downButton);
-		uint8_t Up = MCPReadBit(MCP17A, menubuttonbank, upButton);
-		uint8_t Right = MCPReadBit(MCP17A, menubuttonbank, rightButton);
-		uint8_t Left = MCPReadBit(MCP17A, menubuttonbank, leftButton);
+		uint8_t Down = mcpA.readBit(menubuttonbank, downButton);
+		uint8_t Up = mcpA.readBit(menubuttonbank, upButton);
+		uint8_t Right = mcpA.readBit(menubuttonbank, rightButton);
+		uint8_t Left = mcpA.readBit(menubuttonbank, leftButton);
 		
 		if (Up == 1){MenuUp();}
 		if (Down == 1){MenuDown();}
@@ -419,7 +419,7 @@ void MenuLoop()
 	lcd.clear();			//  clear the screen
 	today = 0;				//  set today to 0 so that the date function gets called
 	Alarm.delay(100);
-	MCPRead(MCP17A, GPIOA);	//	clear the interrupt from MCP
+	mcpA.readByte(GPIOA);	//	clear the interrupt from MCP
 	RelayStatusDisplay(0, 3);
 	DS18B20_Read();			//  read the temp sensors so that the display has them
 }
@@ -1236,10 +1236,10 @@ uint16_t MenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t min, 
 	//  Main loop for all of the buttons
 	while (loopNumSel == 1)
 	{
-		uint8_t Down = MCPReadBit(MCP17A, menubuttonbank, downButton);
-		uint8_t Up = MCPReadBit(MCP17A, menubuttonbank, upButton);
-		uint8_t Right = MCPReadBit(MCP17A, menubuttonbank, rightButton);
-		uint8_t Left = MCPReadBit(MCP17A, menubuttonbank, leftButton);
+		uint8_t Down = mcpA.readBit(menubuttonbank, downButton);
+		uint8_t Up = mcpA.readBit(menubuttonbank, upButton);
+		uint8_t Right = mcpA.readBit(menubuttonbank, rightButton);
+		uint8_t Left = mcpA.readBit(menubuttonbank, leftButton);
 
 		//  gets rid of leading digits for the below cases
 

@@ -290,6 +290,9 @@
     <ClInclude Include="..\..\Arduino\libraries\UTouch\UTouchCD.h">
       <Filter>_libraries\UTouch</Filter>
     </ClInclude>
+    <ClInclude Include="MCPExpander.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EEprom.cpp">
@@ -455,6 +458,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GroteskBold24x48.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MCPExpander.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

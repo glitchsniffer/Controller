@@ -11,12 +11,13 @@
 #include <LiquidCrystal_I2C.h>		//LCD I2C library
 #include <DS1307RTC.h>
 #include "EEprom.h"
+#include "MCPExpander.h"
 
 //	VERSIONING VARIABLES
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 38;			//  Sets the build number for the current program
-byte subbuild = 1;			//	Sets the sub build number between major version releases
+byte subbuild = 2;			//	Sets the sub build number between major version releases
 
 #define LOOP_INTERVAL 1000		//	millis between log readings
 
@@ -84,31 +85,33 @@ byte clock[8] = {B00000,B01110,B10101,B10111,B10001,B01110,B00000,};			//	set th
 //  DEFINE THE MCP23017 IO EXPANDER
 //  ***********************************************
 #define MCP17A 0x20
+MCPExpander mcpA(MCP17A);
+MCPExpander mcpB(MCP17A);
 
-// MCP2308 or 17 Control Registers  IOCON BANK set to 1
-#define IOCON 0x0A		//	IOCON register address before switching it to BANK = 1 to allow the same registers to be used for the 23008 and 23017
-#define IODIRA 0x00		//  I/O Direction register 1 = input, 0 = output
-#define IODIRB 0x10		//  I/O Direction register 1 = input, 0 = output
-#define IPOLA 0x01		//  Input Polarity register 1 = GPIO register bit will be inverted from the input pin.  0 = non inverted.
-#define IPOLB 0x11		//  Input Polarity register 1 = GPIO register bit will be inverted from the input pin.  0 = non inverted.
-#define GPINTENA 0x02	//	Interrupt on change control register 1 = enable 0 = disable GPIO input pin for interrupt
-#define GPINTENB 0x12	//	Interrupt on change control register 1 = enable 0 = disable GPIO input pin for interrupt
-#define DEFVALA 0x03	//	Default compare register for int on change. Defines the default value of the interrupts.
-#define DEFVALB 0x13	//	Default compare register for int on change. Defines the default value of the interrupts.
-#define INTCONA 0x04	//	Interrupt Control register 1 = pin is compared to DEFVAL 0 = pin is compared to the previous value
-#define INTCONB 0x14	//	Interrupt Control register 1 = pin is compared to DEFVAL 0 = pin is compared to the previous value
-#define IOCONA 0x05		//	bit2: 1=Open drain output 0=active driver output(INTPOL sets the polarity. bit1: 1=active high 0=active low for the interrupt pin
-#define IOCONB 0x15		//	bit2: 1=Open drain output 0=active driver output(INTPOL sets the polarity. bit1: 1=active high 0=active low for the interrupt pin
-#define GPPUA 0x06		//	Pull-up Resistor configuration.  1 = PU enabled, 0 = PU disabled.  100k
-#define GPPUB 0x16		//	Pull-up Resistor configuration.  1 = PU enabled, 0 = PU disabled.  100k
-#define INTFA 0x07		//	Interrupt Flag register. read only. 1 = pin caused interrupt, 0 = interrupt not pending
-#define INTFB 0x17		//	Interrupt Flag register. read only. 1 = pin caused interrupt, 0 = interrupt not pending
-#define INTCAPA 0x08	//	Interrupt catpure register.  captures the GPIO port value when an interrupt occures.  1=high, 0=low
-#define INTCAPB 0x18	//	Interrupt catpure register.  captures the GPIO port value when an interrupt occures.  1=high, 0=low
-#define GPIOA 0x09		//	Port GPIO register.  Writing 1=high, 0=low modifies the OLAT register
-#define GPIOB 0x19		//	Port GPIO register.  Writing 1=high, 0=low modifies the OLAT register
-#define OLATA 0x0A		//	Output Latch register.  1=high, 0=low writing to this register modifies the output latches.  reading, reads the output latches.
-#define OLATB 0x1A		//	Output Latch register.  1=high, 0=low writing to this register modifies the output latches.  reading, reads the output latches.
+//  MCP2308 or 17 Control Registers  IOCON BANK set to 1
+//#define IOCON 0x0A		//	IOCON register address before switching it to BANK = 1 to allow the same registers to be used for the 23008 and 23017
+//#define IODIRA 0x00		//  I/O Direction register 1 = input, 0 = output
+//#define IODIRB 0x10		//  I/O Direction register 1 = input, 0 = output
+//#define IPOLA 0x01		//  Input Polarity register 1 = GPIO register bit will be inverted from the input pin.  0 = non inverted.
+//#define IPOLB 0x11		//  Input Polarity register 1 = GPIO register bit will be inverted from the input pin.  0 = non inverted.
+//#define GPINTENA 0x02		//	Interrupt on change control register 1 = enable 0 = disable GPIO input pin for interrupt
+//#define GPINTENB 0x12		//	Interrupt on change control register 1 = enable 0 = disable GPIO input pin for interrupt
+//#define DEFVALA 0x03		//	Default compare register for int on change. Defines the default value of the interrupts.
+//#define DEFVALB 0x13		//	Default compare register for int on change. Defines the default value of the interrupts.
+//#define INTCONA 0x04		//	Interrupt Control register 1 = pin is compared to DEFVAL 0 = pin is compared to the previous value
+//#define INTCONB 0x14		//	Interrupt Control register 1 = pin is compared to DEFVAL 0 = pin is compared to the previous value
+//#define IOCONA 0x05		//	bit2: 1=Open drain output 0=active driver output(INTPOL sets the polarity. bit1: 1=active high 0=active low for the interrupt pin
+//#define IOCONB 0x15		//	bit2: 1=Open drain output 0=active driver output(INTPOL sets the polarity. bit1: 1=active high 0=active low for the interrupt pin
+//#define GPPUA 0x06		//	Pull-up Resistor configuration.  1 = PU enabled, 0 = PU disabled.  100k
+//#define GPPUB 0x16		//	Pull-up Resistor configuration.  1 = PU enabled, 0 = PU disabled.  100k
+//#define INTFA 0x07		//	Interrupt Flag register. read only. 1 = pin caused interrupt, 0 = interrupt not pending
+//#define INTFB 0x17		//	Interrupt Flag register. read only. 1 = pin caused interrupt, 0 = interrupt not pending
+//#define INTCAPA 0x08		//	Interrupt catpure register.  captures the GPIO port value when an interrupt occures.  1=high, 0=low
+//#define INTCAPB 0x18		//	Interrupt catpure register.  captures the GPIO port value when an interrupt occures.  1=high, 0=low
+//#define GPIOA 0x09		//	Port GPIO register.  Writing 1=high, 0=low modifies the OLAT register
+//#define GPIOB 0x19		//	Port GPIO register.  Writing 1=high, 0=low modifies the OLAT register
+//#define OLATA 0x0A		//	Output Latch register.  1=high, 0=low writing to this register modifies the output latches.  reading, reads the output latches.
+//#define OLATB 0x1A		//	Output Latch register.  1=high, 0=low writing to this register modifies the output latches.  reading, reads the output latches.
 
 uint32_t debouncing_time = 250;		//	debouncing time in millis
 volatile uint32_t last_micros;
@@ -396,14 +399,14 @@ void setup()
 	}
 
 	//	SETUP THE MCP23017 PINS
-	MCPWrite(MCP17A, IOCON, 0x80);		//	Switches the IOCON to use BANK = 1 register addresses
-	MCPWrite(MCP17A, IODIRA, 0xF8);		//	configure the pins for A0-2 (SD card LEDs) as outputs and A3-7 (Menu Buttons) as inputs.
-	MCPWrite(MCP17A, IODIRB, 0x00);		//	configure the pins for B0-7 as outputs  This is for the Relays
-	MCPWrite(MCP17A, GPPUA, 0xF8);		//	turn on the 100k pullups
-	MCPWrite(MCP17A, GPINTENA, 0x80);	//	enable the interrupt on GPIO pin
-	MCPWrite(MCP17A, DEFVALA, 0x80);	//	set the default value of the interrupt pin to be high
-	MCPWrite(MCP17A, INTCONA, 0x80);	//	set the interrupt to use the value of DEFVAL
-	MCPWrite(MCP17A, GPIOB, 0xFF);		//	write the relays to off
+	mcpA.writeByte(IOCON, 0x80);		//	Switches the IOCON to use BANK = 1 register addresses
+	mcpA.writeByte(IODIRA, 0xF8);		//	configure the pins for A0-2 (SD card LEDs) as outputs and A3-7 (Menu Buttons) as inputs.
+	mcpA.writeByte(IODIRB, 0x00);		//	configure the pins for B0-7 as outputs  This is for the Relays
+	mcpA.writeByte(GPPUA, 0xF8);		//	turn on the 100k pullups
+	mcpA.writeByte(GPINTENA, 0x80);	//	enable the interrupt on GPIO pin
+	mcpA.writeByte(DEFVALA, 0x80);	//	set the default value of the interrupt pin to be high
+	mcpA.writeByte(INTCONA, 0x80);	//	set the interrupt to use the value of DEFVAL
+	mcpA.writeByte(GPIOB, 0xFF);		//	write the relays to off
 
 	pinMode(menuEnterIntPin, INPUT_PULLUP);
 	attachInterrupt(digitalPinToInterrupt(menuEnterIntPin), MenuButtonPress, FALLING);		//  Attaches int.4, pin 19(RX1) on the Mega and Due and sets it to trigger on a low input from the menu button
@@ -534,7 +537,7 @@ void setup()
 		Serial.print(millis());
 		Serial.println();
 		//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
-		//TestSDLEDS();			//**********NICE SPOT TO TEST SDLEDS**************
+		TestSDLEDS();			//**********NICE SPOT TO TEST SDLEDS**************
 }
 
 void loop()
@@ -622,12 +625,12 @@ void RelayToggleALL()
 
 	for (uint8_t relay = 0; relay <= relayCount; relay++)	//	loop through the relays and turn each one on
 	{
-		MCPWriteBit(MCP17A, 1, relay, 0);			//	writes the selected port low to turn the relay on
+		mcpA.writeBit(1, relay, 0);			//	writes the selected port low to turn the relay on
 		delay(200);
 	}
 	for (uint8_t relay = 0; relay <= relayCount; relay++)	//	loop through the relays and turn each one off
 	{	
-		MCPWriteBit(MCP17A, 1, relay, 1);			//	writes the selected port low to turn the relay off
+		mcpA.writeBit(1, relay, 1);			//	writes the selected port low to turn the relay off
 		delay(200);
 	}
 }
@@ -654,7 +657,7 @@ void RelayToggle(uint8_t state, uint8_t onoff)
 				{
 					RelayState = RelayState ^ (1 << i);	//	toggles the bit held in RelayState
 				}
-				MCPWriteBit(MCP17A, 1, i, 1);			//	turns the relay off
+				mcpA.writeBit(1, i, 1);			//	turns the relay off
 				lcd.print("-");							//	sets the relay to display a - on the LCD screen
 			}
 			break;
@@ -665,7 +668,7 @@ void RelayToggle(uint8_t state, uint8_t onoff)
 				{
 					RelayState = RelayState ^ (1 << i);	//	toggles the bit held in RelayState
 				}
-				MCPWriteBit(MCP17A, 1, i, 0);			//	turns the relay on
+				mcpA.writeBit(1, i, 0);			//	turns the relay on
 				lcd.print("+");							//	sets the relay to display a - on the LCD screen
 			}
 			break;
@@ -930,7 +933,7 @@ void logger()
 {
 	time_t t;
 
-	MCPWriteBit(MCP17A, sdledbank,greenledpin, 1);
+	mcpA.writeBit(sdledbank,greenledpin, 1);
 
 	if ((serialDebug & 1) == 1)
 	{Serial.println("Preparing Data");}
@@ -1042,7 +1045,7 @@ void logger()
 		break;
 	}
 
-	MCPWriteBit(MCP17A, sdledbank, greenledpin, 0);
+	mcpA.writeBit(sdledbank, greenledpin, 0);
 
 	//  Write the data to disk if the millis are more than the write interval
 	if ((millis() - syncTime) < SDCARD_WRITE_INTERVAL) { return; }
@@ -1054,9 +1057,9 @@ void logger()
 		Serial.println("Writing log to the SD Card");
 		Serial.println("");
 	}
-	MCPWriteBit(MCP17A, sdledbank, blueledpin, 1);
+	mcpA.writeBit(sdledbank, blueledpin, 1);
 	logfile.flush();
-	MCPWriteBit(MCP17A, sdledbank, blueledpin, 1);
+	mcpA.writeBit(sdledbank, blueledpin, 1);
 }
 
 void FlowSensorRead()
@@ -1213,102 +1216,6 @@ void factoryDefaultset()
 	Serial.println("Factory Defaults Restored");
 }
 
-void MCPWrite(uint8_t address, uint8_t reg, uint8_t data)
-{
-	//  Send data to the address and register of the I2C device
-	Wire.beginTransmission(address);    //  begin the transmission of data
-	Wire.write(reg);                    //  write to the specific register
-	Wire.write(data);                   //  write the data byte
-	Wire.endTransmission();             //  end the transmission of the data
-}
-
-uint8_t MCPRead(int8_t address, uint8_t reg)
-{
-	uint8_t data = 0;
-
-	//  Start by sending the register address
-	Wire.beginTransmission(address);
-	Wire.write(reg);
-	Wire.endTransmission();
-
-	//  request 1 bytes from the device
-	Wire.requestFrom(address, 1);		//	initiate the request for , x bytes from the I2C device
-	if (!Wire.available()) {}			//  wait until data is received
-	data = Wire.read();					//	write the bytes to data once it is done receiving
-
-	return data;						//	return the data as a byte
-}
-
-uint8_t MCPWriteBit(uint8_t address, uint8_t bank, uint8_t port, uint8_t state)
-{
-	//  address = the address of the MCP to write to
-	//  bank = is the GPIO bank A or B that you want to write to
-	//  port = is the port on the bank that you want to write to 0 - 7
-	//  state = is the bit you want to write to that port 0 or 1
-
-	//  will return the last reading from the port
-
-	uint8_t read = 0;
-
-	//  read the current setting IO port bank
-	if (bank == 0)
-	{
-		read = MCPRead(address, GPIOA);						//	read the GPIO ports from the MCP
-		MCPWrite(address, GPIOA, read ^ (1 << port));		//	write the specific port back to the MCP either turning it off
-		read = MCPRead(address, GPIOB);						//	read back the GPIO port to be able to print out what the final result is
-	}
-	else if (bank == 1)
-	{
-		read = MCPRead(address, GPIOB);						//	read the GPIO ports from the MCP
-		MCPWrite(address, GPIOB, read ^ (1 << port));		//	write the specific port back to the MCP either turning it on
-		read = MCPRead(address, GPIOB);						//	read back the GPIO port to be able to print out what the final result is
-	}
-	else { Serial.println("Incorrect bank selection"); }
-
-	return read;		//	return what was the final read was
-	
-}
-
-uint8_t MCPReadBit(uint8_t address, uint8_t bank, uint8_t port)
-{
-	//  address = the address of the MCP to read from
-	//  bank = is the GPIO bank A or B that you want to read from
-	//  port = is the port on the bank that you want to read from to 0 - 7
-
-	//	will return the current bit of the port selected as a 1 or 0
-
-	uint8_t read = 0;
-
-	//  read the current setting IO port bank
-	if (bank == 0)
-	{
-		read = MCPRead(address, GPIOA);
-	}
-	else if (bank == 1)
-	{
-		read = MCPRead(address, GPIOB);
-	}
-	else { Serial.println("Incorrect bank selection"); }
-
-	//	this will take the reading and shift it in and out to isolate the bit
-
-	read = (read ^ (1 << port));
-	read = (read << (7 - port));
-	read = (read >> 7);
-
-	//	evaluate the bit selected and return the proper value
-	switch (read)
-	{
-	case 0:
-		return 0;
-	case 1:
-		return 1;
-	default:
-		return 2;
-	}
-}
-
-
 uint16_t freeRam()
 {
 	extern int32_t __heap_start, *__brkval;
@@ -1330,22 +1237,22 @@ void error(char*str)
 {
 	Serial.print("Error: ");
 	Serial.println(str);
-	MCPWriteBit(MCP17A, sdledbank, redledpin, 1);
+	mcpA.writeBit(sdledbank, redledpin, 1);
 }
 
 void TestSDLEDS()
 {
 	//TEST THE LEDS
-	MCPWriteBit(MCP17A, sdledbank, redledpin, 1);
+	mcpA.writeBit(sdledbank, redledpin, 1);
 	delay(500);
-	MCPWriteBit(MCP17A, sdledbank, greenledpin, 1);
+	mcpA.writeBit(sdledbank, greenledpin, 1);
 	delay(500);
-	MCPWriteBit(MCP17A, sdledbank, blueledpin, 1);
+	mcpA.writeBit(sdledbank, blueledpin, 1);
 	delay(500);
-	MCPWriteBit(MCP17A, sdledbank, redledpin, 0);
+	mcpA.writeBit(sdledbank, redledpin, 0);
 	delay(500);
-	MCPWriteBit(MCP17A, sdledbank, greenledpin, 0);
+	mcpA.writeBit(sdledbank, greenledpin, 0);
 	delay(500);
-	MCPWriteBit(MCP17A, sdledbank, blueledpin, 0);
+	mcpA.writeBit(sdledbank, blueledpin, 0);
 	delay(500);
 }

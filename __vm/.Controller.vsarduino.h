@@ -109,5 +109,7 @@ extern "C" void __cxa_pure_virtual() {;}
 #include <EEprom.h>
 #include <GroteskBold16x32.c>
 #include <GroteskBold24x48.c>
+#include <MCPExpander.cpp>
+#include <MCPExpander.h>
 #include <Menu_System.ino>
 #endif

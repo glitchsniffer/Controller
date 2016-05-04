@@ -157,6 +157,7 @@
     <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.7\variants\arduino_due_x\pins_arduino.h" />
     <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.7\variants\arduino_due_x\variant.h" />
     <ClInclude Include="EEprom.h" />
+    <ClInclude Include="MCPExpander.h" />
     <ClInclude Include="Visual Micro\.Controller.vsarduino.h" />
     <ClInclude Include="__vm\.Controller.vsarduino.h" />
   </ItemGroup>
@@ -216,6 +217,7 @@
     <ClCompile Include="EEprom.cpp" />
     <ClCompile Include="GroteskBold16x32.c" />
     <ClCompile Include="GroteskBold24x48.c" />
+    <ClCompile Include="MCPExpander.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
