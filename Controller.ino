@@ -17,9 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 38;			//  Sets the build number for the current program
-byte subbuild = 2;			//	Sets the sub build number between major version releases
-
-#define LOOP_INTERVAL 1000		//	millis between log readings
+byte subbuild = 3;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -44,7 +42,13 @@ byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte today = 0;				//  Sets the today to the current date to display on the RTC
 
 
-//  INITIALIZE THE LCD
+//  DEFINE THE LCD SCREENS
+//  ***********************************************
+//	**** set the LCD type to 0 for the 20x4 LCD Character screen
+//	**** set the LCD type to 1 for the 4.3" TFT Touchscreen
+#define LCD_TYPE 1
+
+//  DEFINE THE LCD CHARACTER DISPLAY
 //  ***********************************************
 #define LCD_DEV_ADDR 0x3F		//  Set the address of the LCD screen	(Both systems)
 
@@ -57,29 +61,26 @@ byte today = 0;				//  Sets the today to the current date to display on the RTC
 #define D5 5
 #define D6 6
 #define D7 7
-LiquidCrystal_I2C lcd(LCD_DEV_ADDR,En,Rw,Rs,D4,D5,D6,D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
+LiquidCrystal_I2C lcd(LCD_DEV_ADDR, En, Rw, Rs, D4, D5, D6, D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
 const int16_t backlight = 8;		//	variable used to store the pin for the backlight
 
-//  INITIALIZE THE LCD TOUCHSCREEN
+//  SETUP CUSTOM CHARACTERS
+byte degree[8] = { B01100,B10010,B10010,B01100,B00000,B00000,B00000, };		//  set the lcd char for the degree symbol
+byte rarrow[8] = { B00000,B01000,B01100,B01110,B01100,B01000,B00000, };		//  set the lcd char for the right arrow symbol
+byte uarrow[8] = { B00000,B00000,B00100,B01110,B11111,B00000,B00000, };		//  set the lcd char for the up arrow symbol
+byte clock[8] = { B00000,B01110,B10101,B10111,B10001,B01110,B00000, };		//	set the lcd char for the clock symbol
+
+
+//  INITIALIZE THE 4.3" TFT TOUCHSCREEN
 //  ***********************************************
 UTFT myGLCD(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
 UTouch myTouch(6, 5, 32, 3, 2);			//	start an instance of the UTouch class using the pins used
 
 //	set the fonts that we will be using
-extern uint8_t BigFont[];				
+extern uint8_t BigFont[];
 extern uint8_t SevenSegNumFont[];
 extern uint8_t GroteskBold16x32[];
 extern uint8_t GroteskBold24x48[];
-
-//  SETUP CUSTOM CHARACTERS
-byte degree[8] = {B01100,B10010,B10010,B01100,B00000,B00000,B00000,};		//  set the lcd char for the degree symbol
-byte rarrow[8] = {B00000,B01000,B01100,B01110,B01100,B01000,B00000,};		//  set the lcd char for the right arrow symbol
-byte uarrow[8] = {B00000,B00000,B00100,B01110,B11111,B00000,B00000,};		//  set the lcd char for the up arrow symbol
-//byte larrow[8] = {B00000,B00010,B00110,B01110,B00110,B00010,B00000,};		//  set the lcd char for the left arrow symbol
-//byte darrow[8] = {B00000,B00000,B11111,B01110,B00100,B00000,B00000,};		//  set the lcd char for the down arrow symbol
-//byte bell[8] = {B00100,B01110,B01110,B01110,B11111,B00000,B00100,};		//  set the lcd char for the timer bell symbol
-//byte relon[8] = {B11100,B10100,B11100,B00000,B00111,B00101,B00101,};		//  set the lcd char for the relay on symbol
-byte clock[8] = {B00000,B01110,B10101,B10111,B10001,B01110,B00000,};			//	set the lcd char for the clock symbol
 
 
 //  DEFINE THE MCP23017 IO EXPANDER
@@ -88,48 +89,22 @@ byte clock[8] = {B00000,B01110,B10101,B10111,B10001,B01110,B00000,};			//	set th
 MCPExpander mcpA(MCP17A);
 MCPExpander mcpB(MCP17A);
 
-//  MCP2308 or 17 Control Registers  IOCON BANK set to 1
-//#define IOCON 0x0A		//	IOCON register address before switching it to BANK = 1 to allow the same registers to be used for the 23008 and 23017
-//#define IODIRA 0x00		//  I/O Direction register 1 = input, 0 = output
-//#define IODIRB 0x10		//  I/O Direction register 1 = input, 0 = output
-//#define IPOLA 0x01		//  Input Polarity register 1 = GPIO register bit will be inverted from the input pin.  0 = non inverted.
-//#define IPOLB 0x11		//  Input Polarity register 1 = GPIO register bit will be inverted from the input pin.  0 = non inverted.
-//#define GPINTENA 0x02		//	Interrupt on change control register 1 = enable 0 = disable GPIO input pin for interrupt
-//#define GPINTENB 0x12		//	Interrupt on change control register 1 = enable 0 = disable GPIO input pin for interrupt
-//#define DEFVALA 0x03		//	Default compare register for int on change. Defines the default value of the interrupts.
-//#define DEFVALB 0x13		//	Default compare register for int on change. Defines the default value of the interrupts.
-//#define INTCONA 0x04		//	Interrupt Control register 1 = pin is compared to DEFVAL 0 = pin is compared to the previous value
-//#define INTCONB 0x14		//	Interrupt Control register 1 = pin is compared to DEFVAL 0 = pin is compared to the previous value
-//#define IOCONA 0x05		//	bit2: 1=Open drain output 0=active driver output(INTPOL sets the polarity. bit1: 1=active high 0=active low for the interrupt pin
-//#define IOCONB 0x15		//	bit2: 1=Open drain output 0=active driver output(INTPOL sets the polarity. bit1: 1=active high 0=active low for the interrupt pin
-//#define GPPUA 0x06		//	Pull-up Resistor configuration.  1 = PU enabled, 0 = PU disabled.  100k
-//#define GPPUB 0x16		//	Pull-up Resistor configuration.  1 = PU enabled, 0 = PU disabled.  100k
-//#define INTFA 0x07		//	Interrupt Flag register. read only. 1 = pin caused interrupt, 0 = interrupt not pending
-//#define INTFB 0x17		//	Interrupt Flag register. read only. 1 = pin caused interrupt, 0 = interrupt not pending
-//#define INTCAPA 0x08		//	Interrupt catpure register.  captures the GPIO port value when an interrupt occures.  1=high, 0=low
-//#define INTCAPB 0x18		//	Interrupt catpure register.  captures the GPIO port value when an interrupt occures.  1=high, 0=low
-//#define GPIOA 0x09		//	Port GPIO register.  Writing 1=high, 0=low modifies the OLAT register
-//#define GPIOB 0x19		//	Port GPIO register.  Writing 1=high, 0=low modifies the OLAT register
-//#define OLATA 0x0A		//	Output Latch register.  1=high, 0=low writing to this register modifies the output latches.  reading, reads the output latches.
-//#define OLATB 0x1A		//	Output Latch register.  1=high, 0=low writing to this register modifies the output latches.  reading, reads the output latches.
-
-uint32_t debouncing_time = 250;		//	debouncing time in millis
-volatile uint32_t last_micros;
-
 
 //  DEFINE BUTTON PINS
 //  ***********************************************
 #define menubuttonbank 0		//	this is the bank of ports that the switches are on
-#define upButton 5			//  set the up button to port 0.5
-#define leftButton 6		//  set the right button to port 0.6
-#define rightButton 3		//  set the left button to port 0.3
-#define downButton 4		//  set the down button to port 0.4
-#define menuenterbutton 7	//	set the menu enter button to port 0.7
+#define upButton 5				//  set the up button to port 0.5
+#define leftButton 6			//  set the right button to port 0.6
+#define rightButton 3			//  set the left button to port 0.3
+#define downButton 4			//  set the down button to port 0.4
+#define menuenterbutton 7		//	set the menu enter button to port 0.7
 
-byte menuEnterInterrupt = 4;	//	interrupt to trigger to enter the menu
-byte menuEnterIntPin = 19;		//	pin on the arduino to use for the interrupt
+byte menuEnterInterrupt = 4;		//	interrupt to trigger to enter the menu
+byte menuEnterIntPin = 19;			//	pin on the arduino to use for the interrupt
+uint32_t debouncing_time = 250;		//	debouncing time in millis
+volatile uint32_t last_micros;		//	placeholder variable to store when the interrrupt was triggered
 
-volatile int8_t menuMode = 0;	//  set the variable that will be change to enable the menu in the interrupt
+volatile int8_t menuMode = 0;		//  set the variable that will be change to enable the menu in the interrupt
 
 
 //  INITIALIZE THE MENU VARIABLES
@@ -201,6 +176,8 @@ float tempReadF[4];		//	array to hold the temperature readings taken
 
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
+#define LOOP_INTERVAL 1000		//	millis between log readings
+
 byte AlarmEnable;			//  byte for storing all 8 alarm's enable flags as bits
 byte AlarmState;			//  byte for storing all 8 alarm's state flags as bits
 byte AlarmType[8];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
@@ -251,7 +228,7 @@ File logfile;							//	initialize the file to log to
 
 //  INITIALIZE THE LEDS
 //  ***********************************************
-#define sdledbank	0		//	the sdcard leds are on bank 0 of the MCP23017
+#define sdledbank 0			//	the sdcard leds are on bank 0 of the MCP23017
 #define redledpin 0			//  located on port 0.0 of the MCP23017
 #define greenledpin 1		//  located on port 0.1 of the MCP23017
 #define blueledpin 2		//  located on port 0.2 of the MCP23017
@@ -542,7 +519,6 @@ void setup()
 
 void loop()
 {
-	//	Serial.println(freeRam());		//	Used to check the ammount of free RAM on the micro
 	if (menuMode == 1)
 	{
 		Serial.println("Entering Menu");		//  calls the MenuTitle as long as menuMode = 1
@@ -735,6 +711,9 @@ void START_SCREEN()
 	c = c + 24;
 	myGLCD.printNumI(subbuild, c, y * 4, 2, '0');
 
+	myGLCD.clrScr();
+	myGLCD.fillScr(VGA_BLUE);
+
 }
 	
 void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space)
@@ -745,63 +724,101 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 //	space can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
 //	if sec == 99 then dont print seconds, if sec == 98 print seconds and AM/PM, if sec != 99 then print the seconds only
 {
-	//	display the hour
 	uint8_t realhour = hour;
-	switch (timeFormat)		//	use timeFormat to determine where to put the cursor for the hour if set for 12 hour time and print the hour and AM/PM
+
+	if (LCD_TYPE == 1)
 	{
-	case 0:		//	if 24 hour set the cursor to use 2 digits
-		if (hour <= 9){ lcd.setCursor(col + 1, row); }	//  set cursor for single digits
-		else { lcd.setCursor(col, row); }				//	set cursor for double digits
-		lcd.print(hour);
-		break;
-	case 1:		//	if 12 hour set the cursor to account for # of hour digits
-		//  convert hour to 12 hour time
-		if (hour == 0){ hour = 12; }					//	if hour is midnight, add 12 to the display of the hour to make it 12 AM
-		else if (hour >= 13) { hour = hour - 12; }		//	if hour is 1pm or greater convert to 12 hour
-
-		//	set the cursor to print the hour digits
-		lcd.setCursor(col, row);
-		if (hour <= 9){ lcd.print(" ");	}		//	add a leading space for the hour if <= 9
-		
-		//	print the hour
-		lcd.print(hour);
-		break;
-	}
-
-	//	display the minutes
-	col = col + 2;
-	lcd.setCursor(col, row);		//	set cursor for the colon
-	lcd.print(":");						//	print the colon for the minutes
-
-	if (min <= 9){ lcd.print("0"); }	//	if the minutes is 1 digit pad a 0 to the single digit
-	lcd.print(min);
-
-	col = col + 3;
-	lcd.setCursor(col, row);		//	set the cursor for the either the seconds or AMPM printing
-
-	//	display the seconds
-	if ((secondsDisplay == 1) || (disp == 2))		//  only display seconds if disp forces it or they are set to display
-	{
-		if ((disp & 1) != 1)		//	if the disp byte is not set to force seconds digits off, print the seconds
+		//	display the hour
+		switch (timeFormat)		//	use timeFormat to determine where to put the cursor for the hour if set for 12 hour time and print the hour and AM/PM
 		{
-			lcd.print(":");
-			if (second() <= 9)				//	print the 1 digit second padded with a 0
+		case 0:		//	if 24 hour set the cursor to use 2 digits
+			if (hour <= 9) { lcd.setCursor(col + 1, row); }	//  set cursor for single digits
+			else { lcd.setCursor(col, row); }				//	set cursor for double digits
+			lcd.print(hour);
+			break;
+		case 1:		//	if 12 hour set the cursor to account for # of hour digits
+			//  convert hour to 12 hour time
+			if (hour == 0) { hour = 12; }					//	if hour is midnight, add 12 to the display of the hour to make it 12 AM
+			else if (hour >= 13) { hour = hour - 12; }		//	if hour is 1pm or greater convert to 12 hour
+
+			//	set the cursor to print the hour digits
+			lcd.setCursor(col, row);
+			if (hour <= 9) { lcd.print(" "); }		//	add a leading space for the hour if <= 9
+
+			//	print the hour
+			lcd.print(hour);
+			break;
+		}
+
+		//	display the minutes
+		col = col + 2;
+		lcd.setCursor(col, row);		//	set cursor for the colon
+		lcd.print(":");						//	print the colon for the minutes
+
+		if (min <= 9) { lcd.print("0"); }	//	if the minutes is 1 digit pad a 0 to the single digit
+		lcd.print(min);
+
+		col = col + 3;
+		lcd.setCursor(col, row);		//	set the cursor for the either the seconds or AMPM printing
+
+		//	display the seconds
+		if ((secondsDisplay == 1) || (disp == 2))		//  only display seconds if disp forces it or they are set to display
+		{
+			if ((disp & 1) != 1)		//	if the disp byte is not set to force seconds digits off, print the seconds
 			{
-				lcd.print("0");
-				lcd.print(second());
+				lcd.print(":");
+				if (second() <= 9)				//	print the 1 digit second padded with a 0
+				{
+					lcd.print("0");
+					lcd.print(second());
+				}
+				else { lcd.print(second()); }	//	print the 2 digit second
+				col = col + 3;
 			}
-			else { lcd.print(second()); }	//	print the 2 digit second
-			col = col + 3;
+		}
+
+		//  display AM/PM
+		if (timeFormat == 1)
+		{
+			//	if ((disp & 1) != 1){ lcd.setCursor(col + 3, row); }
+			col = col + space;
+			lcd.setCursor(col, row);
+			if (realhour >= 12) {
+				lcd.print("PM");
+			}
+			else if (realhour <= 11) {
+				lcd.print("AM");
+			}
 		}
 	}
-	//  display AM/PM
-	if (timeFormat == 1)
+	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
+	//else
 	{
-		//	if ((disp & 1) != 1){ lcd.setCursor(col + 3, row); }
-		col = col + space;
-		lcd.setCursor(col, row);
-		if (realhour >= 12){ lcd.print("PM"); }
-		else if (realhour <= 11){ lcd.print("AM"); }
+		myGLCD.setFont(GroteskBold24x48);
+		int c = 0;
+		int y = 5;
+		myGLCD.printNumI(hour, c, y, 2, ' ');
+		c = c + (24 * 2);
+		myGLCD.print(":", c, y);
+		c = c + 24;
+		myGLCD.printNumI(min, c, y, 2, '0');
+		c = c + (24 * 2);
+		myGLCD.print(":", c, y, 0);
+		c = c + 24;
+		myGLCD.printNumI(sec, c, y, 2, '0');
+		c = c + (24 * 2);
+
+		//  display AM/PM
+		if (timeFormat == 1)
+		{
+			//	if ((disp & 1) != 1){ lcd.setCursor(col + 3, row); }
+			if (realhour >= 12) {
+				myGLCD.print("PM", c, y);
+			}
+			else if (realhour <= 11) {
+				myGLCD.print("AM", c, y);
+			}
+		}
 	}
 }
 
@@ -810,38 +827,57 @@ void LCDDateDisplay(byte display, uint8_t col, uint8_t row)
 //	display - 1 to enable 0 padding on the day
 
 {
-	if(display == 0 && day() == today){ return; }		//	if the day hasn't changed, dont refresh it	
-	else
+	if (LCD_TYPE == 1)
 	{
-		uint8_t addcol = 0;
-		uint8_t tempcol = 0;
-
-		lcd.setCursor(col, row);
-		lcd.print("           ");					//	erase the current line
-
-		//	display and shift the cursor according to the month
-		if (month() < 10){ addcol = 1; }
-		lcd.setCursor(col + addcol, row);
-		lcd.print(month());
-		lcd.print("/");
-		col = col + 3;
-		addcol = 0;
-
-		//	display and shift the cursor according to the day
-		if (display == 1 && day() < 10)
+		if (display == 0 && day() == today) { return; }		//	if the day hasn't changed, dont refresh it	
+		else
 		{
-			lcd.print("0");
-			addcol = 1;
-		}
-		lcd.setCursor(col + addcol , row);
-		lcd.print(day());
-		lcd.print("/");
-		col = col + 3;
-		addcol = 0;
+			uint8_t addcol = 0;
+			uint8_t tempcol = 0;
 
-		//	display the year
-		lcd.print(year());
-		today = day();					//	set the day = to today so that it doesn't refresh the display with it until tomorrow
+			lcd.setCursor(col, row);
+			lcd.print("           ");					//	erase the current line
+
+			//	display and shift the cursor according to the month
+			if (month() < 10) { addcol = 1; }
+			lcd.setCursor(col + addcol, row);
+			lcd.print(month());
+			lcd.print("/");
+			col = col + 3;
+			addcol = 0;
+
+			//	display and shift the cursor according to the day
+			if (display == 1 && day() < 10)
+			{
+				lcd.print("0");
+				addcol = 1;
+			}
+			lcd.setCursor(col + addcol, row);
+			lcd.print(day());
+			lcd.print("/");
+			col = col + 3;
+			addcol = 0;
+
+			//	display the year
+			lcd.print(year());
+			today = day();					//	set the day = to today so that it doesn't refresh the display with it until tomorrow
+		}
+	}
+	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
+	//else
+	{
+		myGLCD.setFont(GroteskBold24x48);
+		int c = 0;
+		int y = 53;
+		myGLCD.printNumI(day(), c, y, 2, ' ');
+		c = c + (24 * 2);
+		myGLCD.print("/", c, y);
+		c = c + 24;
+		myGLCD.printNumI(month(), c, y, 2, '0');
+		c = c + (24 * 2);
+		myGLCD.print("/", c, y, 0);
+		c = c + 24;
+		myGLCD.printNumI(year(), c, y);
 	}
 }
 
