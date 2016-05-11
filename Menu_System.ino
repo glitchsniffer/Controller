@@ -382,13 +382,14 @@ void MenuTitle()
 	}
 	delay(150);
 	
-//  If it just entered the menu system it will call the MenuLoop function.  Otherwise it will use the return to fall
+//  If it just entered the menu system it will call the MenuLoop function and reset the interrupt in the MCP chip.  Otherwise it will use the return to fall
 //  back to the MenuLoop.  This prevents an endless loop with no return and keeps the stack from piling up.  When the
 //	menu is called from the main loop it sets mRet to 0 to make sure it calls the MenuLoop the first time through.
-	if (mRet == 0){
-		mRet = 1;
-		MenuLoop();}
-		else{return;}
+	if (mRet == 0){					//	will only run the first time through
+		mRet = 1;					//	set to 1 to cause subsequent runs to not do the following 2 lines
+		mcpA.readByte(INTCAPA);		//	clear the interrupt in the mcpA
+		MenuLoop();}				//	start the MenuLoop
+		else{return;}				//	return to the MenuLoop
 }
 void MenuLoop()
 {

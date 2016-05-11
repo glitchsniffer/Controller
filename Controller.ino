@@ -3,11 +3,11 @@
 #include <SD.h>
 #include <SPI.h>
 #include <TimeLib.h>
-#include <Time.h>               //Time Library
-#include <TimeAlarms.h>			//TimeAlarms Library
-#include <OneWire.h>            //OneWire Library for the DS Sensors
-#include <DallasTemperature.h>  //Dallas Temperature library
-#include <Wire.h>               //I2C Wire library
+#include <Time.h>					//Time Library
+#include <TimeAlarms.h>				//TimeAlarms Library
+#include <OneWire.h>				//OneWire Library for the DS Sensors
+#include <DallasTemperature.h>		//Dallas Temperature library
+#include <Wire.h>					//I2C Wire library
 #include <LiquidCrystal_I2C.h>		//LCD I2C library
 #include <DS1307RTC.h>
 #include "EEprom.h"
@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 38;			//  Sets the build number for the current program
-byte subbuild = 3;			//	Sets the sub build number between major version releases
+byte subbuild = 4;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -377,27 +377,29 @@ void setup()
 
 	//	SETUP THE MCP23017 PINS
 	mcpA.writeByte(IOCON, 0x80);		//	Switches the IOCON to use BANK = 1 register addresses
+	mcpA.writeByte(GPPUA, 0xF8);		//	turn on the 100k pullups
+	mcpA.writeByte(GPINTENA, 0x80);		//	enable the interrupt on GPIO pin
 	mcpA.writeByte(IODIRA, 0xF8);		//	configure the pins for A0-2 (SD card LEDs) as outputs and A3-7 (Menu Buttons) as inputs.
 	mcpA.writeByte(IODIRB, 0x00);		//	configure the pins for B0-7 as outputs  This is for the Relays
-	mcpA.writeByte(GPPUA, 0xF8);		//	turn on the 100k pullups
-	mcpA.writeByte(GPINTENA, 0x80);	//	enable the interrupt on GPIO pin
-	mcpA.writeByte(DEFVALA, 0x80);	//	set the default value of the interrupt pin to be high
-	mcpA.writeByte(INTCONA, 0x80);	//	set the interrupt to use the value of DEFVAL
+	mcpA.writeByte(DEFVALA, 0x80);		//	set the default value of the interrupt pin to be high
+	mcpA.writeByte(INTCONA, 0x80);		//	set the interrupt to use the value of DEFVAL
 	mcpA.writeByte(GPIOB, 0xFF);		//	write the relays to off
+	mcpA.readByte(INTCAPA);				//	read from the interrupt port to clear any interrupts that happened
+	mcpA.readByte(INTCAPB);				//	read from the interrupt port to clear any interrupts that happened
 
-	pinMode(menuEnterIntPin, INPUT_PULLUP);
+	pinMode(menuEnterIntPin, INPUT_PULLUP);		//	set the pin mode for the interrupt pin on the arduino
 	attachInterrupt(digitalPinToInterrupt(menuEnterIntPin), MenuButtonPress, FALLING);		//  Attaches int.4, pin 19(RX1) on the Mega and Due and sets it to trigger on a low input from the menu button
 
 	//  SETUP THE FLOW SENSOR
-	pinMode(flowSensorIntPin, INPUT);				//	set the flow sensor as an input to the pin number in the variable
-	digitalWrite(flowSensorIntPin, HIGH);			//	write the pin high to be active low
+	pinMode(flowSensorIntPin, INPUT);		//	set the flow sensor as an input to the pin number in the variable
+	digitalWrite(flowSensorIntPin, HIGH);	//	write the pin high to be active low
 
 	//  SETUP THE LCD SCREEN
 	lcd.begin(20, 4);						//  setup the LCD's number of columns and rows
 	lcd.createChar(1, degree);				//  init custom characters as numbers
 	lcd.createChar(2, rarrow);				//  init custom characters as numbers
 	lcd.createChar(3, uarrow);				//  init custom characters as numbers
-	lcd.setBacklightPin(B_Light, POSITIVE);  //  set the backlight pin and polarity
+	lcd.setBacklightPin(B_Light, POSITIVE); //  set the backlight pin and polarity
 	lcd.setBacklight(HIGH);					//  toggle the backlight on
 	pinMode(backlight, OUTPUT);				//	set the pin for the backlight as an output
 	analogWrite(backlight, backlightLevel);	//	write the backlightlevel to the pin for the backlight
@@ -411,9 +413,6 @@ void setup()
 	myGLCD.setColor(VGA_SILVER);
 
 	START_SCREEN();		//  call the start up screen function
-
-	RelayStatusDisplay(0, 3);				//	call the relay status display function
-	RelayToggle(RelayState, 1);				//	Turn on the relays according to the AlarmState byte
 
 	//  SETUP THE DS18B20 SENSORS
 	//  Check to see how many sensors are on the busses
@@ -507,14 +506,35 @@ void setup()
 		logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
 	}
 
-		//	TAKE A TEMP READING AND START THE LOOP
-		if ((serialDebug & 1) == 1){ Serial.println(); }
-		DS18B20_Read();
-		Serial.print("Starting Loop :");
-		Serial.print(millis());
-		Serial.println();
-		//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
-		TestSDLEDS();			//**********NICE SPOT TO TEST SDLEDS**************
+	//	CLEAR THE LCD SCREENS
+	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
+	{
+		lcd.setCursor(0, 0);
+		lcd.clear();
+	}
+	if (LCD_TYPE == 1)		//	temporary to show both screens
+							//else
+	{
+		myGLCD.clrScr();
+		myGLCD.fillScr(VGA_BLUE);
+	}
+
+	//	SETUP THE RELAYS TO DISPLY AND TURN THEM ON IF NEEDED
+	RelayStatusDisplay(0, 3);				//	call the relay status display function
+	RelayToggle(RelayState, 1);				//	Turn on the relays according to the AlarmState byte
+
+	//	TAKE A TEMP READING AND START THE LOOP
+	if ((serialDebug & 1) == 1){ Serial.println(); }
+	DS18B20_Read();
+	Serial.print("Starting Loop :");
+	Serial.print(millis());
+	Serial.println();
+
+	//	RESET MENU MODE
+	menuMode = 0;						//	set the menuMode variable to make sure it is set to 0 when the loop starts
+
+	//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
+	//TestSDLEDS();			//**********NICE SPOT TO TEST SDLEDS**************
 }
 
 void loop()
@@ -533,11 +553,11 @@ void loop()
 	{
 	case 0:
 		if (timeFormat == 0){ LCDTimeDisplay(0, 2, 0, hour(), minute(), second(), 0); }
-		else { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
+		else { LCDTimeDisplay(0, 1, 0, hourFormat12(), minute(), second(), 0); }
 		break;
 	case 1:
 		if (timeFormat == 0){ LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
-		else { LCDTimeDisplay(0, 0, 0, hour(), minute(), second(), 0); }
+		else { LCDTimeDisplay(0, 0, 0, hourFormat12(), minute(), second(), 0); }
 		break;
 	}
 
@@ -673,47 +693,47 @@ void RelayStatusDisplay(uint8_t col, uint8_t row)
 
 void START_SCREEN()
 {
-	int c = 0;	//	keeps a running total for the cursor
-	int y = 0;	//	y variable for rows
+	int y = 0;					//	y variable for rows
+	String versionString;		//	create a string for the version
+	char buffer[16];			//	create a buffer for the time string
+	sprintf(buffer, "Version %d.%02d.%02d", version, build, subbuild);	//	prepare the string to print for the version
+	versionString = String(buffer);
 
-	lcd.setCursor(3,0);
-	lcd.print("GLITCHSNIFFER'S");
-	lcd.setCursor(6,1);
-	lcd.print("AQUARIUM");
-	lcd.setCursor(5,2);
-	lcd.print("CONTROLLER");
-	lcd.setCursor(3,3);
-	lcd.print("VERSION ");
-	lcd.print(version);
-	lcd.print(".");
-	if (build < 10){lcd.print("0");}
-	lcd.print(build);
-	lcd.print(".");
-	lcd.print(subbuild);
-	delay(1000);
-	lcd.setCursor(0,0);
-	lcd.clear();
+	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
+	{
+		lcd.setCursor(3, 0);
+		lcd.print("GLITCHSNIFFER'S");
+		lcd.setCursor(6, 1);
+		lcd.print("AQUARIUM");
+		lcd.setCursor(5, 2);
+		lcd.print("CONTROLLER");
+		lcd.setCursor(3, 3);
+		lcd.print(versionString);
+	}
+	//	Print to the 4.3" LCD touch screen
+	//	***************************************
+	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
+	//else
+	{
+		myGLCD.setFont(GroteskBold24x48);
+		y = 55;
+		myGLCD.print("GLITCHSNIFFER'S", CENTER, 5, 0);
+		myGLCD.print("AQUARIUM", CENTER, y * 1, 0);
+		myGLCD.print("CONTROLLER", CENTER, y * 2, 0);
+		myGLCD.print(versionString, CENTER, y * 3, 0);
 
-	myGLCD.setFont(GroteskBold24x48);
-	y = 55;
-	myGLCD.print("GLITCHSNIFFER'S", CENTER, 5, 0);
-	myGLCD.print("AQUARIUM", CENTER, y * 1, 0);
-	myGLCD.print("CONTROLLER", CENTER, y * 2, 0);
-	myGLCD.print("Version", CENTER, y * 3, 0);
-	c = 144;
-	myGLCD.printNumI(version, c, y*4, 2, '0');
-	c = c + (24 * 2);
-	myGLCD.print(".", c, y * 4);
-	c = c + 24;
-	myGLCD.printNumI(build, c, y * 4, 2, '0');
-	c = c + (24 * 2);
-	myGLCD.print(".", c, y * 4, 0);
-	c = c + 24;
-	myGLCD.printNumI(subbuild, c, y * 4, 2, '0');
-
-	myGLCD.clrScr();
-	myGLCD.fillScr(VGA_BLUE);
-
+		//c = 144;
+		//myGLCD.printNumI(version, c, y * 4, 2, '0');
+		//c = c + (24 * 2);
+		//myGLCD.print(".", c, y * 4);
+		//c = c + 24;
+		//myGLCD.printNumI(build, c, y * 4, 2, '0');
+		//c = c + (24 * 2);
+		//myGLCD.print(".", c, y * 4, 0);
+		//c = c + 24;
+		//myGLCD.printNumI(subbuild, c, y * 4, 2, '0');
+	}
+	//delay(1000);
 }
 	
 void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space)
@@ -721,163 +741,133 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 //		0 = No options
 //		1 = force seconds display off.
 //		2 = force seconds display on.
+//	col and row are the absolute start of the print.  this will be modified to center the print later
+//	hour, min, sec are passed to the function as either the time of the time you want displayed.
 //	space can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
 //	if sec == 99 then dont print seconds, if sec == 98 print seconds and AM/PM, if sec != 99 then print the seconds only
 {
 	uint8_t realhour = hour;
 
-	if (LCD_TYPE == 1)
+	//	prepare the date string 
+	String h;
+	String m;
+	String s;
+	String apm;
+	int length = 0;				//	variable to store the length of the string
+	String timestring;			//	create a string for the date
+	char buffer[12];			//	create a buffer for the time string
+	char indbuf[3];			//	create a buffer for the individual items to print
+
+	switch (timeFormat)
 	{
-		//	display the hour
-		switch (timeFormat)		//	use timeFormat to determine where to put the cursor for the hour if set for 12 hour time and print the hour and AM/PM
+	case 0:		//	if 24 hour set the cursor to use 2 digits
+		sprintf(indbuf, "%02d", hour);
+		h = String(indbuf);
+		break;
+	case 1:		//	if 12 hour set the cursor to account for # of hour digits
+		sprintf(indbuf, "%2d", hour);
+		h = String(indbuf);
+		break;
+	}
+	timestring = h + ":";
+	sprintf(indbuf, "%02d", min);
+	m = String(indbuf);
+
+	timestring = timestring + m;
+
+	if ((secondsDisplay == 1) || (disp == 2))		//  only display seconds if disp forces it or they are set to display
+	{
+		if ((disp & 1) != 1)		//	if the disp byte is not set to force seconds digits off, print the seconds
 		{
-		case 0:		//	if 24 hour set the cursor to use 2 digits
-			if (hour <= 9) { lcd.setCursor(col + 1, row); }	//  set cursor for single digits
-			else { lcd.setCursor(col, row); }				//	set cursor for double digits
-			lcd.print(hour);
-			break;
-		case 1:		//	if 12 hour set the cursor to account for # of hour digits
-			//  convert hour to 12 hour time
-			if (hour == 0) { hour = 12; }					//	if hour is midnight, add 12 to the display of the hour to make it 12 AM
-			else if (hour >= 13) { hour = hour - 12; }		//	if hour is 1pm or greater convert to 12 hour
-
-			//	set the cursor to print the hour digits
-			lcd.setCursor(col, row);
-			if (hour <= 9) { lcd.print(" "); }		//	add a leading space for the hour if <= 9
-
-			//	print the hour
-			lcd.print(hour);
-			break;
-		}
-
-		//	display the minutes
-		col = col + 2;
-		lcd.setCursor(col, row);		//	set cursor for the colon
-		lcd.print(":");						//	print the colon for the minutes
-
-		if (min <= 9) { lcd.print("0"); }	//	if the minutes is 1 digit pad a 0 to the single digit
-		lcd.print(min);
-
-		col = col + 3;
-		lcd.setCursor(col, row);		//	set the cursor for the either the seconds or AMPM printing
-
-		//	display the seconds
-		if ((secondsDisplay == 1) || (disp == 2))		//  only display seconds if disp forces it or they are set to display
-		{
-			if ((disp & 1) != 1)		//	if the disp byte is not set to force seconds digits off, print the seconds
-			{
-				lcd.print(":");
-				if (second() <= 9)				//	print the 1 digit second padded with a 0
-				{
-					lcd.print("0");
-					lcd.print(second());
-				}
-				else { lcd.print(second()); }	//	print the 2 digit second
-				col = col + 3;
-			}
-		}
-
-		//  display AM/PM
-		if (timeFormat == 1)
-		{
-			//	if ((disp & 1) != 1){ lcd.setCursor(col + 3, row); }
-			col = col + space;
-			lcd.setCursor(col, row);
-			if (realhour >= 12) {
-				lcd.print("PM");
-			}
-			else if (realhour <= 11) {
-				lcd.print("AM");
-			}
+			sprintf(indbuf, "%02d", sec);
+			s = String(indbuf);
+			timestring = timestring + ":" + s;
 		}
 	}
+
+	//  display am/pm
+	if (timeFormat == 1)
+	{
+		if (realhour >= 12) { apm = "PM"; }
+		else if (realhour <= 11) { apm = "AM"; }
+	}
+	timestring = timestring + apm;
+	length = timestring.length();		//	get the length of the time string to use in determining where to start the cursor
+
+	//	Print to the character LCD screen
+	//	***************************************
+	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
+	{
+		lcd.setCursor(col, row);			//	set the cursor to erase the current line
+		lcd.print("          ");			//	erase the current line
+		if (length == 10) { lcd.setCursor(col, row); }		//	determine where to set the cursor row
+		else { lcd.setCursor(col + 1, row); }
+
+		lcd.print(timestring);				//	print the date string to the lcd screen
+	}
+
+	//	Print to the 4.3" LCD touch screen
+	//	***************************************
 	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
 	//else
 	{
-		myGLCD.setFont(GroteskBold24x48);
-		int c = 0;
-		int y = 5;
-		myGLCD.printNumI(hour, c, y, 2, ' ');
-		c = c + (24 * 2);
-		myGLCD.print(":", c, y);
-		c = c + 24;
-		myGLCD.printNumI(min, c, y, 2, '0');
-		c = c + (24 * 2);
-		myGLCD.print(":", c, y, 0);
-		c = c + 24;
-		myGLCD.printNumI(sec, c, y, 2, '0');
-		c = c + (24 * 2);
+		int x = (col * 24);					//	use col variable to decide where to start
+		int y = (row * 48) + 5;				//	use row variable to decide where to start + 5 to pad the rows
+		x = ((240 - (length * 24)) / 2);	//	determine where to start printing to center the date
 
-		//  display AM/PM
-		if (timeFormat == 1)
-		{
-			//	if ((disp & 1) != 1){ lcd.setCursor(col + 3, row); }
-			if (realhour >= 12) {
-				myGLCD.print("PM", c, y);
-			}
-			else if (realhour <= 11) {
-				myGLCD.print("AM", c, y);
-			}
-		}
+		// 4 is the minimum ammount of digits to display.  clear preceeding digits when appropriate.
+
+		myGLCD.setFont(GroteskBold24x48);	//	set the font
+		myGLCD.print(timestring, x, y);		//	print the date string to x and y coordinates
 	}
 }
 
 void LCDDateDisplay(byte display, uint8_t col, uint8_t row)
 //	display - 0 to not change the date if it is the same day.
-//	display - 1 to enable 0 padding on the day
 
 {
-	if (LCD_TYPE == 1)
+	if (display == 0 && day() == today) { return; }		//	if the day hasn't changed, dont refresh it	
+	else
 	{
-		if (display == 0 && day() == today) { return; }		//	if the day hasn't changed, dont refresh it	
-		else
+		//	prepare the date string
+		//	***************************************
+		int m = month();			//	convert the month to an integer to combine in the string
+		int d = day();				//	convert the day to an integer to combine in the string
+		int y = year();				//	convert the year to an integer to combine in the string
+		int length = 0;				//	variable to store the length of the string
+		String datestring = "";		//	create a string for the date
+		char buffer[12];			//	create a buffer to hold the date string
+
+		sprintf(buffer, "%d/%d/%d", m, d, y);	//	assemble the date as a string
+		datestring = String(buffer);			//	convert the char array to a string
+		length = datestring.length();			//	get the length of the date string to use in determining where to start the cursor
+
+		//	Print to the character LCD screen
+		//	***************************************
+		if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
 		{
-			uint8_t addcol = 0;
-			uint8_t tempcol = 0;
-
-			lcd.setCursor(col, row);
-			lcd.print("           ");					//	erase the current line
-
-			//	display and shift the cursor according to the month
-			if (month() < 10) { addcol = 1; }
-			lcd.setCursor(col + addcol, row);
-			lcd.print(month());
-			lcd.print("/");
-			col = col + 3;
-			addcol = 0;
-
-			//	display and shift the cursor according to the day
-			if (display == 1 && day() < 10)
-			{
-				lcd.print("0");
-				addcol = 1;
-			}
-			lcd.setCursor(col + addcol, row);
-			lcd.print(day());
-			lcd.print("/");
-			col = col + 3;
-			addcol = 0;
-
-			//	display the year
-			lcd.print(year());
-			today = day();					//	set the day = to today so that it doesn't refresh the display with it until tomorrow
+			lcd.setCursor(col, row);			//	set the cursor to erase the current line
+			lcd.print("          ");			//	erase the current line
+			if (length == 10) { lcd.setCursor(col, row); }		//	determine where to set the cursor row
+			else { lcd.setCursor(col + 1, row); }
+			
+			lcd.print(datestring);				//	print the date string to the lcd screen
 		}
-	}
-	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
-	//else
-	{
-		myGLCD.setFont(GroteskBold24x48);
-		int c = 0;
-		int y = 53;
-		myGLCD.printNumI(day(), c, y, 2, ' ');
-		c = c + (24 * 2);
-		myGLCD.print("/", c, y);
-		c = c + 24;
-		myGLCD.printNumI(month(), c, y, 2, '0');
-		c = c + (24 * 2);
-		myGLCD.print("/", c, y, 0);
-		c = c + 24;
-		myGLCD.printNumI(year(), c, y);
+
+		//	Print to the 4.3" LCD touch screen
+		//	***************************************
+		if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
+		//else
+		{
+			int x = (col * 24);					//	use col variable to decide where to start
+			int y = (row * 48) + 5;				//	use row variable to decide where to start + 5 to pad the rows
+			x = ((240 - (length * 24)) / 2);	//	determine where to start printing to center the date
+
+			myGLCD.print("          ", x, y);	//	this will clear the current spot for the date and allow an shorter date to be written clearly
+			myGLCD.setFont(GroteskBold24x48);	//	set the font
+			myGLCD.print(datestring, x, y);		//	print the date string to x and y coordinates
+		}
+		today = day(); //	set the day = to today so that it doesn't refresh the display with it until tomorrow
 	}
 }
 
