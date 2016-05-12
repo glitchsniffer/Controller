@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 38;			//  Sets the build number for the current program
-byte subbuild = 4;			//	Sets the sub build number between major version releases
+byte subbuild = 5;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -412,7 +412,7 @@ void setup()
 	myGLCD.setBackColor(VGA_BLUE);
 	myGLCD.setColor(VGA_SILVER);
 
-	START_SCREEN();		//  call the start up screen function
+	StartScreen();		//  call the start up screen function
 
 	//  SETUP THE DS18B20 SENSORS
 	//  Check to see how many sensors are on the busses
@@ -513,7 +513,7 @@ void setup()
 		lcd.clear();
 	}
 	if (LCD_TYPE == 1)		//	temporary to show both screens
-							//else
+	//else
 	{
 		myGLCD.clrScr();
 		myGLCD.fillScr(VGA_BLUE);
@@ -553,11 +553,11 @@ void loop()
 	{
 	case 0:
 		if (timeFormat == 0){ LCDTimeDisplay(0, 2, 0, hour(), minute(), second(), 0); }
-		else { LCDTimeDisplay(0, 1, 0, hourFormat12(), minute(), second(), 0); }
+		else { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
 		break;
 	case 1:
 		if (timeFormat == 0){ LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
-		else { LCDTimeDisplay(0, 0, 0, hourFormat12(), minute(), second(), 0); }
+		else { LCDTimeDisplay(0, 0, 0, hour(), minute(), second(), 0); }
 		break;
 	}
 
@@ -691,14 +691,17 @@ void RelayStatusDisplay(uint8_t col, uint8_t row)
 		}
 }
 
-void START_SCREEN()
+void StartScreen()
+//	print the startup screen to the selected LCD screen
 {
-	int y = 0;					//	y variable for rows
-	String versionString;		//	create a string for the version
-	char buffer[16];			//	create a buffer for the time string
+	int y = 0;							//	y variable for rows
+	String versionString;				//	create a string for the version
+	char buffer[16];					//	create a buffer for the time string
 	sprintf(buffer, "Version %d.%02d.%02d", version, build, subbuild);	//	prepare the string to print for the version
-	versionString = String(buffer);
+	versionString = String(buffer);		//	create a string for the version
 
+	//	Print to the character LCD screen
+	//	***************************************
 	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
 	{
 		lcd.setCursor(3, 0);
@@ -715,25 +718,14 @@ void START_SCREEN()
 	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
 	//else
 	{
-		myGLCD.setFont(GroteskBold24x48);
-		y = 55;
+		myGLCD.setFont(GroteskBold24x48);	//	set the font
+		y = 55;		//	this is the total height of the font and the added space between lines
 		myGLCD.print("GLITCHSNIFFER'S", CENTER, 5, 0);
 		myGLCD.print("AQUARIUM", CENTER, y * 1, 0);
 		myGLCD.print("CONTROLLER", CENTER, y * 2, 0);
 		myGLCD.print(versionString, CENTER, y * 3, 0);
-
-		//c = 144;
-		//myGLCD.printNumI(version, c, y * 4, 2, '0');
-		//c = c + (24 * 2);
-		//myGLCD.print(".", c, y * 4);
-		//c = c + 24;
-		//myGLCD.printNumI(build, c, y * 4, 2, '0');
-		//c = c + (24 * 2);
-		//myGLCD.print(".", c, y * 4, 0);
-		//c = c + 24;
-		//myGLCD.printNumI(subbuild, c, y * 4, 2, '0');
 	}
-	//delay(1000);
+	delay(1000);
 }
 	
 void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space)
@@ -765,7 +757,12 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 		h = String(indbuf);
 		break;
 	case 1:		//	if 12 hour set the cursor to account for # of hour digits
-		sprintf(indbuf, "%2d", hour);
+		if (hour > 12) { sprintf(indbuf, "%2d", hour - 12); }
+		else
+		{
+			if (hour == 0) { hour = 12; }
+			sprintf(indbuf, "%2d", hour);
+		}
 		h = String(indbuf);
 		break;
 	}
@@ -873,6 +870,7 @@ void LCDDateDisplay(byte display, uint8_t col, uint8_t row)
 
 void DS18B20_Read()
 {
+
 	uint8_t c;
 	//  Read the DS sensors found in void setup
 	for (uint8_t i = 0; i < NUMBER_OF_BUS; i++)   // poll every bus
