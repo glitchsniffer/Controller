@@ -422,7 +422,7 @@ void MenuLoop()
 	Alarm.delay(100);
 	mcpA.readByte(GPIOA);	//	clear the interrupt from MCP
 	RelayStatusDisplay(0, 3);
-	DS18B20_Read();			//  read the temp sensors so that the display has them
+	ReadTempSensors();			//  read the temp sensors so that the display has them
 }
 
 void MenuUp()

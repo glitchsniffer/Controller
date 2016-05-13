@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 38;			//  Sets the build number for the current program
-byte subbuild = 5;			//	Sets the sub build number between major version releases
+byte subbuild = 6;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -154,24 +154,28 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
 // define the DS18B20 global variables
-const uint8_t ONE_WIRE_BUS[]={8};		// the array to define which pins you will use for the busses ie {2,3,4,5};
+#define TEMP_SENSOR_PIN 8				//	define which pin you will use for the one wire bus
+#define TEMP_SENSOR_PRECISION 10		//	set the temperature precision to 9 -12 bits
+//#define NUMBER_OF_BUS 1					//	how many busses will you use for the sensors
 
-#define TEMPERATURE_PRECISION 10
-#define NUMBER_OF_BUS 1				// how many busses will you use for the sensors
+OneWire oneWire(TEMP_SENSOR_PIN);		//  Setup oneWire instances to communicate with any OneWire Devices
+DallasTemperature tempSensors(&oneWire);	//	pass onewire reference to Dallas temperatures.
+DeviceAddress tempSensorAddr[4];		//  arrays to hold device addresses for 4 sensors
 
-OneWire *oneWire[NUMBER_OF_BUS];	//  Setup oneWire instances to communicate with any OneWire Devices
-
-DallasTemperature *sensors[NUMBER_OF_BUS];  // Pass onewire reference to Dallas temperatures.
-
-DeviceAddress tempDeviceAddress[8];		//  arrays to hold device addresses
-
-uint16_t numberOfDevices[NUMBER_OF_BUS];		//  define the variable to store the number of busses
+//uint16_t numberOfDevices[NUMBER_OF_BUS];		//  define the variable to store the number of busses
+byte numberOfSensors;		//	define the byte to store the number of sensors that is found on the pin
 byte tempType;				//  initializes the byte tempType
 byte tempPrecision;			//	initializes the byte tempPrecision
 byte tempReadDelay;			//	initializes the byte tempReadDelay
 
-float tempReadC[4];		//	array to hold the temperature readings taken
-float tempReadF[4];		//	array to hold the temperature readings taken
+float tempReadC[4];			//	array to hold the temperature readings taken
+float tempReadF[4];			//	array to hold the temperature readings taken
+
+//	set the strings for the sensor names
+String tempSensorName1 = "Front";
+String tempSensorName2 = "Bottom";
+String tempSensorName3 = "Back";
+String tempSensorName4 = "Filter";
 
 
 //  INITIALIZE THE ALARM Variables
@@ -196,9 +200,9 @@ AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
 
 //  INITIALIZE THE FLOW SENSOR
 //  ***********************************************
-byte flowSensorInterrupt = 5;		//	interrupt to trigger for the flow sensor
-byte flowSensorIntPin = 18;			//	pin on the arduino to use for the interrupt
-byte flowSensorEnable;				//	initializes the byte flowSensorEnable
+byte flowSensorInterrupt = 5;			//	interrupt to trigger for the flow sensor
+byte flowSensorIntPin = 18;				//	pin on the arduino to use for the interrupt
+byte flowSensorEnable;					//	initializes the byte flowSensorEnable
 byte flowReadDelay = 30;				//	initializes the byte flowReadDelay (currently in seconds)
 
 volatile uint16_t flowPulseCount = 0;	//	number of pulses trigger in the interrupt
@@ -206,7 +210,7 @@ volatile uint16_t flowPulseCount = 0;	//	number of pulses trigger in the interru
 uint16_t flowRateMax;					//	maximum flow rate as calibrated by the user
 uint16_t flowRateMin;					//  minimum flow rate before an alarm is triggered, this is a percentage of flowRateMax
 
-uint16_t flowPulseReading[5];		//	the array to store the last 5 flow pulse readings in
+uint16_t flowPulseReading[5];			//	the array to store the last 5 flow pulse readings in
 byte flowPulseIndex = 0;				//	the number that selects the number of the flowPulseReadings array to write to
 uint16_t flowPulseTotal;				//	the variable used to store the running total of the last 5 flowPulseCount samples
 
@@ -240,7 +244,7 @@ void setup()
 	Wire.begin();
 	delay(250);
 	Serial.begin(115200);				//  start the serial port if debugging is on
-	
+
 	//  SETUP THE RTC
 	setSyncProvider(RTC.get);		//  this function get the time from the RTC
 	if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
@@ -249,13 +253,13 @@ void setup()
 		Serial.println("Unable to get the RTC");
 		Serial.println();
 	}
-	else{ Serial.println("RTC system time"); }
+	else { Serial.println("RTC system time"); }
 
 	//  READ THE VARIABLES OUT OF THE EEPROM
 
 	//  READ NON USER SETTINGS FROM EEPROM
 	e2Empty = eeprom.read(0);			//	reads the e2Empty out to determine if it needs to set defaults
-	if (e2Empty == 0){ factoryDefaultset(); }
+	if (e2Empty == 0) { factoryDefaultset(); }
 	configID = eeprom.read(0);			//  reads the configID out
 
 	serialDebug = eeprom.read(5);		//	reads out user setting to turn serial debugging on for each type of debugging
@@ -273,7 +277,7 @@ void setup()
 	flowRateMin = eeprom.read(29);		//	reads out the user setting for the minimum flow rate
 
 	//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
-	tempReadID = Alarm.timerRepeat(tempReadDelay, DS18B20_Read);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
+	tempReadID = Alarm.timerRepeat(tempReadDelay, ReadTempSensors);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
 	AlarmEnable = eeprom.read(100);		//	reads out the byte for the enable flags for all 8 alarms
 	AlarmState = eeprom.read(101);		//	reads out the byte for the state flags for all 8 alarms
 	RelayState = eeprom.read(150);
@@ -287,7 +291,7 @@ void setup()
 
 	for (uint8_t id = 0; id <= relayCount; id++)		//  read each of the alarms values out of the EEPROM
 	{
-		if ((serialDebug & 8) == 8){ serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
+		if ((serialDebug & 8) == 8) { serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
 		AlarmType[id] = eeprom.read(102 + (id * 6));
 		AlarmRelay[id] = eeprom.read(103 + (id * 6));
 		AlarmHourOn[id] = eeprom.read(104 + (id * 6));
@@ -302,33 +306,33 @@ void setup()
 			Serial.print(id);
 			Serial.print("  ");
 			Serial.print(AlarmIDOn[id]);
-			if (AlarmIDOn[id] >= 10){ Serial.print("  "); }
+			if (AlarmIDOn[id] >= 10) { Serial.print("  "); }
 			else { Serial.print("   "); }
 			Serial.print(AlarmIDOff[id]);
-			if (AlarmIDOff[id] >= 10){ Serial.print(" "); }
+			if (AlarmIDOff[id] >= 10) { Serial.print(" "); }
 			else { Serial.print("  "); }
-			if ((AlarmEnable & (1 << id)) == (1 << id)){ Serial.print(" ON   "); }
-			else{ Serial.print(" OFF  "); }
+			if ((AlarmEnable & (1 << id)) == (1 << id)) { Serial.print(" ON   "); }
+			else { Serial.print(" OFF  "); }
 			Serial.print(AlarmType[id]);
 			Serial.print("  ");
 
-			if (AlarmHourOn[id] < 10){ Serial.print(" "); }
+			if (AlarmHourOn[id] < 10) { Serial.print(" "); }
 			Serial.print(AlarmHourOn[id]);
 			Serial.print(":");
-			if (AlarmMinOn[id] < 10){
+			if (AlarmMinOn[id] < 10) {
 				Serial.print("0");
 				Serial.print(AlarmMinOn[id]);
 			}
-			else{ Serial.print(AlarmMinOn[id]); }
+			else { Serial.print(AlarmMinOn[id]); }
 			Serial.print("  ");
-			if (AlarmHourOff[id] < 10){ Serial.print(" "); }
+			if (AlarmHourOff[id] < 10) { Serial.print(" "); }
 			Serial.print(AlarmHourOff[id]);
 			Serial.print(":");
-			if (AlarmMinOff[id] < 10){
+			if (AlarmMinOff[id] < 10) {
 				Serial.print("0");
 				Serial.print(AlarmMinOff[id]);
 			}
-			else{ Serial.print(AlarmMinOff[id]); }
+			else { Serial.print(AlarmMinOff[id]); }
 			Serial.print("  ");
 			Serial.println(AlarmRelay[id], BIN);
 		}
@@ -415,54 +419,49 @@ void setup()
 	StartScreen();		//  call the start up screen function
 
 	//  SETUP THE DS18B20 SENSORS
-	//  Check to see how many sensors are on the busses
-	for (uint16_t i = 0; i < NUMBER_OF_BUS; i++)   //search each bus one by one
-	{
-		oneWire[i] = new OneWire(ONE_WIRE_BUS[i]);
-		sensors[i] = new DallasTemperature(oneWire[i]);
-		sensors[i]->begin();
-		numberOfDevices[i] = sensors[i]->getDeviceCount();
+	//  Check to see how many sensors are on the pin
 
-		if ((serialDebug & 1) == 1)
-		{
-			Serial.println();
-			Serial.print("Locating devices ");
-			Serial.print("Found ");
-			Serial.print(numberOfDevices[i], DEC);
-			Serial.print(" devices on port ");
-			Serial.println(ONE_WIRE_BUS[i], DEC);
-			Serial.println();
-		}
-		for (uint16_t j = 0; j < numberOfDevices[i]; j++)
-		{
-			// Search the wire for address
-			if (sensors[i]->getAddress(tempDeviceAddress[j], j))
-			{
-
-				if ((serialDebug & 1) == 1)
-				{
-					Serial.print("Found device ");
-					Serial.print(j, DEC);
-					Serial.print(" with address ");
-					printAddress(tempDeviceAddress[j]);
-					Serial.println();
-				}
-
-				// set the resolution to TEMPERATURE_PRECISION bit (Each Dallas/Maxim device is capable of several different resolutions)
-				sensors[i]->setResolution(tempDeviceAddress[j], TEMPERATURE_PRECISION);
-			}
-			else{
-				if ((serialDebug & 1) == 1)
-				{
-					Serial.print("Found ghost device at ");
-					Serial.print(j, DEC);
-					Serial.print(" but could not detect address. Check power and cabling");
-					Serial.println();
-				}
-			}
-		}
-		delay(200);
+	//	unknown why, but i have to add these again to get it working correctly
+	new OneWire(TEMP_SENSOR_PIN);					//	setup a new instance of OneWire
+	new DallasTemperature(&oneWire);				//	setup a new instance of DallasTemperature
+	
+	tempSensors.begin();								//	start the DallasTemperature library
+	delay(100);
+	numberOfSensors = tempSensors.getDeviceCount();		//	get the number of devices found on the bus
+	if (numberOfSensors == 0) {
+		delay(1000);
+		numberOfSensors = 4;
 	}
+
+	if ((serialDebug & 1) == 1)
+	{
+		Serial.printf("Found %d temp sensors on pin %d", numberOfSensors, TEMP_SENSOR_PIN);
+		Serial.println();
+	}
+	for (byte j = 0; j < numberOfSensors; j++)
+	{
+		// Search the wire for address
+		if (tempSensors.getAddress(tempSensorAddr[j], j))
+		{
+			if ((serialDebug & 1) == 1)
+			{
+				Serial.printf("Found sensor %d with address ", j);
+				printAddress(tempSensorAddr[j]);
+				Serial.println();
+			}
+
+			// set the resolution to TEMPERATURE_PRECISION bit (Each Dallas/Maxim device is capable of several different resolutions)
+			tempSensors.setResolution(tempSensorAddr[j], TEMP_SENSOR_PRECISION);
+		}
+		else {
+			if ((serialDebug & 1) == 1)
+			{
+				Serial.printf("Found ghost device at %d but could not detect address. Check power and cabling", j);
+			}
+		}
+	}
+	delay(200);
+	//}
 
 	//	INITIALIZE THE SD CARD
 	Serial.println("Initializing the SD Card...");
@@ -525,7 +524,7 @@ void setup()
 
 	//	TAKE A TEMP READING AND START THE LOOP
 	if ((serialDebug & 1) == 1){ Serial.println(); }
-	DS18B20_Read();
+	ReadTempSensors();
 	Serial.print("Starting Loop :");
 	Serial.print(millis());
 	Serial.println();
@@ -748,7 +747,7 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 	int length = 0;				//	variable to store the length of the string
 	String timestring;			//	create a string for the date
 	char buffer[12];			//	create a buffer for the time string
-	char indbuf[3];			//	create a buffer for the individual items to print
+	char indbuf[3];				//	create a buffer for the individual items to print
 
 	switch (timeFormat)
 	{
@@ -868,28 +867,25 @@ void LCDDateDisplay(byte display, uint8_t col, uint8_t row)
 	}
 }
 
-void DS18B20_Read()
+void ReadTempSensors()
 {
-
-	uint8_t c;
 	//  Read the DS sensors found in void setup
-	for (uint8_t i = 0; i < NUMBER_OF_BUS; i++)   // poll every bus
-	{
-		sensors[i]->begin();
-		numberOfDevices[i] = sensors[i]->getDeviceCount();
-		sensors[i]->requestTemperatures();
+
+		tempSensors.begin();
+		numberOfSensors = tempSensors.getDeviceCount();
+		tempSensors.requestTemperatures();
 		// print the device information
-		for (uint8_t j = 0; j < numberOfDevices[i]; j++)    // poll devices connect to the bus
+		for (uint8_t j = 0; j < numberOfSensors; j++)    // poll devices connect to the bus
 		{
-			sensors[i]->getAddress(tempDeviceAddress[j], j);
+			tempSensors.getAddress(tempSensorAddr[j], j);
 			if ((serialDebug & 1) == 1)
 			{
-				printAddress(tempDeviceAddress[j]);      //print ID
+				printAddress(tempSensorAddr[j]);      //print ID
 				Serial.print(";");
 			}
 
-			float tempC = sensors[i]->getTempC(tempDeviceAddress[j]);
-			float tempF = sensors[i]->getTempF(tempDeviceAddress[j]);
+			float tempC = tempSensors.getTempC(tempSensorAddr[j]);
+			float tempF = tempSensors.getTempF(tempSensorAddr[j]);
 
 			tempReadC[j] = tempC;	//	store the current reading to be logged in Celcius
 			tempReadF[j] = tempF;	//	store the current reading to be logged in Fahrenheit
@@ -949,7 +945,7 @@ void DS18B20_Read()
 			}
 		}
 		if ((serialDebug & 1) == 1){ Serial.println(); }
-	}
+	//}
 	if(SDexist == 1){ logger(); }
 }
 
