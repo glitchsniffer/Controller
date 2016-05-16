@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 38;			//  Sets the build number for the current program
-byte subbuild = 6;			//	Sets the sub build number between major version releases
+byte subbuild = 7;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -160,10 +160,10 @@ char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Li
 
 OneWire oneWire(TEMP_SENSOR_PIN);		//  Setup oneWire instances to communicate with any OneWire Devices
 DallasTemperature tempSensors(&oneWire);	//	pass onewire reference to Dallas temperatures.
-DeviceAddress tempSensorAddr[4];		//  arrays to hold device addresses for 4 sensors
+DeviceAddress tempSensorAddr[5];		//  arrays to hold device addresses for 4 sensors
 
 //uint16_t numberOfDevices[NUMBER_OF_BUS];		//  define the variable to store the number of busses
-byte numberOfSensors;		//	define the byte to store the number of sensors that is found on the pin
+byte numberOfSensors = 0;		//	define the byte to store the number of sensors that is found on the pin
 byte tempType;				//  initializes the byte tempType
 byte tempPrecision;			//	initializes the byte tempPrecision
 byte tempReadDelay;			//	initializes the byte tempReadDelay
@@ -172,11 +172,8 @@ float tempReadC[4];			//	array to hold the temperature readings taken
 float tempReadF[4];			//	array to hold the temperature readings taken
 
 //	set the strings for the sensor names
-String tempSensorName1 = "Front";
-String tempSensorName2 = "Bottom";
-String tempSensorName3 = "Back";
-String tempSensorName4 = "Filter";
-
+char* tempSensorNameChar[] = { "S1", "S2", "S3", "S4", "S5" };
+char* tempSensorNameGraph[] = { "Sensor 1", "Sensor 2", "Sensor 3", "Sensor 4", "Sensor 5" };
 
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
@@ -240,7 +237,8 @@ File logfile;							//	initialize the file to log to
 
 void setup()
 {
-	//  SETUP THE SERIAL PORT
+//  SETUP THE SERIAL PORT
+//  ***********************************************
 	Wire.begin();
 	delay(250);
 	Serial.begin(115200);				//  start the serial port if debugging is on
@@ -379,7 +377,8 @@ void setup()
 		Serial.println();
 	}
 
-	//	SETUP THE MCP23017 PINS
+//	SETUP THE MCP23017 PINS
+//  ***********************************************
 	mcpA.writeByte(IOCON, 0x80);		//	Switches the IOCON to use BANK = 1 register addresses
 	mcpA.writeByte(GPPUA, 0xF8);		//	turn on the 100k pullups
 	mcpA.writeByte(GPINTENA, 0x80);		//	enable the interrupt on GPIO pin
@@ -398,7 +397,8 @@ void setup()
 	pinMode(flowSensorIntPin, INPUT);		//	set the flow sensor as an input to the pin number in the variable
 	digitalWrite(flowSensorIntPin, HIGH);	//	write the pin high to be active low
 
-	//  SETUP THE LCD SCREEN
+//  SETUP THE LCD SCREEN
+//  ***********************************************
 	lcd.begin(20, 4);						//  setup the LCD's number of columns and rows
 	lcd.createChar(1, degree);				//  init custom characters as numbers
 	lcd.createChar(2, rarrow);				//  init custom characters as numbers
@@ -408,7 +408,8 @@ void setup()
 	pinMode(backlight, OUTPUT);				//	set the pin for the backlight as an output
 	analogWrite(backlight, backlightLevel);	//	write the backlightlevel to the pin for the backlight
 
-	//	SETUP THE TFT LCD
+//	SETUP THE TFT LCD
+//  ***********************************************
 	myGLCD.InitLCD();
 	myGLCD.clrScr();
 	myGLCD.setFont(BigFont);
@@ -418,50 +419,56 @@ void setup()
 
 	StartScreen();		//  call the start up screen function
 
-	//  SETUP THE DS18B20 SENSORS
-	//  Check to see how many sensors are on the pin
+//  SETUP THE DS18B20 SENSORS
+//  ***********************************************
+//  Check to see how many sensors are on the pin and put the addresses into the tempSensorAddr[] array
 
 	//	unknown why, but i have to add these again to get it working correctly
-	new OneWire(TEMP_SENSOR_PIN);					//	setup a new instance of OneWire
-	new DallasTemperature(&oneWire);				//	setup a new instance of DallasTemperature
+	new OneWire(TEMP_SENSOR_PIN);		//	setup a new instance of OneWire
+	new DallasTemperature(&oneWire);	//	setup a new instance of DallasTemperature
 	
-	tempSensors.begin();								//	start the DallasTemperature library
-	delay(100);
-	numberOfSensors = tempSensors.getDeviceCount();		//	get the number of devices found on the bus
-	if (numberOfSensors == 0) {
-		delay(1000);
-		numberOfSensors = 4;
-	}
+	tempSensors.begin();				//	start the DallasTemperature library
+	delay(100);							//	small delay to allow it to get the number of sensors
 
-	if ((serialDebug & 1) == 1)
-	{
+	//	try 3 times to get the device count of the onewire pin
+	for (byte j = 0; j < 3; j++)	{
+		numberOfSensors = tempSensors.getDeviceCount();		//	get the number of devices found on the bus
+
+		//	if there were now sensors found, delay, print if needed, and repeat
+		if (numberOfSensors == 0) {
+			delay(500);
+			if ((serialDebug & 1) == 1) { Serial.printf("Did not find any sensors! Retry #", j); }		//	print the retry message if sensor debuggint is on
+		}
+		//	this is for debugging, if it shows 5 sensors, it means that none were detected
+		if (numberOfSensors == 0) { numberOfSensors = 5; }
+		Serial.println();
+	}
+	//	Print the number of sensors on the pin to the serial port
+	if ((serialDebug & 1) == 1)	{
 		Serial.printf("Found %d temp sensors on pin %d", numberOfSensors, TEMP_SENSOR_PIN);
 		Serial.println();
 	}
-	for (byte j = 0; j < numberOfSensors; j++)
-	{
-		// Search the wire for address
-		if (tempSensors.getAddress(tempSensorAddr[j], j))
-		{
-			if ((serialDebug & 1) == 1)
-			{
-				Serial.printf("Found sensor %d with address ", j);
+	// Search the wire for address
+	for (byte j = 0; j < numberOfSensors; j++) {
+		//	print the address to the serial port and set the resolution of the sensor
+		if (tempSensors.getAddress(tempSensorAddr[j], j)) {
+			//	print the found sensors address to the serial port
+			if ((serialDebug & 1) == 1)	{
+				Serial.printf("Found sensor %s with address ", tempSensorNameChar[j]);
 				printAddress(tempSensorAddr[j]);
 				Serial.println();
 			}
-
-			// set the resolution to TEMPERATURE_PRECISION bit (Each Dallas/Maxim device is capable of several different resolutions)
-			tempSensors.setResolution(tempSensorAddr[j], TEMP_SENSOR_PRECISION);
+			tempSensors.setResolution(tempSensorAddr[j], TEMP_SENSOR_PRECISION);	// set the resolution to TEMPERATURE_PRECISION bit
 		}
 		else {
-			if ((serialDebug & 1) == 1)
-			{
+			//	if there isnt an address, print the following
+			if ((serialDebug & 1) == 1)	{
 				Serial.printf("Found ghost device at %d but could not detect address. Check power and cabling", j);
 			}
 		}
 	}
+	if ((serialDebug & 1) == 1) { Serial.println(); }		//	Print a line space for the next function
 	delay(200);
-	//}
 
 	//	INITIALIZE THE SD CARD
 	Serial.println("Initializing the SD Card...");
@@ -870,82 +877,82 @@ void LCDDateDisplay(byte display, uint8_t col, uint8_t row)
 void ReadTempSensors()
 {
 	//  Read the DS sensors found in void setup
+	tempSensors.begin();
+	numberOfSensors = tempSensors.getDeviceCount();
+	tempSensors.requestTemperatures();
+	Serial.println(numberOfSensors);
 
-		tempSensors.begin();
-		numberOfSensors = tempSensors.getDeviceCount();
-		tempSensors.requestTemperatures();
-		// print the device information
-		for (uint8_t j = 0; j < numberOfSensors; j++)    // poll devices connect to the bus
+	// print the device information
+	for (uint8_t j = 0; j < numberOfSensors; j++)    // poll devices connect to the bus
+	{
+		tempSensors.getAddress(tempSensorAddr[j], j);
+		if ((serialDebug & 1) == 1)
 		{
-			tempSensors.getAddress(tempSensorAddr[j], j);
-			if ((serialDebug & 1) == 1)
-			{
-				printAddress(tempSensorAddr[j]);      //print ID
-				Serial.print(";");
-			}
-
-			float tempC = tempSensors.getTempC(tempSensorAddr[j]);
-			float tempF = tempSensors.getTempF(tempSensorAddr[j]);
-
-			tempReadC[j] = tempC;	//	store the current reading to be logged in Celcius
-			tempReadF[j] = tempF;	//	store the current reading to be logged in Fahrenheit
-
-
-			if ((serialDebug & 1) == 1)
-			{
-				Serial.print(j);
-				Serial.print(" ");
-			}
-			switch (tempPrecision)
-			{
-			case 0:
-				lcd.setCursor(13, j);	//  Set the lcd cursor depending on what sensor your are reading
-				lcd.print("S");
-				lcd.print(j + 1);		//  print the sensor number
-				lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
-
-				//  determine if padding is needed for temps higher than 3 digits
-				if (tempC >= 100 || tempF >= 100){ lcd.setCursor(15, j); }
-				else{ lcd.setCursor(16, j); }
-				break;
-			case 1:
-				lcd.setCursor(11, j);	//  Set the lcd cursor depending on what sensor your are reading
-				lcd.print("S");
-				lcd.print(j + 1);			//  print the sensor number
-				lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
-
-				//  determine if padding is needed for temps higher than 3 digits
-				if (tempC >= 100 || tempF >= 100){ lcd.setCursor(13, j); }
-				else{ lcd.setCursor(14, j); }
-				break;
-			}
-
-			//  print the temp to the LCD screen in Celsius or Fahrenheit depending on what the user set in TempType	
-			if (tempType == 0)
-			{
-				lcd.print(tempC, tempPrecision);
-				lcd.write(byte(1));
-				lcd.print("C");
-			}
-			else
-			{
-				lcd.print(tempF, tempPrecision);
-				lcd.write(byte(1));
-				lcd.print("F");
-			}
-
-			//  send the temps to the serial port
-
-			if ((serialDebug & 1) == 1)
-			{
-				Serial.print(tempC, tempPrecision);
-				Serial.print("C ");
-				Serial.print(tempF, tempPrecision);
-				Serial.println("F");
-			}
+			printAddress(tempSensorAddr[j]);      //print ID
+			Serial.print(";");
 		}
-		if ((serialDebug & 1) == 1){ Serial.println(); }
-	//}
+
+		float tempC = tempSensors.getTempC(tempSensorAddr[j]);
+		float tempF = tempSensors.getTempF(tempSensorAddr[j]);
+
+		tempReadC[j] = tempC;	//	store the current reading to be logged in Celcius
+		tempReadF[j] = tempF;	//	store the current reading to be logged in Fahrenheit
+
+
+		if ((serialDebug & 1) == 1)
+		{
+			Serial.print(j);
+			Serial.print(" ");
+		}
+		switch (tempPrecision)
+		{
+		case 0:
+			lcd.setCursor(13, j);	//  Set the lcd cursor depending on what sensor your are reading
+			lcd.print("S");
+			lcd.print(j + 1);		//  print the sensor number
+			lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
+
+			//  determine if padding is needed for temps higher than 3 digits
+			if (tempC >= 100 || tempF >= 100){ lcd.setCursor(15, j); }
+			else{ lcd.setCursor(16, j); }
+			break;
+		case 1:
+			lcd.setCursor(11, j);	//  Set the lcd cursor depending on what sensor your are reading
+			lcd.print("S");
+			lcd.print(j + 1);			//  print the sensor number
+			lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
+
+			//  determine if padding is needed for temps higher than 3 digits
+			if (tempC >= 100 || tempF >= 100){ lcd.setCursor(13, j); }
+			else{ lcd.setCursor(14, j); }
+			break;
+		}
+
+		//  print the temp to the LCD screen in Celsius or Fahrenheit depending on what the user set in TempType	
+		if (tempType == 0)
+		{
+			lcd.print(tempC, tempPrecision);
+			lcd.write(byte(1));
+			lcd.print("C");
+		}
+		else
+		{
+			lcd.print(tempF, tempPrecision);
+			lcd.write(byte(1));
+			lcd.print("F");
+		}
+
+		//  send the temps to the serial port
+
+		if ((serialDebug & 1) == 1)
+		{
+			Serial.print(tempC, tempPrecision);
+			Serial.print("C ");
+			Serial.print(tempF, tempPrecision);
+			Serial.println("F");
+		}
+	}
+	if ((serialDebug & 1) == 1){ Serial.println(); }
 	if(SDexist == 1){ logger(); }
 }
 

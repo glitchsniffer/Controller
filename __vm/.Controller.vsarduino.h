@@ -103,7 +103,6 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portInputRegister(P)
 #define portModeRegister(P)
 #include <Controller.ino>
-#include <Alarms.h>
 #include <Alarms.ino>
 #include <EEprom.cpp>
 #include <EEprom.h>
