@@ -97,10 +97,10 @@
     <ClCompile Include="MCPExpander.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
-    <ClCompile Include="GroteskBold16x32.c">
+    <ClCompile Include="GroteskBold24x48.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GroteskBold24x48.c">
+    <ClCompile Include="GroteskBold16x32.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -102,6 +102,40 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portOutputRegister(P)
 #define portInputRegister(P)
 #define portModeRegister(P)
+
+//
+//
+void AlarmON();
+void AlarmOFF();
+void RelayToggleALL();
+void RelayToggle(uint8_t state, uint8_t onoff);
+void RelayStatusDisplay(uint8_t col, uint8_t row);
+void StartScreen();
+void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space);
+void LCDDateDisplay(byte display, uint8_t col, uint8_t row);
+void ReadTempSensors();
+String convertTempSensorAddress(DeviceAddress deviceAddress);
+void logger();
+void FlowSensorRead();
+void FlowSensorCounter();
+void MenuButtonPress();
+void factoryDefaultset();
+uint16_t freeRam();
+byte decToBcd(byte val);
+byte bcdToDec(byte val);
+void error(char*str);
+void TestSDLEDS();
+void AlarmSet(byte id);
+void AlarmSetDisplay(uint8_t id);
+void MenuTitle();
+void MenuLoop();
+void MenuUp();
+void MenuDown();
+void MenuSelect();
+void MenuBack();
+void MenuDo();
+uint16_t MenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t min, uint16_t max, uint16_t step, uint16_t col, uint16_t row, uint16_t dmicro);
+
 #include <Controller.ino>
 #include <Alarms.ino>
 #include <EEprom.cpp>

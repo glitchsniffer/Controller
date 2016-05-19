@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 38;			//  Sets the build number for the current program
-byte subbuild = 8;			//	Sets the sub build number between major version releases
+byte subbuild = 9;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -167,12 +167,11 @@ byte tempType;				//  initializes the byte tempType
 byte tempPrecision;			//	initializes the byte tempPrecision
 byte tempReadDelay;			//	initializes the byte tempReadDelay
 
-float tempReadC[4];			//	array to hold the temperature readings taken
-float tempReadF[4];			//	array to hold the temperature readings taken
+float tempRead[4];			//	array to hold the temperature readings taken
 
 //	set the strings for the sensor names
-char* tempSensorNameChar[] = { "T1", "T2", "T3", "T4", "T5" };
-char* tempSensorNameGraph[] = { "Temp 1", "Temp 2", "Temp 3", "Temp 4", "Temp 5" };
+char* tempSensorNameChar[] = { "T1", "T2", "T3", "T4", "T5" };		//	names for the character display
+char* tempSensorNameGraph[] = { "Temp 1", "Temp 2", "Temp 3", "Temp 4", "Temp 5" };		//	names for the graphic display
 
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
@@ -236,6 +235,7 @@ File logfile;							//	initialize the file to log to
 
 void setup()
 {
+	delay(1000);	//	wait 5 seconds for things to settle down
 //  SETUP THE SERIAL PORT
 //  ***********************************************
 	Wire.begin();
@@ -467,7 +467,6 @@ void setup()
 		}
 	}
 	if ((serialDebug & 1) == 1) { Serial.println(); }		//	Print a line space for the next function
-	delay(200);
 
 	//	INITIALIZE THE SD CARD
 	Serial.println("Initializing the SD Card...");
@@ -871,105 +870,106 @@ void LCDDateDisplay(byte display, uint8_t col, uint8_t row)
 }
 
 void ReadTempSensors()
-//  Read the DS18B20 sensors that are attached to the oneWire bus on the TEMP_SENSOR_PIN
+//  Read the DS18B20 sensors that are attached to the oneWire bus on the TEMP_SENSOR_PIN and print to the appropriate device
 {
-	String addrString;
-	//	get the number of devices again incase there is a missing one
-	numberOfSensors = tempSensors.getDeviceCount();
-
 	//	have all the sensors on the bus start a temperature conversion
 	tempSensors.requestTemperatures();
 
 	//	cycle through each one of the sensors
 	for (uint8_t j = 0; j < numberOfSensors; j++)    // loop through the number of sensors found
 	{
-		// print the device information
-		if (tempSensors.isConnected(tempSensorAddr[j]) == true) {	//	see if there is a sensor at the given address
-			
-			addrString = convertTempSensorAddress(tempSensorAddr[j]);			//	print the address of the sensor
-			Serial.print(addrString);
-			Serial.print(", ");
-			Serial.print(tempSensorNameGraph[j]);		//	print the name of the sensor
-			Serial.print(" ");
+		String addrString;				//	string to print the address
+		uint8_t sensorConnected = 0;	//	int to compare if the current sensor is connected and readable
 
-			float tempC = tempSensors.getTempC(tempSensorAddr[j]);	//	request the temperature data from the sensor in C
-			float tempF = tempSensors.getTempF(tempSensorAddr[j]);	//	request the temperature data from the sensor in F
+		//	convert the address of the sensor to a string
+		addrString = convertTempSensorAddress(tempSensorAddr[j]);
 
-			tempReadC[j] = tempC;	//	store the current reading to be logged in Celcius
-			tempReadF[j] = tempF;	//	store the current reading to be logged in Fahrenheit
+		// determine if there is a sensor connected to the current address
+		if (tempSensors.isConnected(tempSensorAddr[j]) == true) {
+			sensorConnected = 1;	//	see if there is a sensor at the given address
+			if (tempType == 0) tempRead[j] = tempSensors.getTempC(tempSensorAddr[j]);	//	request the temp data from the sensor in C
+			else tempRead[j] = tempSensors.getTempF(tempSensorAddr[j]);					//	request the temp data from the sensor in F
+		}
+		else sensorConnected = 0;
 
+		//	Print to the character LCD screen
+		//	***************************************
+		if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
+		{
+			//	determine which tempPrecision to use
 			switch (tempPrecision) {
-			case 0:
+			case 0:	//	0 decimal
 				lcd.setCursor(13, j);	//  Set the lcd cursor depending on what sensor your are reading
-				lcd.print("S");
-				lcd.print(j + 1);		//  print the sensor number
-				lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
-
-				//  determine if padding is needed for temps higher than 3 digits
-				if (tempC >= 100 || tempF >= 100){ lcd.setCursor(15, j); }
-				else{ lcd.setCursor(16, j); }
+				if (sensorConnected == 1) lcd.printf("%s%3.0f", tempSensorNameChar[j + 1], tempRead[j]);	//	print the sensor name and temp
+				else lcd.printf("%s --", tempSensorNameChar[j + 1]);	//	print the sensor name and blanks
 				break;
-			case 1:
+			case 1:	//	1 decimal
 				lcd.setCursor(11, j);	//  Set the lcd cursor depending on what sensor your are reading
-				lcd.print("S");
-				lcd.print(j + 1);		//  print the sensor number
-				lcd.print(("   "));		//  clear the display to prevent extra characters from interfering when F rolls from 3 to 2 digits
+				if (sensorConnected == 1) lcd.printf("%s%5.1f", tempSensorNameChar[j], tempRead[j]);	//	print the sensor name and temp
+				else lcd.printf("%s ----", tempSensorNameChar[j + 1]);	//	print the sensor name and blanks
+				break;
+			}
+			lcd.write(byte(1));		//	print the degree symbol
+			if (tempType == 0) lcd.print("C");	//	print the temp type if C
+			else lcd.print("F");				//	print the temp type if F
+		}
 
-				//  determine if padding is needed for temps higher than 3 digits
-				if (tempC >= 100 || tempF >= 100){ lcd.setCursor(13, j); }
-				else{ lcd.setCursor(14, j); }
+		//	Print to the 4.3" LCD touch screen
+		//	***************************************
+		if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
+		//else
+		{
+			int y = (j * 32) + 3;		//	use row variable to decide where to start + 5 to pad the rows
+			String tempString;			//	string to store the completed temp string to print to the screen
+			char buffer[20];			//	buffer to store the sprintf data
+
+			switch (tempPrecision) {	//	decide what temp precision to print
+			case 0:	//	0 decimal
+				if (sensorConnected == 1) {	//	if there is a sensor connected then print the following
+					if (tempType == 0)	sprintf(buffer, "  %s%3.0f`C", tempSensorNameGraph[j], tempRead[j]);	//	assemble the string to print if C and no decimal point
+					else  sprintf(buffer, "  %s%3.0f`F", tempSensorNameGraph[j], tempRead[j]);					//	assemble the string to print if F and no decimal point
+				}
+				else sprintf(buffer, "  %s ----", tempSensorNameGraph[j]);	//	print nothing if there isnt a sensor connected
+				break;
+			case 1:	//	1 decimal
+				if (sensorConnected == 1) {	//	if there is a sensor connected then print the following
+					if (tempType == 0)	sprintf(buffer, "%s%5.1f`C", tempSensorNameGraph[j], tempRead[j]);	//	assemble the string to print if C and 1 decimal point
+					else  sprintf(buffer, "%s%5.1f`F", tempSensorNameGraph[j], tempRead[j]);				//	assemble the string to print if F and 1 decimal point
+				}
+				else sprintf(buffer, "%s ------", tempSensorNameGraph[j]);	//	print nothing if there isnt a sensor connected
 				break;
 			}
 
-			//  print the temp to the LCD screen in Celsius or Fahrenheit depending on what the user set in TempType	
-			if (tempType == 0) {
-				lcd.print(tempC, tempPrecision);
-				lcd.write(byte(1));
-				lcd.print("C");
+			tempString = buffer;	//	save the buffer
+
+			myGLCD.setFont(GroteskBold16x32);	//	set the font
+			myGLCD.print(tempString, RIGHT, y);	//	print the date string to x and y coordinates
+		}
+
+		//	Print to the serial port
+		//	***************************************
+		if ((serialDebug & 1) == 1) {
+			if (sensorConnected == 1) {			//	if there is a sensor connected then print the following
+				Serial.print(addrString);		//	print the string for the address
+				Serial.printf(", %s %5.1f", tempSensorNameGraph[j], tempRead[j]);  //	print the name of the sensor and the reading
+				if (tempType == 0) Serial.println("C");		//	print the type in C
+				else Serial.println("F");					//	print the type in F
 			}
 			else {
-				lcd.print(tempF, tempPrecision);
-				lcd.write(byte(1));
-				lcd.print("F");
-			}
-
-			//  send the temps to the serial port
-			Serial.print(tempC, tempPrecision);
-			Serial.print("C ");
-			Serial.print(tempF, tempPrecision);
-			Serial.println("F");
-		}
-		else {
-			addrString = convertTempSensorAddress(tempSensorAddr[j]);
-			Serial.print(addrString);
-			Serial.print(", ");
-			Serial.print(tempSensorNameGraph[j]);
-			Serial.println(" No Sensor Found");
-			switch (tempPrecision)
-			{
-			case 0:
-				lcd.setCursor(13, j);
-				lcd.print("S");
-				lcd.print(j + 1);
-				lcd.print(" ------");
-				break;
-			case 1:
-				lcd.setCursor(11, j);
-				lcd.print("S");
-				lcd.print(j + 1);
-				lcd.print(" ------");
-				break;
+				Serial.print(addrString);		//	print the string for the address
+				Serial.printf(", %s No Sensor Found", tempSensorNameGraph[j]);	//	print that no sensor is found
+				Serial.println();
 			}
 		}
 	}
-	Serial.println();
-	if(SDexist == 1){ logger(); }
+	if ((serialDebug & 1) == 1)	Serial.println();	//	print a line break
+	if(SDexist == 1){ logger(); }	//	log the data if the SD card is present
 }
 
 String convertTempSensorAddress(DeviceAddress deviceAddress)
 //	this function will convert the DS18B20 sensor address from a 64bit integer to a string that can be printed easily
 {
-	String addrString;
+	String addrString;		//	string to hold the address
 
 	//	cycle through all 8 bytes of the sensor address
 	for (uint8_t i = 0; i < 8; i++)
@@ -1041,13 +1041,13 @@ void logger()
 		logfile.print(", ");
 		logfile.print("C");
 		logfile.print(", ");
-		logfile.print(tempReadC[0], 2);
+		logfile.print(tempRead[0], 2);
 		logfile.print(", ");
-		logfile.print(tempReadC[1], 2);
+		logfile.print(tempRead[1], 2);
 		logfile.print(", ");
-		logfile.print(tempReadC[2], 2);
+		logfile.print(tempRead[2], 2);
 		logfile.print(", ");
-		logfile.print(tempReadC[3], 2);
+		logfile.print(tempRead[3], 2);
 		logfile.print(", ");
 		logfile.println(RelayState, BIN);
 		if ((serialDebug & 1) == 1)
@@ -1055,13 +1055,13 @@ void logger()
 			Serial.print(", ");
 			Serial.print("C");
 			Serial.print(", ");
-			Serial.print(tempReadC[0], 2);
+			Serial.print(tempRead[0], 2);
 			Serial.print(", ");
-			Serial.print(tempReadC[1], 2);
+			Serial.print(tempRead[1], 2);
 			Serial.print(", ");
-			Serial.print(tempReadC[2], 2);
+			Serial.print(tempRead[2], 2);
 			Serial.print(", ");
-			Serial.print(tempReadC[3], 2);
+			Serial.print(tempRead[3], 2);
 			Serial.print(",");
 			Serial.println(RelayState, BIN);
 		}
@@ -1070,13 +1070,13 @@ void logger()
 		logfile.print(", ");
 		logfile.print("F");
 		logfile.print(", ");
-		logfile.print(tempReadF[0], 2);
+		logfile.print(tempRead[0], 2);
 		logfile.print(", ");
-		logfile.print(tempReadF[1], 2);
+		logfile.print(tempRead[1], 2);
 		logfile.print(", ");
-		logfile.print(tempReadF[2], 2);
+		logfile.print(tempRead[2], 2);
 		logfile.print(", ");
-		logfile.print(tempReadF[3], 2);
+		logfile.print(tempRead[3], 2);
 		logfile.print(", ");
 		logfile.println(RelayState, BIN);
 		if ((serialDebug & 1) == 1)
@@ -1084,13 +1084,13 @@ void logger()
 			Serial.print(", ");
 			Serial.print("F");
 			Serial.print(", ");
-			Serial.print(tempReadF[0], 2);
+			Serial.print(tempRead[0], 2);
 			Serial.print(", ");
-			Serial.print(tempReadF[1], 2);
+			Serial.print(tempRead[1], 2);
 			Serial.print(", ");
-			Serial.print(tempReadF[2], 2);
+			Serial.print(tempRead[2], 2);
 			Serial.print(", ");
-			Serial.print(tempReadF[3], 2);
+			Serial.print(tempRead[3], 2);
 			Serial.print(",");
 			Serial.println(RelayState, BIN);
 		}
