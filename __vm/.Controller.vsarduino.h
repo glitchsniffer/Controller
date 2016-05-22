@@ -108,7 +108,7 @@ extern "C" void __cxa_pure_virtual() {;}
 void AlarmON();
 void AlarmOFF();
 void RelayToggleALL();
-void RelayToggle(uint8_t state, uint8_t onoff);
+void RelayToggle(uint8_t relay, uint8_t onoff);
 void RelayStatusDisplay(uint8_t col, uint8_t row);
 void StartScreen();
 void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space);

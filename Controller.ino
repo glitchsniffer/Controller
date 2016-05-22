@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 39;			//  Sets the build number for the current program
-byte subbuild = 0;			//	Sets the sub build number between major version releases
+byte subbuild = 1;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -632,66 +632,64 @@ void RelayToggleALL()
 	}
 }
 
-void RelayToggle(uint8_t state, uint8_t onoff)
+void RelayToggle(uint8_t relay, uint8_t onoff)
+//	turns on or off the selected relays if the state passed differs from 
+//	relay = the relay that should be toggled
+//	onoff = should be a 0 for off or 1 for on
 {
-	Serial.printf("Before state ");
-	Serial.print(state, BIN);
-	Serial.print(" RelayState ");
-	Serial.println(RelayState, BIN);
-
-	for (uint8_t i = 0; i <= relayCount; i++)
-	{
-		uint8_t rl;
-		rl = (state & (1 << i));		//	isolate a single relay to see if its bit is set to 1 or 0
-		lcd.setCursor(i, 3);			//	set the cursor position to the current relay to print a + or -
+	if ((serialDebug & 16) == 16) {
+		Serial.printf("Before state ");
+		Serial.print(relay, BIN);
+		Serial.print(" RelayState ");
+		Serial.println(RelayState, BIN);
+	}
+	//	read all relays and isolate them 1 by 1 to determine if it needs turned on or off
+	for (uint8_t i = 0; i <= relayCount; i++) {
+		uint8_t rl;		//	variable to store the single relay
+		rl = (relay & (1 << i));		//	isolate a single relay to see if its bit is set to 1 or 0
 		
 		//	switch to turn on or off the relay
-		switch (onoff)
-		{
-		case 0:			//  turns off the relay
-			if (rl > 0)
-			{
-				if ((RelayState & (1 << i)) != 0)		//	Only changes if there is not a 0 for that bit.  this prevents changing the relaystate if there it is alread on
-				{
-					RelayState = RelayState ^ (1 << i);	//	toggles the bit held in RelayState
-				}
+		switch (onoff) {
+		case 0:		//  turns the relay off
+			if (rl > 0)	{
+				//	Only changes if there is not a 0 for that bit.  this prevents changing the relaystate if there it is alread on
+				if ((RelayState & (1 << i)) != 0) { RelayState = RelayState ^ (1 << i); }	//	toggles the bit held in RelayState
 				mcpA.writeBit(1, i, 1);			//	turns the relay off
-				lcd.print("-");							//	sets the relay to display a - on the LCD screen
 			}
 			break;
-		case 1:
-			if (rl > 0)
-			{
-				if ((RelayState & (1 << i)) != (1 << i))//	Only changes if there is not a 1 for that bit.  this prevents changing the relaystate if there it is alread on
-				{
-					RelayState = RelayState ^ (1 << i);	//	toggles the bit held in RelayState
-				}
+		case 1:		//	turns the relay on
+			if (rl > 0)	{
+				//	Only changes if there is not a 1 for that bit.  this prevents changing the relaystate if there it is alread on
+				if ((RelayState & (1 << i)) != (1 << i)) { RelayState = RelayState ^ (1 << i); }	//	toggles the bit held in RelayState
 				mcpA.writeBit(1, i, 0);			//	turns the relay on
-				lcd.print("+");							//	sets the relay to display a - on the LCD screen
 			}
 			break;
 		}
 		delay(200);
 	}
-	Serial.print("After state ");
-	Serial.print(state, BIN);
-	Serial.print(" RelayState ");
-	Serial.println(RelayState, BIN);
+	if ((serialDebug & 16) == 16) {
+		Serial.print("After state ");
+		Serial.print(relay, BIN);
+		Serial.print(" RelayState ");
+		Serial.println(RelayState, BIN);
+	}
 
-	eeprom.write(150, RelayState);
-	RelayState = eeprom.read(150);
+	eeprom.write(150, RelayState);		//	write the relaystate to the eeprom
+	RelayState = eeprom.read(150);		//	read the relaystate out of the eeprom
+	RelayStatusDisplay(0, 3);			//	call the RelayStatusDisplay to write to the displays
 }
 
 void RelayStatusDisplay(uint8_t col, uint8_t row)
 //	write the status of the relays to the LCD screen
 {
-	String relayString = "";
-	myGLCD.setFont(GroteskBold24x48);	//	set the font
+	String relayString = "";	//	variable used to store to string to print to the display
+	myGLCD.setFont(GroteskBold24x48);	//	set the font for the 4.3" touchscreen
 
-	for (uint8_t i = 0; i <= relayCount; i++)
-		{
-			if ((RelayState & (1 << i)) == (1 << i)) { relayString = relayString + "+"; }
-			else relayString = relayString + "-";;
+	//	read RelayState to get all relays assembled into a strin
+	for (uint8_t i = 0; i <= relayCount; i++) {
+		//	isolate each relay and determine whether it is on or off
+		if ((RelayState & (1 << i)) == (1 << i)) { relayString = relayString + "+"; }
+		else relayString = relayString + "-";;
 		}
 	//	Print to the character LCD screen
 	//	***************************************
@@ -700,9 +698,9 @@ void RelayStatusDisplay(uint8_t col, uint8_t row)
 
 	//	Print to the 4.3" LCD touch screen
 	//	***************************************
-	int x = col * 24;
-	int y = (row + 1) * 48;
-	myGLCD.print(relayString, x, y);
+	int x = (col * 24);
+	int y = ((row + 1) * 48) + 35;
+	myGLCD.print(relayString, RIGHT, y);
 }
 
 void StartScreen()
@@ -1262,10 +1260,10 @@ void factoryDefaultset()
 		eeprom.write(102 + (i * 6), 0);			//  writes the alarm type to 0, Day Lights
 		int bit = 1 << i;
 		eeprom.write(103 + (i * 6), (0 ^ bit));	//	writes the relay trigger to relay to match the id
-		eeprom.write(104 + (i * 6), 1);		//  writes the alarm on hour 12
-		eeprom.write(105 + (i * 6), 15+i);		//  writes the alarm on minute 1
-		eeprom.write(106 + (i * 6), 1);		//  writes the alarm off hour 23
-		eeprom.write(107 + (i * 6), 23+i);		//  writes the alarm off minute 11
+		eeprom.write(104 + (i * 6), 0);		//  writes the alarm on hour 12
+		eeprom.write(105 + (i * 6), 28+i);		//  writes the alarm on minute 1
+		eeprom.write(106 + (i * 6), 00);		//  writes the alarm off hour 23
+		eeprom.write(107 + (i * 6), 32+i);		//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");
 }
