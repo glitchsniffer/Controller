@@ -16,8 +16,8 @@
 //	VERSIONING VARIABLES
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
-byte build = 38;			//  Sets the build number for the current program
-byte subbuild = 9;			//	Sets the sub build number between major version releases
+byte build = 39;			//  Sets the build number for the current program
+byte subbuild = 0;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -239,7 +239,7 @@ void setup()
 //  SETUP THE SERIAL PORT
 //  ***********************************************
 	Wire.begin();
-	delay(250);
+	delay(500);
 	Serial.begin(115200);				//  start the serial port if debugging is on
 
 	//  SETUP THE RTC
@@ -616,25 +616,25 @@ void AlarmOFF()
 		Serial.println();
 	}
 }
-void RelayToggleALL()
-{
-	//	NOTE THAT THIS WILL NOT TOGGLE THE RELAY DISPLAY ON THE LCD BECAUSE I DO NOT WRITE TO THE RELAYSTATE
-	int read = 5;
 
-	for (uint8_t relay = 0; relay <= relayCount; relay++)	//	loop through the relays and turn each one on
-	{
+void RelayToggleALL()
+//	toggle all the relays on then toggle them off
+//	this function is used as a test for the relays.
+//	NOTE:  this will not toggle the relay display on the LCD as I do not do anything with the RELAYSTATE
+{
+	for (uint8_t relay = 0; relay <= relayCount; relay++) {	//	loop through the relays and turn each one on
 		mcpA.writeBit(1, relay, 0);			//	writes the selected port low to turn the relay on
 		delay(200);
 	}
-	for (uint8_t relay = 0; relay <= relayCount; relay++)	//	loop through the relays and turn each one off
-	{	
+	for (uint8_t relay = 0; relay <= relayCount; relay++) {	//	loop through the relays and turn each one off
 		mcpA.writeBit(1, relay, 1);			//	writes the selected port low to turn the relay off
 		delay(200);
 	}
 }
+
 void RelayToggle(uint8_t state, uint8_t onoff)
 {
-	Serial.print("Before state ");
+	Serial.printf("Before state ");
 	Serial.print(state, BIN);
 	Serial.print(" RelayState ");
 	Serial.println(RelayState, BIN);
@@ -683,14 +683,26 @@ void RelayToggle(uint8_t state, uint8_t onoff)
 }
 
 void RelayStatusDisplay(uint8_t col, uint8_t row)
+//	write the status of the relays to the LCD screen
 {
-	lcd.setCursor(col, row);
+	String relayString = "";
+	myGLCD.setFont(GroteskBold24x48);	//	set the font
+
 	for (uint8_t i = 0; i <= relayCount; i++)
 		{
-			lcd.setCursor((col + i), row);
-			if ((RelayState & (1 << i)) == (1 << i)){ lcd.print("+"); }
-			else lcd.print("-");
+			if ((RelayState & (1 << i)) == (1 << i)) { relayString = relayString + "+"; }
+			else relayString = relayString + "-";;
 		}
+	//	Print to the character LCD screen
+	//	***************************************
+	lcd.setCursor(col, row);
+	lcd.print(relayString);
+
+	//	Print to the 4.3" LCD touch screen
+	//	***************************************
+	int x = col * 24;
+	int y = (row + 1) * 48;
+	myGLCD.print(relayString, x, y);
 }
 
 void StartScreen()
@@ -1250,10 +1262,10 @@ void factoryDefaultset()
 		eeprom.write(102 + (i * 6), 0);			//  writes the alarm type to 0, Day Lights
 		int bit = 1 << i;
 		eeprom.write(103 + (i * 6), (0 ^ bit));	//	writes the relay trigger to relay to match the id
-		eeprom.write(104 + (i * 6), 18);		//  writes the alarm on hour 12
-		eeprom.write(105 + (i * 6), 00+i);		//  writes the alarm on minute 1
-		eeprom.write(106 + (i * 6), 18);		//  writes the alarm off hour 23
-		eeprom.write(107 + (i * 6), 9+i);		//  writes the alarm off minute 11
+		eeprom.write(104 + (i * 6), 1);		//  writes the alarm on hour 12
+		eeprom.write(105 + (i * 6), 15+i);		//  writes the alarm on minute 1
+		eeprom.write(106 + (i * 6), 1);		//  writes the alarm off hour 23
+		eeprom.write(107 + (i * 6), 23+i);		//  writes the alarm off minute 11
 	}
 	Serial.println("Factory Defaults Restored");
 }
