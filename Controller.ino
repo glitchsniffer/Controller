@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 39;			//  Sets the build number for the current program
-byte subbuild = 1;			//	Sets the sub build number between major version releases
+byte subbuild = 2;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -509,28 +509,27 @@ void setup()
 	}
 
 	//	CLEAR THE LCD SCREENS
-	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
-	{
+	//  ***********************************************
+	if (LCD_TYPE == 1) {	//	if the LCD type is set to 0 then use the character lcd
 		lcd.setCursor(0, 0);
 		lcd.clear();
 	}
-	if (LCD_TYPE == 1)		//	temporary to show both screens
+	if (LCD_TYPE == 1) {	//	temporary to show both screens
 	//else
-	{
 		myGLCD.clrScr();
 		myGLCD.fillScr(VGA_BLUE);
 	}
 
 	//	SETUP THE RELAYS TO DISPLY AND TURN THEM ON IF NEEDED
+	//  ***********************************************
 	RelayStatusDisplay(0, 3);				//	call the relay status display function
 	RelayToggle(RelayState, 1);				//	Turn on the relays according to the AlarmState byte
 
 	//	TAKE A TEMP READING AND START THE LOOP
+	//  ***********************************************
 	if ((serialDebug & 1) == 1){ Serial.println(); }
 	ReadTempSensors();
-	Serial.print("Starting Loop :");
-	Serial.print(millis());
-	Serial.println();
+	Serial.printf("Starting Loop :%u\n", millis());
 
 	//	RESET MENU MODE
 	menuMode = 0;						//	set the menuMode variable to make sure it is set to 0 when the loop starts
@@ -638,7 +637,7 @@ void RelayToggle(uint8_t relay, uint8_t onoff)
 //	onoff = should be a 0 for off or 1 for on
 {
 	if ((serialDebug & 16) == 16) {
-		Serial.printf("Before state ");
+		Serial.print("Before state ");
 		Serial.print(relay, BIN);
 		Serial.print(" RelayState ");
 		Serial.println(RelayState, BIN);
@@ -681,6 +680,8 @@ void RelayToggle(uint8_t relay, uint8_t onoff)
 
 void RelayStatusDisplay(uint8_t col, uint8_t row)
 //	write the status of the relays to the LCD screen
+//	col = the column of the character display that you want to print to
+//	row = the row of the character display that you want to print to
 {
 	String relayString = "";	//	variable used to store to string to print to the display
 	myGLCD.setFont(GroteskBold24x48);	//	set the font for the 4.3" touchscreen
@@ -831,8 +832,9 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 }
 
 void LCDDateDisplay(byte display, uint8_t col, uint8_t row)
-//	display - 0 to not change the date if it is the same day.
-
+//	display = 0 to not change the date if it is the same day
+//	col = the column to start the print on the character display
+//	row = the row to start the print on the character display
 {
 	if (display == 0 && day() == today) { return; }		//	if the day hasn't changed, dont refresh it	
 	else
@@ -978,6 +980,7 @@ void ReadTempSensors()
 
 String convertTempSensorAddress(DeviceAddress deviceAddress)
 //	this function will convert the DS18B20 sensor address from a 64bit integer to a string that can be printed easily
+//	devAddress = the address of the sensor that this function will print
 {
 	String addrString;		//	string to hold the address
 
