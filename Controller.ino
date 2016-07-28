@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 39;			//  Sets the build number for the current program
-byte subbuild = 2;			//	Sets the sub build number between major version releases
+byte subbuild = 3;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -81,7 +81,7 @@ extern uint8_t BigFont[];
 extern uint8_t SevenSegNumFont[];
 extern uint8_t GroteskBold16x32[];
 extern uint8_t GroteskBold24x48[];
-
+extern unsigned short gear[0x400];
 
 //  DEFINE THE MCP23017 IO EXPANDER
 //  ***********************************************
@@ -219,18 +219,18 @@ byte relayCount = 7;		//  Set the number of relays
 //  INITIALIZE THE SD CARD
 //  ***********************************************
 #define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
-uint32_t syncTime = 0;					//	time of the last sync
-const uint8_t chipSelect = 9;			//	pin for the chip select line on the SD Card
+#define SD_CHIP_SELECT 9				//	pin for the chip select line on the SD Card
+uint32_t SDLastSyncTime = 0;			//	time of the last sync
 uint8_t SDexist = 0;					//	variable to determine if there is a problem with the sd card.  If there is then dont use the SD card.
-File logfile;							//	initialize the file to log to
+File SDLogfile;							//	initialize the file to log to
 
 
 //  INITIALIZE THE LEDS
 //  ***********************************************
-#define sdledbank 0			//	the sdcard leds are on bank 0 of the MCP23017
-#define redledpin 0			//  located on port 0.0 of the MCP23017
-#define greenledpin 1		//  located on port 0.1 of the MCP23017
-#define blueledpin 2		//  located on port 0.2 of the MCP23017
+#define SD_LED_BANK 0		//	the sdcard leds are on bank 0 of the MCP23017
+#define RED_LED_PIN 0		//  located on port 0.0 of the MCP23017
+#define GREEN_LED_PIN 1		//  located on port 0.1 of the MCP23017
+#define BLUE_LED_PIN 2		//  located on port 0.2 of the MCP23017
 
 
 void setup()
@@ -409,12 +409,15 @@ void setup()
 
 //	SETUP THE TFT LCD
 //  ***********************************************
-	myGLCD.InitLCD();
+	myGLCD.InitLCD(LANDSCAPE);
 	myGLCD.clrScr();
 	myGLCD.setFont(BigFont);
 	myGLCD.fillScr(VGA_BLUE);
 	myGLCD.setBackColor(VGA_BLUE);
 	myGLCD.setColor(VGA_SILVER);
+
+	myTouch.InitTouch();
+	myTouch.setPrecision(PREC_MEDIUM);
 
 	StartScreen();		//  call the start up screen function
 
@@ -468,36 +471,33 @@ void setup()
 	}
 	if ((serialDebug & 1) == 1) { Serial.println(); }		//	Print a line space for the next function
 
-	//	INITIALIZE THE SD CARD
+//	INITIALIZE THE SD CARD
+//  ***********************************************
 	Serial.println("Initializing the SD Card...");
-	pinMode(chipSelect, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
+	pinMode(SD_CHIP_SELECT, OUTPUT);		//	the chipselect line of the SD Card. always configure it to an output
 
-	if (!SD.begin(chipSelect))
-	{
+	//	Determine if the SD card is present or not
+	if (!SD.begin(SD_CHIP_SELECT)) {
 		Serial.println("Card Failed, or Card is not present");
 		SDexist = 0;
-		digitalWrite(redledpin, HIGH);
+		digitalWrite(RED_LED_PIN, HIGH);
 	}
-	else
-	{
+	else {
 		Serial.println("SD card initialized.");
 		SDexist = 1;
 	}
-	//	CREATE A NEW FILE
-	if (SDexist == 1)
-	{
+	//	CREATE A NEW FILE IF THE SD CARD EXISTS
+	if (SDexist == 1) {
 		char filename[] = "LOGGER00.CSV";
-		for (uint8_t i = 0; i < 100; i++)
-		{
+		for (uint8_t i = 0; i < 100; i++) {
 			filename[6] = i / 10 + '0';
 			filename[7] = i % 10 + '0';
-			if (!SD.exists(filename))
-			{
-				logfile = SD.open(filename, FILE_WRITE);	//	only open a new file if it doesn't exist
+			if (!SD.exists(filename)) {
+				SDLogfile = SD.open(filename, FILE_WRITE);	//	only open a new file if it doesn't exist
 				break;
 			}
 		}
-		if (!logfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
+		if (!SDLogfile){ error("Could not create a file"); }		//	if there is an error call the error function with the error
 
 		//	print the filename that was created in the code above
 		Serial.print("Logging to: ");
@@ -505,7 +505,7 @@ void setup()
 		Serial.println();
 
 		//	CREATE A HEADER FOR THE LOGFILE
-		logfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
+		SDLogfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
 	}
 
 	//	CLEAR THE LCD SCREENS
@@ -547,21 +547,30 @@ void loop()
 		Serial.println("Exiting Menu");
 	}
 
-	if (RTC_Status == 1){ LCDDateDisplay(0, 0, 1); }						//  only calls LCDDateDisplay if the RTC has been set
+	if (RTC_Status == 1){ LCDDateDisplay(0, 0, 1); }		//  only calls LCDDateDisplay if the RTC has been set
 
-	//	adjusts for 12 or 24 hour and if the seconds are to be displayed on the LCD screen
-	switch (secondsDisplay)
+	TimeDisplay();		//	update the time
+
+	//	check to see if the settings icon was touched
+	if (myTouch.dataAvailable())
 	{
-	case 0:
-		if (timeFormat == 0){ LCDTimeDisplay(0, 2, 0, hour(), minute(), second(), 0); }
-		else { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
-		break;
-	case 1:
-		if (timeFormat == 0){ LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
-		else { LCDTimeDisplay(0, 0, 0, hour(), minute(), second(), 0); }
-		break;
-	}
 
+		myTouch.read();
+		int x = myTouch.getX();
+		int y = myTouch.getY();
+
+		if ((y >= 240) && (y <= 272));
+		{
+			if ((x >= 10) && (x <= 42))  // Settings Button
+			{
+				myGLCD.clrScr();
+				myGLCD.fillScr(255, 0, 0);
+				delay(1000);
+				myGLCD.fillScr(VGA_BLUE);
+				menuMode = 1;
+			}
+		}
+	}
 	//	delay for the ammount of time selected between readings
 	Alarm.delay(((LOOP_INTERVAL - 1) - (millis() % LOOP_INTERVAL)));	//  uses the Alarm.delay to use the timer
 }
@@ -739,6 +748,22 @@ void StartScreen()
 		myGLCD.print(versionString, CENTER, y * 3, 0);
 	}
 }
+
+void TimeDisplay()
+{
+	//	adjusts for 12 or 24 hour and if the seconds are to be displayed on the LCD screen
+	switch (secondsDisplay)
+	{
+	case 0:
+		if (timeFormat == 0) { LCDTimeDisplay(0, 2, 0, hour(), minute(), second(), 0); }
+		else { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
+		break;
+	case 1:
+		if (timeFormat == 0) { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
+		else { LCDTimeDisplay(0, 0, 0, hour(), minute(), second(), 0); }
+		break;
+	}
+}
 	
 void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space)
 //	disp is used for options
@@ -828,6 +853,7 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 
 		myGLCD.setFont(GroteskBold24x48);	//	set the font
 		myGLCD.print(timestring, x, y);		//	print the date string to x and y coordinates
+		myGLCD.drawBitmap(10, 240, 32, 32, gear);	//	draw the settings gear
 	}
 }
 
@@ -998,15 +1024,15 @@ void logger()
 {
 	time_t t;
 
-	mcpA.writeBit(sdledbank,greenledpin, 1);
+	mcpA.writeBit(SD_LED_BANK,GREEN_LED_PIN, 1);
 
 	if ((serialDebug & 1) == 1)
 	{Serial.println("Preparing Data");}
 
 	// log the millis since starting
 	uint32_t m = millis();
-	logfile.print(m);
-	logfile.print(", ");
+	SDLogfile.print(m);
+	SDLogfile.print(", ");
 
 	if ((serialDebug & 1) == 1)
 	{
@@ -1017,19 +1043,19 @@ void logger()
 	t = now();		//	fetch the current time
 
 	//	print the log time
-	logfile.print(t);
-	logfile.print(", ");
-	logfile.print(year(t), DEC);
-	logfile.print("/");
-	logfile.print(month(t), DEC);
-	logfile.print("/");
-	logfile.print(day(t), DEC);
-	logfile.print(" ");
-	logfile.print(hour(t), DEC);
-	logfile.print(":");
-	logfile.print(minute(t), DEC);
-	logfile.print(":");
-	logfile.print(second(t), DEC);
+	SDLogfile.print(t);
+	SDLogfile.print(", ");
+	SDLogfile.print(year(t), DEC);
+	SDLogfile.print("/");
+	SDLogfile.print(month(t), DEC);
+	SDLogfile.print("/");
+	SDLogfile.print(day(t), DEC);
+	SDLogfile.print(" ");
+	SDLogfile.print(hour(t), DEC);
+	SDLogfile.print(":");
+	SDLogfile.print(minute(t), DEC);
+	SDLogfile.print(":");
+	SDLogfile.print(second(t), DEC);
 	//	echo to the serial port
 	if ((serialDebug & 1) == 1)
 	{
@@ -1051,18 +1077,18 @@ void logger()
 	switch (tempType)
 	{
 	case 0:
-		logfile.print(", ");
-		logfile.print("C");
-		logfile.print(", ");
-		logfile.print(tempRead[0], 2);
-		logfile.print(", ");
-		logfile.print(tempRead[1], 2);
-		logfile.print(", ");
-		logfile.print(tempRead[2], 2);
-		logfile.print(", ");
-		logfile.print(tempRead[3], 2);
-		logfile.print(", ");
-		logfile.println(RelayState, BIN);
+		SDLogfile.print(", ");
+		SDLogfile.print("C");
+		SDLogfile.print(", ");
+		SDLogfile.print(tempRead[0], 2);
+		SDLogfile.print(", ");
+		SDLogfile.print(tempRead[1], 2);
+		SDLogfile.print(", ");
+		SDLogfile.print(tempRead[2], 2);
+		SDLogfile.print(", ");
+		SDLogfile.print(tempRead[3], 2);
+		SDLogfile.print(", ");
+		SDLogfile.println(RelayState, BIN);
 		if ((serialDebug & 1) == 1)
 		{
 			Serial.print(", ");
@@ -1080,18 +1106,18 @@ void logger()
 		}
 		break;
 	case 1:
-		logfile.print(", ");
-		logfile.print("F");
-		logfile.print(", ");
-		logfile.print(tempRead[0], 2);
-		logfile.print(", ");
-		logfile.print(tempRead[1], 2);
-		logfile.print(", ");
-		logfile.print(tempRead[2], 2);
-		logfile.print(", ");
-		logfile.print(tempRead[3], 2);
-		logfile.print(", ");
-		logfile.println(RelayState, BIN);
+		SDLogfile.print(", ");
+		SDLogfile.print("F");
+		SDLogfile.print(", ");
+		SDLogfile.print(tempRead[0], 2);
+		SDLogfile.print(", ");
+		SDLogfile.print(tempRead[1], 2);
+		SDLogfile.print(", ");
+		SDLogfile.print(tempRead[2], 2);
+		SDLogfile.print(", ");
+		SDLogfile.print(tempRead[3], 2);
+		SDLogfile.print(", ");
+		SDLogfile.println(RelayState, BIN);
 		if ((serialDebug & 1) == 1)
 		{
 			Serial.print(", ");
@@ -1110,11 +1136,11 @@ void logger()
 		break;
 	}
 
-	mcpA.writeBit(sdledbank, greenledpin, 0);
+	mcpA.writeBit(SD_LED_BANK, GREEN_LED_PIN, 0);
 
 	//  Write the data to disk if the millis are more than the write interval
-	if ((millis() - syncTime) < SDCARD_WRITE_INTERVAL) { return; }
-	syncTime = millis();
+	if ((millis() - SDLastSyncTime) < SDCARD_WRITE_INTERVAL) { return; }
+	SDLastSyncTime = millis();
 
 	//	write the logfiles data to the SD Card
 	if ((serialDebug & 1) == 1)
@@ -1122,9 +1148,9 @@ void logger()
 		Serial.println("Writing log to the SD Card");
 		Serial.println("");
 	}
-	mcpA.writeBit(sdledbank, blueledpin, 1);
-	logfile.flush();
-	mcpA.writeBit(sdledbank, blueledpin, 1);
+	mcpA.writeBit(SD_LED_BANK, BLUE_LED_PIN, 1);
+	SDLogfile.flush();
+	mcpA.writeBit(SD_LED_BANK, BLUE_LED_PIN, 1);
 }
 
 void FlowSensorRead()
@@ -1292,22 +1318,22 @@ void error(char*str)
 {
 	Serial.print("Error: ");
 	Serial.println(str);
-	mcpA.writeBit(sdledbank, redledpin, 1);
+	mcpA.writeBit(SD_LED_BANK, RED_LED_PIN, 1);
 }
 
 void TestSDLEDS()
 {
 	//TEST THE LEDS
-	mcpA.writeBit(sdledbank, redledpin, 1);
+	mcpA.writeBit(SD_LED_BANK, RED_LED_PIN, 1);
 	delay(500);
-	mcpA.writeBit(sdledbank, greenledpin, 1);
+	mcpA.writeBit(SD_LED_BANK, GREEN_LED_PIN, 1);
 	delay(500);
-	mcpA.writeBit(sdledbank, blueledpin, 1);
+	mcpA.writeBit(SD_LED_BANK, BLUE_LED_PIN, 1);
 	delay(500);
-	mcpA.writeBit(sdledbank, redledpin, 0);
+	mcpA.writeBit(SD_LED_BANK, RED_LED_PIN, 0);
 	delay(500);
-	mcpA.writeBit(sdledbank, greenledpin, 0);
+	mcpA.writeBit(SD_LED_BANK, GREEN_LED_PIN, 0);
 	delay(500);
-	mcpA.writeBit(sdledbank, blueledpin, 0);
+	mcpA.writeBit(SD_LED_BANK, BLUE_LED_PIN, 0);
 	delay(500);
 }

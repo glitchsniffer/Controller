@@ -103,5 +103,8 @@
     <ClCompile Include="GroteskBold16x32.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gear.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
