@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 39;			//  Sets the build number for the current program
-byte subbuild = 4;			//	Sets the sub build number between major version releases
+byte subbuild = 5;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -833,6 +833,10 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
 	{
 		lcd.setCursor(col, row);			//	set the cursor to erase the current line
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// THE FOLLOWING LINE NEEDS TO BE FIXED FOR THE TIME TO BE DISPLAYED CORRECTLY IN THE TIMERS SETUP MENU FUNCTION
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 		lcd.print("          ");			//	erase the current line
 		if (length == 10) { lcd.setCursor(col, row); }		//	determine where to set the cursor row
 		else { lcd.setCursor(col + 1, row); }
