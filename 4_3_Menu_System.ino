@@ -1,11 +1,11 @@
 
 //  MENU SYSTEM
 //  ***********************************************
-void MenuTitle()
+void TFTMenuTitle()
 {
 	menuTimeout = 0;
 	if (mLevel == 3)		//	menu printing is not necessary if its the final level so it just calls the do function
-		{MenuDo();
+		{TFTMenuDo();
 		return;}
 		
 	lcd.clear();					//	clear the menu in preparation for setting the new title
@@ -388,10 +388,10 @@ void MenuTitle()
 	if (mRet == 0){					//	will only run the first time through
 		mRet = 1;					//	set to 1 to cause subsequent runs to not do the following 2 lines
 		mcpA.readByte(INTCAPA);		//	clear the interrupt in the mcpA
-		MenuLoop();}				//	start the MenuLoop
+		TFTMenuLoop();}				//	start the MenuLoop
 		else{return;}				//	return to the MenuLoop
 }
-void MenuLoop()
+void TFTMenuLoop()
 {
 	Alarm.delay(100);
 	mcpA.readByte(GPIOA);		//	clear the interrupt from the MCP
@@ -403,10 +403,10 @@ void MenuLoop()
 		uint8_t Right = mcpA.readBit(menubuttonbank, rightButton);
 		uint8_t Left = mcpA.readBit(menubuttonbank, leftButton);
 		
-		if (Up == 1){MenuUp();}
-		if (Down == 1){MenuDown();}
-		if (Right == 1){MenuSelect();}
-		if (Left == 1){MenuBack();}
+		if (Up == 1){ TFTMenuUp();}
+		if (Down == 1){ TFTMenuDown();}
+		if (Right == 1){ TFTMenuSelect();}
+		if (Left == 1){ TFTMenuBack();}
 		
 		menuTimeout++;
 		if (menuTimeout == 10000){ menuMode = 0; }		//	this will exit the menu system after approx 20 seconds after a button has not been pushed
@@ -425,7 +425,7 @@ void MenuLoop()
 	ReadTempSensors();			//  read the temp sensors so that the display has them
 }
 
-void MenuUp()
+void TFTMenuUp()
 {
 	switch (mLevel)		//  switches to adjust the appropriate pointer
 	{
@@ -439,10 +439,10 @@ void MenuUp()
 			m2Start--;
 			break;
 	}
-	MenuTitle();
+	TFTMenuTitle();
 }
 
-void MenuDown()
+void TFTMenuDown()
 {
 	switch (mLevel)		//  switches to adjust the appropriate pointer
 	{
@@ -456,10 +456,10 @@ void MenuDown()
 			m2Start++;
 			break;
 	}
-	MenuTitle();
+	TFTMenuTitle();
 }
 
-void MenuSelect()
+void TFTMenuSelect()
 {
 	mLevel++;			//  increments the menu level
 	switch (mLevel)		//	switches for selecting the appropriate title and menu lines
@@ -481,16 +481,16 @@ void MenuSelect()
 			m3Start = 0;
 			break;
 	}
-	MenuTitle();
+	TFTMenuTitle();
 }
 
-void MenuBack()	//  function for going back 1 level in the menu system
+void TFTMenuBack()	//  function for going back 1 level in the menu system
 {
 	if (mLevel > 0) { mLevel--; }	//  decrements the menu level back 1 level if the level isnt 0 already.
-	MenuTitle();
+	TFTMenuTitle();
 }
 
-void MenuDo()	//  function for doing the currently selected menu item at the final level
+void TFTMenuDo()	//  function for doing the currently selected menu item at the final level
 {
 	if ((serialDebug & 2) == 2)
 	{
@@ -557,7 +557,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 					case 0:
 						tempReadDelay = eeprom.read(22);
-						to = MenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
+						to = TFTMenuNumSel(0, 22, tempReadDelay, 1, 60, 1, 9, 2, 200);
 						if (to == 32767){ return; }
 						tempReadDelay = eeprom.read(22);
 						Alarm.write(tempReadID, tempReadDelay);
@@ -573,7 +573,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					{
 					case 0:
 						backlightLevel = eeprom.read(25);
-						to = MenuNumSel(0, 25, backlightLevel, 0, 255, 5, 9, 2, 250);
+						to = TFTMenuNumSel(0, 25, backlightLevel, 0, 255, 5, 9, 2, 250);
 						if (to == 32767){ return; }
 						backlightLevel = eeprom.read(25);
 						analogWrite(backlight, backlightLevel);
@@ -654,7 +654,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.setCursor(5, 2);
 							lcd.write(byte(3));		//  print the up arrow
 							lcd.write(byte(3));		//  print the up arrow
-							setmonth = MenuNumSel(192, 255, month(), 1, 12, 1, 5, 1, 250);
+							setmonth = TFTMenuNumSel(192, 255, month(), 1, 12, 1, 5, 1, 250);
 							lcd.setCursor(5, 2);
 							lcd.print("  ");
 
@@ -662,7 +662,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.setCursor(8, 2);
 							lcd.write(byte(3));		//  print the up arrow
 							lcd.write(byte(3));		//  print the up arrow
-							setday = MenuNumSel(192, 255, day(), 1, 31, 1, 8, 1, 250);
+							setday = TFTMenuNumSel(192, 255, day(), 1, 31, 1, 8, 1, 250);
 							lcd.setCursor(8, 2);
 							lcd.print("  ");
 
@@ -671,7 +671,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.write(byte(3));		//  print the up arrow
 							lcd.write(byte(3));		//  print the up arrow
 							tmp = year() - 2000;
-							setyear = MenuNumSel(192, 255, tmp, 1, 99, 1, 13, 1, 250);
+							setyear = TFTMenuNumSel(192, 255, tmp, 1, 99, 1, 13, 1, 250);
 							lcd.setCursor(13, 2);
 							lcd.print("  ");
 
@@ -679,7 +679,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.clear();
 							lcd.setCursor(1, 0);
 							lcd.print("Set the Day of Week");
-							setweekday = MenuNumSel(208, 255, weekday(), 1, 7, 1, 6, 2, 250);
+							setweekday = TFTMenuNumSel(208, 255, weekday(), 1, 7, 1, 6, 2, 250);
 							
 							//	setup the lcd for the time setting
 							lcd.clear();
@@ -696,7 +696,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.setCursor(column, 2);
 							lcd.write(byte(3));
 							lcd.write(byte(3));
-							sethour = MenuNumSel(197, 255, hour(), 0, 23, 1, column, 1, 250);
+							sethour = TFTMenuNumSel(197, 255, hour(), 0, 23, 1, column, 1, 250);
 							lcd.setCursor(column, 2);
 							lcd.print("  ");
 
@@ -704,7 +704,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.setCursor(column + 3, 2);
 							lcd.write(byte(3));
 							lcd.write(byte(3));
-							setminutes = MenuNumSel(192, 255, minute(), 0, 59, 1, column + 3, 1, 250);
+							setminutes = TFTMenuNumSel(192, 255, minute(), 0, 59, 1, column + 3, 1, 250);
 							lcd.setCursor(column + 3, 2);
 							lcd.print("  ");
 
@@ -712,7 +712,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 							lcd.setCursor(column + 6, 2);
 							lcd.write(byte(3));
 							lcd.write(byte(3));
-							setseconds = MenuNumSel(192, 255, second(), 0, 59, 1, column + 6, 1, 250);
+							setseconds = TFTMenuNumSel(192, 255, second(), 0, 59, 1, column + 6, 1, 250);
 							lcd.setCursor(column + 6, 2);
 							lcd.print("  ");
 
@@ -780,7 +780,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 								else if (sethour <= 11){ lcd.print("AM"); }
 							}
 							
-							tmp = MenuNumSel(194, 255, 0, 0, 1, 1, 8, 3, 250);
+							tmp = TFTMenuNumSel(194, 255, 0, 0, 1, 1, 8, 3, 250);
 							
 							//	write the date and time to the RTC
 							if (tmp == 0){ break; }
@@ -948,7 +948,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					uint8_t rd;
 					lcd.setCursor(0, 1);
 					lcd.print("Calibrate Flow Sens");
-					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 8, 3, 250);
+					rd = TFTMenuNumSel(66, 28, 0, 0, 1, 1, 8, 3, 250);
 					if (rd == 0){ break; }
 					Alarm.disable(tempReadID);
 					Alarm.disable(flowReadID);
@@ -971,7 +971,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					lcd.print(flowPulseTotal / 5);
 					lcd.setCursor(0, 1);
 					lcd.print("Set As Normal Flow?");
-					rd = MenuNumSel(66, 28, 0, 0, 1, 1, 8, 2, 250);
+					rd = TFTMenuNumSel(66, 28, 0, 0, 1, 1, 8, 2, 250);
 					if (rd == 0)
 					{
 						lcd.clear();
@@ -999,7 +999,7 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 					flowRateMin = eeprom.read(29);
 					lcd.setCursor(11, 2);
 					lcd.print("%");
-					to = MenuNumSel(0, 29, flowRateMin, 5, 100, 5, 8, 2, 250);
+					to = TFTMenuNumSel(0, 29, flowRateMin, 5, 100, 5, 8, 2, 250);
 					if (to == 32767){ return; }
 					flowRateMin = eeprom.read(29);
 					break;
@@ -1192,10 +1192,10 @@ void MenuDo()	//  function for doing the currently selected menu item at the fin
 	}
 	delay(1000);
 	mLevel = mLevel-2;
-	MenuTitle();
+	TFTMenuTitle();
 	return;
 }
-uint16_t MenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t min, uint16_t max, uint16_t step, uint16_t col, uint16_t row, uint16_t dmicro)
+uint16_t TFTMenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t min, uint16_t max, uint16_t step, uint16_t col, uint16_t row, uint16_t dmicro)
 //  type of display, EEprom addr, # to start on, minimum number to select, maximum number to select, step size, cursor column, cursor row, speed to run through the selection
 //  If you set the max to 59, it will pad a 0 in front of the 1's digit if it is < 10
 //  If you set the max to 23 and you have timeformat == 1 (12 hour), it will add AMPM display to the hours

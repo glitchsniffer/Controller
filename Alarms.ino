@@ -38,7 +38,7 @@ void AlarmSet(byte id)
 	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 0, 1);
 
 	//  call the number selection menu to select the hour
-	to = MenuNumSel(65, (104 + (id * 6)), AlarmHourOn[id], 0, 23, 1, (6 + t), 1, 250);
+	to = CharMenuNumSel(65, (104 + (id * 6)), AlarmHourOn[id], 0, 23, 1, (6 + t), 1, 250);
 	if (to == 32767){ return; }
 	AlarmHourOn[id] = eeprom.read(104 + (id * 6));
 
@@ -65,7 +65,7 @@ void AlarmSet(byte id)
 	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 0, 1);
 
 	//  call the number selection menu to select the hour
-	to = MenuNumSel(64, (105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 175);
+	to = CharMenuNumSel(64, (105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 175);
 	if (to == 32767){ return; }
 	AlarmMinOn[id] = eeprom.read(105 + (id * 6));
 
@@ -92,7 +92,7 @@ void AlarmSet(byte id)
 	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 0, 1);
 
 	//  call the number selection menu to select the hour
-	to = MenuNumSel(65, (106 + (id * 6)), AlarmHourOff[id], 0, 23, 1, (6 + t), 1, 250);
+	to = CharMenuNumSel(65, (106 + (id * 6)), AlarmHourOff[id], 0, 23, 1, (6 + t), 1, 250);
 	if (to == 32767){ return; }
 	AlarmHourOff[id] = eeprom.read(106 + (id * 6));
 
@@ -119,7 +119,7 @@ void AlarmSet(byte id)
 	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 0, 1);
 
 	//  call the number selection menu to select the hour
-	to = MenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 175);
+	to = CharMenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 175);
 	if (to == 32767){ return; }
 	AlarmMinOff[id] = eeprom.read(107 + (id * 6));
 
@@ -165,7 +165,7 @@ void AlarmSet(byte id)
 		else{ start = 0; }
 
 		//  call the number selection menu to select the relay
-		rd = MenuNumSel(200, 255, start, 0, 1, 1, (10 + i), 1, 200);
+		rd = CharMenuNumSel(200, 255, start, 0, 1, 1, (10 + i), 1, 200);
 		if (rd == 32767){ return; }
 
 		bit = 1 << i;
@@ -216,7 +216,7 @@ void AlarmSet(byte id)
 	lcd.write(byte(3));		//  print the up arrow
 
 	//	call the numselmenu to select the type of the relay  1-4
-	to = MenuNumSel(64, (102 + (id * 6)), AlarmType[id], 0, 3, 1, 8, 1, 250);
+	to = CharMenuNumSel(64, (102 + (id * 6)), AlarmType[id], 0, 3, 1, 8, 1, 250);
 	if (to == 32767){ return; }
 	AlarmType[id] = eeprom.read(102 + (id * 6));
 
@@ -253,7 +253,7 @@ void AlarmSet(byte id)
 	if ((AlarmEnable & (1 << id)) == (1 << id)){ start = 1; }		//	Check to see if if the timer is enable or disabled
 	else{ start = 0; }
 
-	rd = MenuNumSel(4, 255, start, 0, 1, 1, 8, 1, 250);	//	Call the function to edit the variable
+	rd = CharMenuNumSel(4, 255, start, 0, 1, 1, 8, 1, 250);	//	Call the function to edit the variable
 	if (rd == 32767){ return; }
 
 	bit = 1 << id;

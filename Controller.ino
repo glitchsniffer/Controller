@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 39;			//  Sets the build number for the current program
-byte subbuild = 3;			//	Sets the sub build number between major version releases
+byte subbuild = 4;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -73,8 +73,8 @@ byte clock[8] = { B00000,B01110,B10101,B10111,B10001,B01110,B00000, };		//	set t
 
 //  INITIALIZE THE 4.3" TFT TOUCHSCREEN
 //  ***********************************************
-UTFT myGLCD(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
-UTouch myTouch(6, 5, 32, 3, 2);			//	start an instance of the UTouch class using the pins used
+UTFT TFT(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
+UTouch Touch(6, 5, 32, 3, 2);			//	start an instance of the UTouch class using the pins used
 
 //	set the fonts that we will be using
 extern uint8_t BigFont[];
@@ -126,29 +126,29 @@ uint16_t menuTimeout;	//	variable to count for a menu system timeout
 uint8_t to = 0;		//	generic variable to determine if the menu system needs to time out
 
 char* m0Items[] = { "", "User Setup", "Timers Setup", "Sensor Addr Setup","Sensor Setup","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
-char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "Flow Sensor On/Off", "XXXX", "" };  //  setup menu item 1 for System Config Min 0 Max 8
-		char* m2Items00[] = { "", "Celsius", "Fahrenheit", ""};
-		char* m2Items01[] = { "", "No Decimal", "1 Decimal", ""};
-		char* m2Items02[] = { "", "Set Temp Read Delay", "" };
-		char* m2Items03[] = { "", "Set BL Brightness", "" };
-		char* m2Items04[] = { "", "24 Hour", "12 Hour", ""};
-		char* m2Items05[] = { "", "Do Not Display Sec", "Display Seconds", "" };
-		char* m2Items06[] = { "", "Exit", "Set Date and Time", ""};
-		char* m2Items07[] = { "", "Disable", "Enable", "" };
-		char* m2Items08[] = { "", "XXXX", "XXXX", "" };
-	char* m1Items1[] = { "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
-		char* m2Items10[] = { "", "Edit", "Exit", ""};
-	char* m1Items2[] = { "", "Temp Sens 1 Add", "Temp Sens 2 Add", "Temp Sens 3 Add", "Temp Sens 4 Add", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
-		char* m2Items20[] = { "", "Address Sens ", "Exit", ""};
-	char* m1Items3[] = { "", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Sensor Calibration Min 0 Max 4
-		char* m2Items30[] = { "", "Calibrate Sensor ", "Exit", ""};
-		char* m2Items34[] = { "", "Calibrate Flow Sens", "Set Min Flow", "Disable Flow Sensor", "Exit", "" };
-	char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults", "" };	//	setup menu item 4 for System Setup
-		char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "Relays", "System", "Flow Sensor", "" };
-		char* m2Items41[] = { "", "Exit Erase EEPROM", "Erase EEPROM", "" };
-		char* m2Items42[] = { "", "Exit", "Restore Defaults", "" };
+char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "Flow Sensor On/Off", "XXXXXX", "" };  //  setup menu item 1 for System Config Min 0 Max 8
+	char* m2Items00[] = { "", "Celsius", "Fahrenheit", ""};
+	char* m2Items01[] = { "", "No Decimal", "1 Decimal", ""};
+	char* m2Items02[] = { "", "Set Temp Read Delay", "" };
+	char* m2Items03[] = { "", "Set BL Brightness", "" };
+	char* m2Items04[] = { "", "24 Hour", "12 Hour", ""};
+	char* m2Items05[] = { "", "No", "Yes", "" };
+	char* m2Items06[] = { "", "Exit", "Set Date and Time", ""};
+	char* m2Items07[] = { "", "Disable", "Enable", "" };
+	char* m2Items08[] = { "", "XXXX", "XXXX", "" };
+char* m1Items1[] = { "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
+	char* m2Items10[] = { "", "Edit", "Exit", ""};
+char* m1Items2[] = { "", "Temp Sens 1 Addr", "Temp Sens 2 Addr", "Temp Sens 3 Addr", "Temp Sens 4 Addr", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
+	char* m2Items20[] = { "", "Address Sens ", "Exit", ""};
+char* m1Items3[] = { "", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Sensor Calibration Min 0 Max 4
+	char* m2Items30[] = { "", "Calibrate Sensor ", "Exit", ""};
+	char* m2Items34[] = { "", "Calibrate Flow Sens", "Set Min Flow", "Disable Flow Sensor", "Exit", "" };
+char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults", "" };	//	setup menu item 4 for System Setup
+	char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "Relays", "System", "Flow Sensor", "" };
+	char* m2Items41[] = { "", "Exit Erase EEPROM", "Erase EEPROM", "" };
+	char* m2Items42[] = { "", "Exit", "Restore Defaults", "" };
 
-	String strExiting = "Exiting";
+String strExiting = "Exiting";
 
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
@@ -409,15 +409,15 @@ void setup()
 
 //	SETUP THE TFT LCD
 //  ***********************************************
-	myGLCD.InitLCD(LANDSCAPE);
-	myGLCD.clrScr();
-	myGLCD.setFont(BigFont);
-	myGLCD.fillScr(VGA_BLUE);
-	myGLCD.setBackColor(VGA_BLUE);
-	myGLCD.setColor(VGA_SILVER);
+	TFT.InitLCD(LANDSCAPE);
+	TFT.clrScr();
+	TFT.setFont(BigFont);
+	TFT.fillScr(VGA_BLUE);
+	TFT.setBackColor(VGA_BLUE);
+	TFT.setColor(VGA_SILVER);
 
-	myTouch.InitTouch();
-	myTouch.setPrecision(PREC_MEDIUM);
+	Touch.InitTouch();
+	Touch.setPrecision(PREC_MEDIUM);
 
 	StartScreen();		//  call the start up screen function
 
@@ -516,8 +516,8 @@ void setup()
 	}
 	if (LCD_TYPE == 1) {	//	temporary to show both screens
 	//else
-		myGLCD.clrScr();
-		myGLCD.fillScr(VGA_BLUE);
+		TFT.clrScr();
+		TFT.fillScr(VGA_BLUE);
 	}
 
 	//	SETUP THE RELAYS TO DISPLY AND TURN THEM ON IF NEEDED
@@ -540,10 +540,11 @@ void setup()
 
 void loop()
 {
+	//  calls the MenuTitle as long as menuMode = 1
 	if (menuMode == 1)
 	{
-		Serial.println("Entering Menu");		//  calls the MenuTitle as long as menuMode = 1
-		MenuTitle();
+		Serial.println("Entering Menu");
+		CharMenuTitle();
 		Serial.println("Exiting Menu");
 	}
 
@@ -552,22 +553,21 @@ void loop()
 	TimeDisplay();		//	update the time
 
 	//	check to see if the settings icon was touched
-	if (myTouch.dataAvailable())
+	if (Touch.dataAvailable())
 	{
-
-		myTouch.read();
-		int x = myTouch.getX();
-		int y = myTouch.getY();
+		Touch.read();
+		int x = Touch.getX();
+		int y = Touch.getY();
 
 		if ((y >= 240) && (y <= 272));
 		{
 			if ((x >= 10) && (x <= 42))  // Settings Button
 			{
-				myGLCD.clrScr();
-				myGLCD.fillScr(255, 0, 0);
+				TFT.clrScr();
+				TFT.fillScr(255, 0, 0);
 				delay(1000);
-				myGLCD.fillScr(VGA_BLUE);
-				menuMode = 1;
+				TFT.fillScr(VGA_BLUE);
+				//menuMode = 1;
 			}
 		}
 	}
@@ -693,7 +693,7 @@ void RelayStatusDisplay(uint8_t col, uint8_t row)
 //	row = the row of the character display that you want to print to
 {
 	String relayString = "";	//	variable used to store to string to print to the display
-	myGLCD.setFont(GroteskBold24x48);	//	set the font for the 4.3" touchscreen
+	TFT.setFont(GroteskBold24x48);	//	set the font for the 4.3" touchscreen
 
 	//	read RelayState to get all relays assembled into a strin
 	for (uint8_t i = 0; i <= relayCount; i++) {
@@ -710,7 +710,7 @@ void RelayStatusDisplay(uint8_t col, uint8_t row)
 	//	***************************************
 	int x = (col * 24);
 	int y = ((row + 1) * 48) + 35;
-	myGLCD.print(relayString, RIGHT, y);
+	TFT.print(relayString, RIGHT, y);
 }
 
 void StartScreen()
@@ -740,12 +740,12 @@ void StartScreen()
 	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
 	//else
 	{
-		myGLCD.setFont(GroteskBold24x48);	//	set the font
+		TFT.setFont(GroteskBold24x48);	//	set the font
 		y = 55;		//	this is the total height of the font and the added space between lines
-		myGLCD.print("GLITCHSNIFFER'S", CENTER, 5, 0);
-		myGLCD.print("AQUARIUM", CENTER, y * 1, 0);
-		myGLCD.print("CONTROLLER", CENTER, y * 2, 0);
-		myGLCD.print(versionString, CENTER, y * 3, 0);
+		TFT.print("GLITCHSNIFFER'S", CENTER, 5, 0);
+		TFT.print("AQUARIUM", CENTER, y * 1, 0);
+		TFT.print("CONTROLLER", CENTER, y * 2, 0);
+		TFT.print(versionString, CENTER, y * 3, 0);
 	}
 }
 
@@ -851,9 +851,9 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 
 		// 4 is the minimum ammount of digits to display.  clear preceeding digits when appropriate.
 
-		myGLCD.setFont(GroteskBold24x48);	//	set the font
-		myGLCD.print(timestring, x, y);		//	print the date string to x and y coordinates
-		myGLCD.drawBitmap(10, 240, 32, 32, gear);	//	draw the settings gear
+		TFT.setFont(GroteskBold24x48);	//	set the font
+		TFT.print(timestring, x, y);		//	print the date string to x and y coordinates
+		TFT.drawBitmap(10, 240, 32, 32, gear);	//	draw the settings gear
 	}
 }
 
@@ -899,9 +899,9 @@ void LCDDateDisplay(byte display, uint8_t col, uint8_t row)
 			int y = (row * 48) + 5;				//	use row variable to decide where to start + 5 to pad the rows
 			x = ((240 - (length * 24)) / 2);	//	determine where to start printing to center the date
 
-			myGLCD.print("          ", x, y);	//	this will clear the current spot for the date and allow an shorter date to be written clearly
-			myGLCD.setFont(GroteskBold24x48);	//	set the font
-			myGLCD.print(datestring, x, y);		//	print the date string to x and y coordinates
+			TFT.print("          ", x, y);	//	this will clear the current spot for the date and allow an shorter date to be written clearly
+			TFT.setFont(GroteskBold24x48);	//	set the font
+			TFT.print(datestring, x, y);		//	print the date string to x and y coordinates
 		}
 		today = day(); //	set the day = to today so that it doesn't refresh the display with it until tomorrow
 	}
@@ -980,8 +980,8 @@ void ReadTempSensors()
 
 			tempString = buffer;	//	save the buffer
 
-			myGLCD.setFont(GroteskBold16x32);	//	set the font
-			myGLCD.print(tempString, RIGHT, y);	//	print the date string to x and y coordinates
+			TFT.setFont(GroteskBold16x32);	//	set the font
+			TFT.print(tempString, RIGHT, y);	//	print the date string to x and y coordinates
 		}
 
 		//	Print to the serial port
