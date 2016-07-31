@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 39;			//  Sets the build number for the current program
-byte subbuild = 5;			//	Sets the sub build number between major version releases
+byte subbuild = 6;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -755,17 +755,17 @@ void TimeDisplay()
 	switch (secondsDisplay)
 	{
 	case 0:
-		if (timeFormat == 0) { LCDTimeDisplay(0, 2, 0, hour(), minute(), second(), 0); }
-		else { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
+		if (timeFormat == 0) { LCDTimeDisplay(0, 2, 0, hour(), minute(), second(), 0, 10); }
+		else { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0, 10); }
 		break;
 	case 1:
-		if (timeFormat == 0) { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0); }
-		else { LCDTimeDisplay(0, 0, 0, hour(), minute(), second(), 0); }
+		if (timeFormat == 0) { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0, 10); }
+		else { LCDTimeDisplay(0, 0, 0, hour(), minute(), second(), 0, 10); }
 		break;
 	}
 }
 	
-void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space)
+void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space, uint8_t maxlength)
 //	disp is used for options
 //		0 = No options
 //		1 = force seconds display off.
@@ -773,6 +773,7 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 //	col and row are the absolute start of the print.  this will be modified to center the print later
 //	hour, min, sec are passed to the function as either the time of the time you want displayed.
 //	space can be used to add space between the time and AM/PM, or to add space elsewhere if needed.
+//	maxlength is the max lenght you would expect the string to be.  this allow for a variable ammount of spaces needed to clear the previous line
 //	if sec == 99 then dont print seconds, if sec == 98 print seconds and AM/PM, if sec != 99 then print the seconds only
 {
 	uint8_t realhour = hour;
@@ -833,13 +834,11 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
 	{
 		lcd.setCursor(col, row);			//	set the cursor to erase the current line
-
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// THE FOLLOWING LINE NEEDS TO BE FIXED FOR THE TIME TO BE DISPLAYED CORRECTLY IN THE TIMERS SETUP MENU FUNCTION
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-		lcd.print("          ");			//	erase the current line
+		for (int i = 1; i == maxlength; i++); { lcd.print(" "); }	//  print maxlength spaces to erase the previous line
 		if (length == 10) { lcd.setCursor(col, row); }		//	determine where to set the cursor row
 		else { lcd.setCursor(col + 1, row); }
+
+		Serial.println(timestring);
 
 		lcd.print(timestring);				//	print the date string to the lcd screen
 	}

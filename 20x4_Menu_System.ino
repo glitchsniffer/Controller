@@ -212,7 +212,6 @@ void CharMenuTitle()
 		break;
 	}
 	
-
 	uint8_t mmax = 1;		//	sets mmax = 1 for use to only print 3 lines.
 	mPoint = mStart;		//	set the starting position of the pointer
 	mmax = mPoint + 3;		//  sets the ending position of the pointer to only print 3 lines
@@ -221,6 +220,7 @@ void CharMenuTitle()
 	mCur = 1;				//	sets the lcd cursor to start on line 1
 
 	//	this for loop actually prints the lines.  it runs this loop 3 times to print each line
+	byte timerCount = 0;	//	this byte is needed to count up to 2 so that the Set Timers will only print the current time once
 	for (; mPoint < mmax; mPoint++)
 	{
 		lcd.setCursor(1, mCur);		//	move the lcd cursor to the lines location
@@ -239,8 +239,12 @@ void CharMenuTitle()
 				break;
 			case 1:		//	prints 2nd level Timer Setup items
 				lcd.print(m1Items1[mPoint]);
-				LCDTimeDisplay(1, 12, 1, AlarmHourOn[mPoint - 2], AlarmMinOn[mPoint - 2], 0, 0);	//	prints the alarms on time
-				LCDTimeDisplay(1, 12, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 0, 0);	//	prints the alarms off time
+				//	this prints the current times for the alarms only on the 3rd item it prints
+				if (timerCount == 2) {
+					LCDTimeDisplay(1, 12, 1, AlarmHourOn[mPoint - 2], AlarmMinOn[mPoint - 2], 0, 0, 10);	//	prints the alarms on time
+					LCDTimeDisplay(1, 12, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 0, 0, 10);	//	prints the alarms off time
+				}
+				timerCount++;	//	increase the timer count so that it will print the current alarm times on the 3rd run through
 				break;
 			case 2:		//	prints 2nd level Sensor Addr Config items
 				lcd.print(m1Items2[mPoint]);
@@ -250,6 +254,7 @@ void CharMenuTitle()
 				break;
 			case 4:		//	prints 2nd level System Setup items
 				lcd.print(m1Items4[mPoint]);
+				break;
 			}
 			break;
 		case 2:
@@ -339,6 +344,7 @@ void CharMenuTitle()
 				//	0,1,2,3 all print the same thing for the Sensor Calibration setups using an if instead of a switch
 				if (m2Sel == 4) { lcd.print(m2Items34[mPoint]); }	//	prints flow sensor calibration items
 				else { lcd.print(m2Items30[mPoint]); }
+				break;
 			case 4:		//	prints 3 level System Setup items
 				switch (m2Sel)
 				{
@@ -389,7 +395,7 @@ void CharMenuTitle()
 }
 void CharMenuLoop()
 {
-	Alarm.delay(100);
+	Alarm.delay(200);
 	mcpA.readByte(GPIOA);		//	clear the interrupt from the MCP
 
 	while (menuMode == 1)		//  scans for a button press to do the appropriate action
@@ -415,7 +421,7 @@ void CharMenuLoop()
 	mRet = 0;
 	lcd.clear();				//  clear the screen
 	today = 0;					//  set today to 0 so that the date function gets called
-	Alarm.delay(100);
+	Alarm.delay(200);
 	mcpA.readByte(GPIOA);		//	clear the interrupt from MCP
 	RelayStatusDisplay(0, 3);
 	ReadTempSensors();			//  read the temp sensors so that the display has them
@@ -686,7 +692,7 @@ void CharMenuDo()	//  function for doing the currently selected menu item at the
 				if (timeFormat == 1) { column = 4; }
 				if (secondsDisplay == 0) { column = 4; }
 				else { column = 6; }
-				LCDTimeDisplay(2, column, 1, hour(), minute(), second(), 1);
+				LCDTimeDisplay(2, column, 1, hour(), minute(), second(), 1, 10);
 
 				//	set the hour
 				lcd.setCursor(column, 2);

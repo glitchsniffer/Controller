@@ -35,7 +35,7 @@ void AlarmSet(byte id)
 	lcd.write(byte(3));		//  print the up arrow
 
 	//  print the time using t as the timeFormat variable
-	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 0, 1);
+	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 0, 1, 10);
 
 	//  call the number selection menu to select the hour
 	to = CharMenuNumSel(65, (104 + (id * 6)), AlarmHourOn[id], 0, 23, 1, (6 + t), 1, 250);
@@ -62,7 +62,7 @@ void AlarmSet(byte id)
 	lcd.write(byte(3));		//  print the up arrow
 
 	//  print the time using t as the timeFormat variable
-	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 0, 1);
+	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 0, 1, 10);
 
 	//  call the number selection menu to select the hour
 	to = CharMenuNumSel(64, (105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 175);
@@ -89,7 +89,7 @@ void AlarmSet(byte id)
 	lcd.write(byte(3));		//  print the up arrow
 
 	//  print the time using t as the timeFormat variable
-	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 0, 1);
+	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 0, 1, 10);
 
 	//  call the number selection menu to select the hour
 	to = CharMenuNumSel(65, (106 + (id * 6)), AlarmHourOff[id], 0, 23, 1, (6 + t), 1, 250);
@@ -116,7 +116,7 @@ void AlarmSet(byte id)
 	lcd.write(byte(3));		//  print the up arrow
 
 	//  print the time using t as the timeFormat variable
-	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 0, 1);
+	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 0, 1, 10);
 
 	//  call the number selection menu to select the hour
 	to = CharMenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 175);
@@ -311,15 +311,15 @@ void AlarmSetDisplay(uint8_t id)
 	lcd.setCursor(9 + t, 1);
 	lcd.print("On ");
 	//	print the time on the display using 24 hour or 12 hour
-	if (timeFormat == 0){ LCDTimeDisplay(1, 15, 1, AlarmHourOn[id], AlarmMinOn[id], 0, 0); }		//	24 hour
-	else { LCDTimeDisplay(1, 12, 1, AlarmHourOn[id], AlarmMinOn[id], 0, 0); }						//	12 hour
+	if (timeFormat == 0){ LCDTimeDisplay(1, 15, 1, AlarmHourOn[id], AlarmMinOn[id], 0, 0, 10); }		//	24 hour
+	else { LCDTimeDisplay(1, 12, 1, AlarmHourOn[id], AlarmMinOn[id], 0, 0, 10); }						//	12 hour
 	
 	//	Set cursor and print OFF-
 	lcd.setCursor(8 + t, 2);
 	lcd.print("Off ");
 	//	print the time on the display using 24 hour or 12 hour
-	if (timeFormat == 0){ LCDTimeDisplay(1, 15, 2, AlarmHourOff[id], AlarmMinOff[id], 0, 0); }		//	24 hour
-	else { LCDTimeDisplay(1, 12, 2, AlarmHourOff[id], AlarmMinOff[id], 0, 0); }					//	12 hour
+	if (timeFormat == 0){ LCDTimeDisplay(1, 15, 2, AlarmHourOff[id], AlarmMinOff[id], 0, 0, 10); }		//	24 hour
+	else { LCDTimeDisplay(1, 12, 2, AlarmHourOff[id], AlarmMinOff[id], 0, 0, 10); }					//	12 hour
 
 	//	set cursor and print the relay number that the alarm is set to trigger
 	lcd.setCursor(6, 3);
