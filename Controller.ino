@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 39;			//  Sets the build number for the current program
-byte subbuild = 6;			//	Sets the sub build number between major version releases
+byte subbuild = 7;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -40,6 +40,7 @@ byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout
 byte secondsDisplay;		//	initializes the byte secondsDisplay
 byte today = 0;				//  Sets the today to the current date to display on the RTC
+String timestr = "";		//	initialize the string for assembling a time to be displayed and manipulated
 
 
 //  DEFINE THE LCD SCREENS
@@ -239,7 +240,6 @@ void setup()
 //  SETUP THE SERIAL PORT
 //  ***********************************************
 	Wire.begin();
-	delay(500);
 	Serial.begin(115200);				//  start the serial port if debugging is on
 
 	//  SETUP THE RTC
@@ -577,9 +577,11 @@ void loop()
 
 void AlarmON()
 {
+	String alarmstring = "";
 	uint8_t id;
 	id = Alarm.getTriggeredAlarmId();
 	id = ((id - 1) / 2);
+
 	Serial.print("Alarm ");
 	Serial.print(id);
 	Serial.print(" ON @ ");
@@ -749,23 +751,31 @@ void StartScreen()
 	}
 }
 
-void TimeDisplay()
+void TimeDisplay()	//	MUST ASSEMBLE THE TIME STRING USING	TimeString() BEFORE CALLING THIS FUNCTION
 {
-	//	adjusts for 12 or 24 hour and if the seconds are to be displayed on the LCD screen
-	switch (secondsDisplay)
+	uint8_t col = 0;
+	//	adjusts for 12 or 24 hour
+	switch (secondsDisplay)		//	if seconds are to be displayed the add some space to the colums
 	{
 	case 0:
-		if (timeFormat == 0) { LCDTimeDisplay(0, 2, 0, hour(), minute(), second(), 0, 10); }
-		else { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0, 10); }
+		if (timeFormat == 0) { col = 2; }
+		else { col = 1; }
 		break;
 	case 1:
-		if (timeFormat == 0) { LCDTimeDisplay(0, 1, 0, hour(), minute(), second(), 0, 10); }
-		else { LCDTimeDisplay(0, 0, 0, hour(), minute(), second(), 0, 10); }
+		if (timeFormat == 0) { col = 1; }
+		else { col = 0; }
 		break;
 	}
+	timestr = TimeString(0, hour(), minute(), second());
+	TimeDisplay(timestr, col, 0, 10);
+	//LCDTimeDisplay(0, col, 0, hour(), minute(), second(), 0, 10);
 }
 	
-void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space, uint8_t maxlength)
+//void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space, uint8_t maxlength)
+//{
+//	TestFunction(disp, col, row, hour, min, sec, space, maxlength);
+//}
+void TestFunction(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t min, uint8_t sec, uint8_t space, uint8_t maxlength)
 //	disp is used for options
 //		0 = No options
 //		1 = force seconds display off.
@@ -827,6 +837,9 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 		else if (realhour <= 11) { apm = "AM"; }
 	}
 	timestring = timestring + apm;
+
+	TimeString(disp, realhour, min, sec);
+
 	length = timestring.length();		//	get the length of the time string to use in determining where to start the cursor
 
 	//	Print to the character LCD screen
@@ -837,8 +850,6 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 		for (int i = 1; i == maxlength; i++); { lcd.print(" "); }	//  print maxlength spaces to erase the previous line
 		if (length == 10) { lcd.setCursor(col, row); }		//	determine where to set the cursor row
 		else { lcd.setCursor(col + 1, row); }
-
-		Serial.println(timestring);
 
 		lcd.print(timestring);				//	print the date string to the lcd screen
 	}
@@ -860,6 +871,101 @@ void LCDTimeDisplay(byte disp, uint8_t col, uint8_t row, uint8_t hour, uint8_t m
 	}
 }
 
+void TimeDisplay(String timestring, uint8_t col, uint8_t row, uint8_t maxlength)
+//	timestring = the string to pring
+//	col and row are the absolute start of the print.  this will be modified to center the print later
+//	hour, min, sec are passed to the function as either the time of the time you want displayed.
+//	maxlength is the max lenght you would expect the string to be.  this allow for a variable ammount of spaces needed to clear the previous line
+{
+	uint8_t length = timestring.length();		//	get the length of the time string to use in determining where to start the cursor
+
+	//	Print to the character LCD screen
+	//	***************************************
+	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
+	{
+		lcd.setCursor(col, row);			//	set the cursor to erase the current line
+		for (int i = 1; i == maxlength; i++); { lcd.print(" "); }	//  print maxlength spaces to erase the previous line
+		if (length == 10) { lcd.setCursor(col, row); }		//	determine where to set the cursor row
+		else { lcd.setCursor(col + 1, row); }
+
+		lcd.print(timestring);				//	print the date string to the lcd screen
+	}
+
+	//	Print to the 4.3" LCD touch screen
+	//	***************************************
+	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
+							//else
+	{
+		int x = (col * 24);					//	use col variable to decide where to start
+		int y = (row * 48) + 5;				//	use row variable to decide where to start + 5 to pad the rows
+		x = ((240 - (length * 24)) / 2);	//	determine where to start printing to center the date
+
+		// 4 is the minimum ammount of digits to display.  clear preceeding digits when appropriate.
+
+		TFT.setFont(GroteskBold24x48);	//	set the font
+		TFT.print(timestring, x, y);		//	print the date string to x and y coordinates
+		TFT.drawBitmap(10, 240, 32, 32, gear);	//	draw the settings gear
+	}
+}
+
+String TimeString(byte disp, uint8_t hour, uint8_t min, uint8_t sec)
+//	function to return a formatted string to represent the time
+//	disp is used for options
+//		0 = No options
+//		1 = force seconds display off.
+//		2 = force seconds display on.
+//		3 = force seconds display off and add a space between mins and AMPM
+//	hour, min, sec are passed to the function as the time you want displayed.
+{
+	uint8_t realhour = hour;	//	stores the hour to be used for the AMPM time if needed
+	String temp;				//	string to store and manipulate the individual data
+	char buffer[12];			//	create a buffer for the time string
+	char indbuf[3];				//	create a buffer for the individual items to print
+
+	//	assemble the hour string
+	switch (timeFormat)		
+	{
+	case 0:		//	if 24 hour use 2 digits
+		sprintf(indbuf, "%02d", hour);	//	0 pad the hours
+		temp = String(indbuf);		//	store the hour string
+		break;
+	case 1:		//	if 12 hour set the cursor to account for # of hour digits
+		if (hour > 12) { hour = hour - 12; }	//	adjust for PM hours
+		if (hour == 0) { hour = 12; }	//	adjust for midnight
+		sprintf(indbuf, "%2d", hour);	//	store the hour string
+		temp = String(indbuf);		//	store the hour string in the buffer
+		break;
+	}
+	timestr = temp + ":";	//	add the hour and : to the timestring
+
+	//	assemble the minute string
+	sprintf(indbuf, "%02d", min);	//	0 pad the minutes
+	temp = String(indbuf);		//	store the min string in the buffer
+	timestr = timestr + temp;	//	add the mins to the timestring
+
+	//	assemble the seconds string if they are set to display
+	if ((secondsDisplay == 1) || (disp == 2))	{		//  only display seconds if disp forces it or they are set to display in the config
+		if ((disp & 1) != 1) {		//	if the disp byte is not set to force seconds digits off, print the seconds
+			sprintf(indbuf, "%02d", sec);	//	0 pad the seconds
+			temp = String(indbuf);		//	store the secs string in the buffer
+			timestr = timestr + ":" + temp;	//	add the seconds to the timestring
+		}
+	}
+
+	//	add a space to the string if disp = 3
+	if (disp == 3) { timestr = timestr + " "; }
+
+	//  assemble the am/pm string if it is set to display
+	if (timeFormat == 1) {	//	only display AMPM if it is set to 12 hour time
+		if (realhour >= 12) { temp = "PM"; }
+		else if (realhour <= 11) { temp = "AM"; }
+		timestr = timestr + temp;		//	add ampm to the timestring
+	}
+
+	Serial.println(timestr);
+	
+	return timestr;	//	return the fully assembled time string
+}
 void LCDDateDisplay(byte display, uint8_t col, uint8_t row)
 //	display = 0 to not change the date if it is the same day
 //	col = the column to start the print on the character display

@@ -241,8 +241,15 @@ void CharMenuTitle()
 				lcd.print(m1Items1[mPoint]);
 				//	this prints the current times for the alarms only on the 3rd item it prints
 				if (timerCount == 2) {
-					LCDTimeDisplay(1, 12, 1, AlarmHourOn[mPoint - 2], AlarmMinOn[mPoint - 2], 0, 0, 10);	//	prints the alarms on time
-					LCDTimeDisplay(1, 12, 2, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 0, 0, 10);	//	prints the alarms off time
+					timestr = TimeString(1, AlarmHourOn[mPoint - 2], AlarmMinOn[mPoint - 2], 0 );	//	assemble the string for the on time
+					//	prints the alarm on time to the display depending on the timeFormat
+					if (timeFormat == 1) { TimeDisplay(timestr, 12, 1, 7); }
+					else { TimeDisplay(timestr, 14, 1, 7); }
+
+					timestr = TimeString(1, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 0);	//	assemble the string for the off time
+					//	prints the alarm on time to the display depending on the timeFormat
+					if (timeFormat == 1) { TimeDisplay(timestr, 12, 2, 7); }
+					else { TimeDisplay(timestr, 14, 2, 7); }
 				}
 				timerCount++;	//	increase the timer count so that it will print the current alarm times on the 3rd run through
 				break;
@@ -692,7 +699,11 @@ void CharMenuDo()	//  function for doing the currently selected menu item at the
 				if (timeFormat == 1) { column = 4; }
 				if (secondsDisplay == 0) { column = 4; }
 				else { column = 6; }
-				LCDTimeDisplay(2, column, 1, hour(), minute(), second(), 1, 10);
+
+				timestr = TimeString(2, hour(), minute(), second());
+				TimeDisplay(timestr, column, 1, 10);
+
+				//LCDTimeDisplay(2, column, 1, hour(), minute(), second(), 1, 10);
 
 				//	set the hour
 				lcd.setCursor(column, 2);
@@ -1188,7 +1199,7 @@ uint16_t CharMenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t m
 	uint8_t loopNumSel = 1;		//	variable to stay in the loop
 	uint8_t apm = 0;			//	variable for storing whether or not am or pm has rolled over
 
-	delay(250);
+	delay(10);
 
 	//	set the cursor depending on the number of digits and print the starting number
 
