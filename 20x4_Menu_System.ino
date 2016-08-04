@@ -243,13 +243,13 @@ void CharMenuTitle()
 				if (timerCount == 2) {
 					timestr = TimeString(1, AlarmHourOn[mPoint - 2], AlarmMinOn[mPoint - 2], 0 );	//	assemble the string for the on time
 					//	prints the alarm on time to the display depending on the timeFormat
-					if (timeFormat == 1) { TimeDisplay(timestr, 12, 1, 7); }
-					else { TimeDisplay(timestr, 14, 1, 7); }
+					if (timeFormat == 1) { PrintTimeDisplay(timestr, 12, 1, 7); }
+					else { PrintTimeDisplay(timestr, 14, 1, 7); }
 
 					timestr = TimeString(1, AlarmHourOff[mPoint - 2], AlarmMinOff[mPoint - 2], 0);	//	assemble the string for the off time
 					//	prints the alarm on time to the display depending on the timeFormat
-					if (timeFormat == 1) { TimeDisplay(timestr, 12, 2, 7); }
-					else { TimeDisplay(timestr, 14, 2, 7); }
+					if (timeFormat == 1) { PrintTimeDisplay(timestr, 12, 2, 7); }
+					else { PrintTimeDisplay(timestr, 14, 2, 7); }
 				}
 				timerCount++;	//	increase the timer count so that it will print the current alarm times on the 3rd run through
 				break;
@@ -641,183 +641,7 @@ void CharMenuDo()	//  function for doing the currently selected menu item at the
 				lcd.print((String)strExiting);
 				break;
 			case 1:
-				uint8_t setyear;
-				uint8_t setmonth;
-				uint8_t setday;
-				uint8_t setweekday;
-				uint8_t sethour;
-				uint8_t setminutes;
-				uint8_t setseconds;
-				uint8_t tmp = 99;
-				uint8_t column;
-
-				//	set up the lcd screen for setting the date
-				lcd.clear();
-				lcd.setCursor(4, 0);
-				lcd.print("Set the Date");
-
-				//	print the current date
-				LCDDateDisplay(1, 5, 1);
-
-				//	set the month
-				lcd.setCursor(5, 2);
-				lcd.write(byte(3));		//  print the up arrow
-				lcd.write(byte(3));		//  print the up arrow
-				setmonth = CharMenuNumSel(192, 255, month(), 1, 12, 1, 5, 1, 250);
-				lcd.setCursor(5, 2);
-				lcd.print("  ");
-
-				// set the day
-				lcd.setCursor(8, 2);
-				lcd.write(byte(3));		//  print the up arrow
-				lcd.write(byte(3));		//  print the up arrow
-				setday = CharMenuNumSel(192, 255, day(), 1, 31, 1, 8, 1, 250);
-				lcd.setCursor(8, 2);
-				lcd.print("  ");
-
-				//	set the year
-				lcd.setCursor(13, 2);
-				lcd.write(byte(3));		//  print the up arrow
-				lcd.write(byte(3));		//  print the up arrow
-				tmp = year() - 2000;
-				setyear = CharMenuNumSel(192, 255, tmp, 1, 99, 1, 13, 1, 250);
-				lcd.setCursor(13, 2);
-				lcd.print("  ");
-
-				//	set the day of the week
-				lcd.clear();
-				lcd.setCursor(1, 0);
-				lcd.print("Set the Day of Week");
-				setweekday = CharMenuNumSel(208, 255, weekday(), 1, 7, 1, 6, 2, 250);
-
-				//	setup the lcd for the time setting
-				lcd.clear();
-				lcd.setCursor(4, 0);
-				lcd.print("Set the Time");
-
-				//	print the current time
-				if (timeFormat == 1) { column = 4; }
-				if (secondsDisplay == 0) { column = 4; }
-				else { column = 6; }
-
-				timestr = TimeString(2, hour(), minute(), second());
-				TimeDisplay(timestr, column, 1, 10);
-
-				//LCDTimeDisplay(2, column, 1, hour(), minute(), second(), 1, 10);
-
-				//	set the hour
-				lcd.setCursor(column, 2);
-				lcd.write(byte(3));
-				lcd.write(byte(3));
-				sethour = CharMenuNumSel(197, 255, hour(), 0, 23, 1, column, 1, 250);
-				lcd.setCursor(column, 2);
-				lcd.print("  ");
-
-				//	set the minutes
-				lcd.setCursor(column + 3, 2);
-				lcd.write(byte(3));
-				lcd.write(byte(3));
-				setminutes = CharMenuNumSel(192, 255, minute(), 0, 59, 1, column + 3, 1, 250);
-				lcd.setCursor(column + 3, 2);
-				lcd.print("  ");
-
-				//	set the seconds
-				lcd.setCursor(column + 6, 2);
-				lcd.write(byte(3));
-				lcd.write(byte(3));
-				setseconds = CharMenuNumSel(192, 255, second(), 0, 59, 1, column + 6, 1, 250);
-				lcd.setCursor(column + 6, 2);
-				lcd.print("  ");
-
-				//	verify to set the time and date
-				lcd.clear();
-				lcd.setCursor(0, 0);
-				lcd.print("Set Date and Time to");
-				lcd.setCursor(6, 1);
-
-				switch (setweekday)
-				{
-				case 0:
-					lcd.print("Invalid number");
-					break;
-				case 1:
-					lcd.print("Sunday   ");
-					break;
-				case 2:
-					lcd.print("Monday   ");
-					break;
-				case 3:
-					lcd.print("Tuesday  ");
-					break;
-				case 4:
-					lcd.print("Wednesday");
-					break;
-				case 5:
-					lcd.print("Thursday ");
-					break;
-				case 6:
-					lcd.print("Friday   ");
-					break;
-				case 7:
-					lcd.print("Saturday ");
-					break;
-				default:
-					lcd.setCursor(1, 0);
-					lcd.print("Invalid Selection");
-					break;
-				}
-
-				lcd.setCursor(2, 2);
-				lcd.print(setmonth);
-				lcd.print("/");
-				lcd.print(setday);
-				lcd.print("/");
-				lcd.print(setyear);
-				lcd.print(" ");
-				if (timeFormat == 1)
-				{
-					if (sethour == 0) { tmp = 12; }
-					else if (sethour >= 13) { tmp = sethour - 12; }
-				}
-				else tmp = sethour;
-				lcd.print(tmp);
-				lcd.print(":");
-				if (setminutes <= 9) { lcd.print("0"); }
-				lcd.print(setminutes);
-				lcd.print(":");
-				if (setseconds <= 9) { lcd.print("0"); }
-				lcd.print(setseconds);
-				if (timeFormat == 1) {
-					if (sethour >= 12) { lcd.print("PM"); }
-					else if (sethour <= 11) { lcd.print("AM"); }
-				}
-
-				tmp = CharMenuNumSel(194, 255, 0, 0, 1, 1, 8, 3, 250);
-
-				//	write the date and time to the RTC
-				if (tmp == 0) { break; }
-				else {
-					Wire.beginTransmission(DS1307RTC);
-					Wire.write(byte(0));
-					Wire.write(decToBcd(setseconds));
-					Wire.write(decToBcd(setminutes));
-					Wire.write(decToBcd(sethour));
-					Wire.write(decToBcd(setweekday));
-					Wire.write(decToBcd(setday));
-					Wire.write(decToBcd(setmonth));
-					Wire.write(decToBcd(setyear));
-					Wire.write(byte(0));
-					Wire.endTransmission();
-
-					//  GET THE TIME FROM THE RTC
-					setSyncProvider(RTC.get);			//  this function get the time from the RTC
-					if (timeStatus() != timeSet) {		//  checks to see if it can read the RTC
-						RTC_Status = 0;
-						Serial.println("Unable to get the RTC");
-						Serial.println();
-					}
-					else { Serial.println("RTC system time"); }
-				}
+				CharMenuSetTime();
 				break;
 			}
 			break;
@@ -1296,9 +1120,9 @@ uint16_t CharMenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t m
 			}
 			//	adds the AM/PM printing to the display
 			if (timeFormat == 1) {
-				//	it type is also set to 4 it will print as if the seconds were displayed.
-				if ((secondsDisplay == 1) || ((type & 4) == 4)) { lcd.setCursor(col + 9, row); }
-				else { lcd.setCursor(col + 6, row); }
+				//	if type is also set to 4 it will print as if the seconds were displayed.
+				if ((secondsDisplay == 1) || ((type & 4) == 4)) { lcd.setCursor(col + 8, row); }
+				else { lcd.setCursor(col + 5, row); }
 
 				switch (apm)
 				{
@@ -1384,43 +1208,8 @@ uint16_t CharMenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t m
 				lcd.print("Invalid number");
 				break;
 			}
-			switch (start)
-			{
-			case 0:
-				lcd.setCursor(col, row);
-				lcd.print("Invalid number");
-				break;
-
-			case 1:
-				lcd.setCursor(col, row);
-				lcd.print("Sunday   ");
-				break;
-			case 2:
-				lcd.setCursor(col, row);
-				lcd.print("Monday   ");
-				break;
-			case 3:
-				lcd.setCursor(col, row);
-				lcd.print("Tuesday  ");
-				break;
-			case 4:
-				lcd.setCursor(col, row);
-				lcd.print("Wednesday");
-				break;
-			case 5:
-				lcd.setCursor(col, row);
-				lcd.print("Thursday ");
-				break;
-			case 6:
-				lcd.setCursor(col, row);
-				lcd.print("Friday   ");
-				break;
-			case 7:
-				lcd.setCursor(col, row);
-				lcd.print("Saturday ");
-				break;
-
-			}
+			lcd.setCursor(col, row);
+			lcd.print(weekdays[start]);
 		}
 		else { lcd.print(start); }				//	print start if no other options
 
@@ -1471,4 +1260,146 @@ uint16_t CharMenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t m
 		delay(dmicro);
 	}
 	return start;
+}
+void CharMenuSetTime()
+{
+	uint8_t setyear;
+	uint8_t setmonth;
+	uint8_t setday;
+	uint8_t setweekday;
+	uint8_t sethour;
+	uint8_t setminutes;
+	uint8_t setseconds;
+	uint8_t tmp = 99;
+	uint8_t column;
+
+	//	set up the lcd screen for setting the date
+	lcd.clear();
+	lcd.setCursor(4, 0);
+	lcd.print("Set the Date");
+
+	//	print the current date
+	LCDDateDisplay(1, 5, 3, 1);
+
+	//	set the month
+	PrintArrows(5, 2);
+	setmonth = CharMenuNumSel(192, 255, month(), 1, 12, 1, 5, 1, 250);
+	lcd.setCursor(5, 2);
+	lcd.print("  ");
+
+	// set the day
+	PrintArrows(8, 2);
+	setday = CharMenuNumSel(192, 255, day(), 1, 31, 1, 8, 1, 250);
+	lcd.setCursor(8, 2);
+	lcd.print("  ");
+
+	//	set the year
+	PrintArrows(13, 2);
+	tmp = year() - 2000;
+	setyear = CharMenuNumSel(192, 255, tmp, 1, 99, 1, 13, 1, 250);
+	lcd.setCursor(13, 2);
+	lcd.print("  ");
+
+	//	set the day of the week
+	lcd.clear();
+	lcd.setCursor(1, 0);
+	lcd.print("Set the Day of Week");
+	setweekday = CharMenuNumSel(208, 255, weekday(), 1, 7, 1, 6, 2, 250);
+
+	//	setup the lcd for the time setting
+	lcd.clear();
+	lcd.setCursor(4, 0);
+	lcd.print("Set the Time");
+
+	//	print the current time
+	if (timeFormat == 1) { column = 4; }
+	else { column = 6; }
+
+	timestr = TimeString(2, hour(), minute(), second());
+	if (timeFormat == 1) { PrintTimeDisplay(timestr, column, 3, 10); }
+	else { PrintTimeDisplay(timestr, column - 1, 3, 10); }
+
+	//	set the hour
+	PrintArrows(column, 2);
+	sethour = CharMenuNumSel(197, 255, hour(), 0, 23, 1, column, 1, 250);
+	lcd.setCursor(column, 2);
+	lcd.print("  ");
+
+	//	set the minutes
+	PrintArrows(column + 3, 2);
+	setminutes = CharMenuNumSel(192, 255, minute(), 0, 59, 1, column + 3, 1, 250);
+	lcd.setCursor(column + 3, 2);
+	lcd.print("  ");
+
+	//	set the seconds
+	PrintArrows(column + 6, 2);
+	setseconds = CharMenuNumSel(192, 255, second(), 0, 59, 1, column + 6, 1, 250);
+	lcd.setCursor(column + 6, 2);
+	lcd.print(" ");
+
+	//	verify to set the time and date
+	lcd.clear();
+	lcd.setCursor(0, 0);
+	lcd.print("Set Date and Time to");
+	lcd.setCursor(6, 1);
+	lcd.print(weekdays[setweekday]);
+
+	lcd.setCursor(2, 2);
+	lcd.print(setmonth);
+	lcd.print("/");
+	lcd.print(setday);
+	lcd.print("/");
+	lcd.print(setyear);
+	lcd.print(" ");
+	if (timeFormat == 1)
+	{
+		if (sethour == 0) { tmp = 12; }
+		else if (sethour >= 13) { tmp = sethour - 12; }
+	}
+	else tmp = sethour;
+	lcd.print(tmp);
+	lcd.print(":");
+	if (setminutes <= 9) { lcd.print("0"); }
+	lcd.print(setminutes);
+	lcd.print(":");
+	if (setseconds <= 9) { lcd.print("0"); }
+	lcd.print(setseconds);
+	if (timeFormat == 1) {
+		if (sethour >= 12) { lcd.print("PM"); }
+		else if (sethour <= 11) { lcd.print("AM"); }
+	}
+
+	tmp = CharMenuNumSel(194, 255, 0, 0, 1, 1, 8, 3, 250);
+
+	//	write the date and time to the RTC
+	if (tmp == 0) { return; }
+	else {
+		Wire.beginTransmission(DS1307RTC);
+		Wire.write(byte(0));
+		Wire.write(decToBcd(setseconds));
+		Wire.write(decToBcd(setminutes));
+		Wire.write(decToBcd(sethour));
+		Wire.write(decToBcd(setweekday));
+		Wire.write(decToBcd(setday));
+		Wire.write(decToBcd(setmonth));
+		Wire.write(decToBcd(setyear));
+		Wire.write(byte(0));
+		Wire.endTransmission();
+
+		//  GET THE TIME FROM THE RTC
+		setSyncProvider(RTC.get);			//  this function get the time from the RTC
+		if (timeStatus() != timeSet) {		//  checks to see if it can read the RTC
+			RTC_Status = 0;
+			Serial.println("Unable to get the RTC");
+			Serial.println();
+		}
+		else { Serial.println("RTC system time"); }
+	}
+}
+
+void PrintArrows(uint8_t col, uint8_t row)
+{
+	lcd.setCursor(col, row);	//	set the lcd cursor to the column and row
+	lcd.write(byte(3));			//  print the up arrow
+	lcd.write(byte(3));			//  print the up arrow
 }
