@@ -1121,7 +1121,8 @@ uint16_t CharMenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t m
 			//	adds the AM/PM printing to the display
 			if (timeFormat == 1) {
 				//	if type is also set to 4 it will print as if the seconds were displayed.
-				if ((secondsDisplay == 1) || ((type & 4) == 4)) { lcd.setCursor(col + 8, row); }
+				if ((secondsDisplay == 1) && ((type & 4) == 0)) { lcd.setCursor(col + 5, row); }
+				else if ((secondsDisplay == 1) || ((type & 4) == 4)) { lcd.setCursor(col + 8, row); }
 				else { lcd.setCursor(col + 5, row); }
 
 				switch (apm)
@@ -1281,6 +1282,8 @@ void CharMenuSetTime()
 	//	print the current date
 	LCDDateDisplay(1, 5, 3, 1);
 
+	delay(100);		//	small delay to keep from carying over the previous button push
+
 	//	set the month
 	PrintArrows(5, 2);
 	setmonth = CharMenuNumSel(192, 255, month(), 1, 12, 1, 5, 1, 250);
@@ -1316,8 +1319,8 @@ void CharMenuSetTime()
 	else { column = 6; }
 
 	timestr = TimeString(2, hour(), minute(), second());
-	if (timeFormat == 1) { PrintTimeDisplay(timestr, column, 3, 10); }
-	else { PrintTimeDisplay(timestr, column - 1, 3, 10); }
+	if (timeFormat == 1) { PrintTimeDisplay(timestr, column, 1, 10); }
+	else { PrintTimeDisplay(timestr, column - 1, 1, 10); }
 
 	//	set the hour
 	PrintArrows(column, 2);

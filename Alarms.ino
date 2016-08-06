@@ -33,11 +33,10 @@ void AlarmSet(byte id)
 	//  print the time using t as the timeFormat variable
 
 	timestr = TimeString(1, AlarmHourOn[id], AlarmMinOn[id], 0);
-	PrintTimeDisplay(timestr, (5+t), 3, 10);
-
-//	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 99, 0, 10);
+	PrintTimeDisplay(timestr, (5+t), 1, 10);
 
 	//  call the number selection menu to select the hour
+	delay(100);		//	small delay to keep from carying over the previous button push
 	to = CharMenuNumSel(65, (104 + (id * 6)), AlarmHourOn[id], 0, 23, 1, (6 + t), 1, 250);
 	if (to == 32767){ return; }
 	AlarmHourOn[id] = eeprom.read(104 + (id * 6));
@@ -62,9 +61,7 @@ void AlarmSet(byte id)
 	//  print the time using t as the timeFormat variable
 
 	timestr = TimeString(1, AlarmHourOn[id], AlarmMinOn[id], 0);
-	PrintTimeDisplay(timestr, (5 + t), 3, 10);
-
-	//LCDTimeDisplay(1, (6 + t), 1, AlarmHourOn[id], AlarmMinOn[id], 0, 1, 10);
+	PrintTimeDisplay(timestr, (5 + t), 1, 10);
 
 	//  call the number selection menu to select the hour
 	to = CharMenuNumSel(64, (105 + (id * 6)), AlarmMinOn[id], 0, 59, 1, (9 + t), 1, 175);
@@ -90,10 +87,8 @@ void AlarmSet(byte id)
 
 	//  print the time using t as the timeFormat variable
 
-	timestr = TimeString(1, AlarmHourOn[id], AlarmMinOn[id], 0);
-	PrintTimeDisplay(timestr, (5 + t), 3, 10);
-
-//	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 0, 1, 10);
+	timestr = TimeString(1, AlarmHourOff[id], AlarmMinOff[id], 0);
+	PrintTimeDisplay(timestr, (5 + t), 1, 10);
 
 	//  call the number selection menu to select the hour
 	to = CharMenuNumSel(65, (106 + (id * 6)), AlarmHourOff[id], 0, 23, 1, (6 + t), 1, 250);
@@ -120,9 +115,7 @@ void AlarmSet(byte id)
 	//  print the time using t as the timeFormat variable
 
 	timestr = TimeString(1, AlarmHourOff[id], AlarmMinOff[id], 0);
-	PrintTimeDisplay(timestr, (5 + t), 3, 10);
-
-//	LCDTimeDisplay(1, (6 + t), 1, AlarmHourOff[id], AlarmMinOff[id], 0, 1, 10);
+	PrintTimeDisplay(timestr, (5 + t), 1, 10);
 
 	//  call the number selection menu to select the hour
 	to = CharMenuNumSel(64, (107 + (id * 6)), AlarmMinOff[id], 0, 59, 1, (9 + t), 1, 175);
