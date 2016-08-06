@@ -502,12 +502,7 @@ void CharMenuBack()	//  function for going back 1 level in the menu system
 void CharMenuDo()	//  function for doing the currently selected menu item at the final level
 {
 	if ((serialDebug & 2) == 2) {
-		Serial.print("Doing selection, ");
-		Serial.print(m1Sel);
-		Serial.print(", ");
-		Serial.print(m2Sel);
-		Serial.print(", ");
-		Serial.println(m3Sel);
+		Serial.printf("Doing Selection, %d, %d, %d\n", m1Sel, m2Sel, m3Sel);
 	}
 
 	lcd.clear();
@@ -1165,16 +1160,12 @@ uint16_t CharMenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t m
 		else if ((type & 4) == 4) {
 			switch (start) {
 			case 0:
-				lcd.setCursor(col + 1, row + 1);
-				lcd.write(byte(3));
-				lcd.write(byte(3));
+				PrintArrows(col + 1, row + 1);
 				lcd.setCursor(col - 1, row);
 				lcd.print("Disable");
 				break;
 			case 1:
-				lcd.setCursor(col + 1, row + 1);
-				lcd.write(byte(3));
-				lcd.write(byte(3));
+				PrintArrows(col + 1, row + 1);
 				lcd.setCursor(col - 1, row);
 				lcd.print("Enable ");
 				break;
@@ -1215,7 +1206,6 @@ uint16_t CharMenuNumSel(uint16_t type, uint16_t addr, uint16_t start, uint16_t m
 		else { lcd.print(start); }				//	print start if no other options
 
 		//	Directional button code
-
 		if (Up == 1) {
 			menuTimeout = 0;
 			if (start < max) { start = start + step; }		//	add the step size to start to increment
@@ -1274,15 +1264,16 @@ void CharMenuSetTime()
 	uint8_t tmp = 99;
 	uint8_t column;
 
-	//	set up the lcd screen for setting the date
+	//	setup the lcd screen for setting the date
 	lcd.clear();
 	lcd.setCursor(4, 0);
 	lcd.print("Set the Date");
 
 	//	print the current date
-	LCDDateDisplay(1, 5, 3, 1);
+	LCDDateDisplay(1, 5, 1, 1);
 
-	delay(100);		//	small delay to keep from carying over the previous button push
+	//	small delay to keep from carying over the previous button push
+	delay(100);
 
 	//	set the month
 	PrintArrows(5, 2);
@@ -1290,7 +1281,7 @@ void CharMenuSetTime()
 	lcd.setCursor(5, 2);
 	lcd.print("  ");
 
-	// set the day
+	//	set the day
 	PrintArrows(8, 2);
 	setday = CharMenuNumSel(192, 255, day(), 1, 31, 1, 8, 1, 250);
 	lcd.setCursor(8, 2);
@@ -1341,37 +1332,32 @@ void CharMenuSetTime()
 	lcd.print(" ");
 
 	//	verify to set the time and date
+	//	*******************************
 	lcd.clear();
 	lcd.setCursor(0, 0);
 	lcd.print("Set Date and Time to");
+
+	//	print the weekday
 	lcd.setCursor(6, 1);
 	lcd.print(weekdays[setweekday]);
 
+	//	print the date
 	lcd.setCursor(2, 2);
-	lcd.print(setmonth);
-	lcd.print("/");
-	lcd.print(setday);
-	lcd.print("/");
-	lcd.print(setyear);
-	lcd.print(" ");
-	if (timeFormat == 1)
-	{
-		if (sethour == 0) { tmp = 12; }
-		else if (sethour >= 13) { tmp = sethour - 12; }
+	lcd.printf("%d/%d/%d ", setmonth, setday, setyear);
+
+	//	print the time depending on 12/24 hour time
+	if (timeFormat == 1) {
+		if (sethour == 0) { tmp = 12; }						//	if midnight
+		else if (sethour >= 13) { tmp = sethour - 12; }		//	if greater than noon
 	}
-	else tmp = sethour;
-	lcd.print(tmp);
-	lcd.print(":");
-	if (setminutes <= 9) { lcd.print("0"); }
-	lcd.print(setminutes);
-	lcd.print(":");
-	if (setseconds <= 9) { lcd.print("0"); }
-	lcd.print(setseconds);
+	else { tmp = sethour; }
+	lcd.printf("%d:%02d:%02d", tmp, setminutes, setseconds);	// print the time to set to the RTC
+
+	//	print AM/PM if set to 12 hour time
 	if (timeFormat == 1) {
 		if (sethour >= 12) { lcd.print("PM"); }
 		else if (sethour <= 11) { lcd.print("AM"); }
 	}
-
 	tmp = CharMenuNumSel(194, 255, 0, 0, 1, 1, 8, 3, 250);
 
 	//	write the date and time to the RTC
