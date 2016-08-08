@@ -1,14 +1,14 @@
 #include "EEprom.h"
 #include "Wire.h"
 
-EEprom::EEprom(uint8_t addr)
+EEprom::EEprom(int addr)
 //	initialization function to start the class and set the device address of the eeprom
 //	addr = the I2C device address of the eeprom
 {
 	_Addr = addr;
 }
 
-bool EEprom::write(uint16_t address, byte data)
+bool EEprom::write(int address, byte data)
 //	function to write a byte to the eeprom
 //	address = is the address to write to in the EEprom
 //	data = is the data byte to write to the eeprom
@@ -35,7 +35,7 @@ bool EEprom::write(uint16_t address, byte data)
 	else false;
 }
 
-byte EEprom::read(uint16_t address)
+byte EEprom::read(int address)
 //	function to read out a byte from the eeprom
 //	address = the address to read from in the eeprom
 

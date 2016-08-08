@@ -3,7 +3,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <TimeLib.h>
-#include <Time.h>					//Time Library
+//#include <Time.h>					//Time Library
 #include <TimeAlarms.h>				//TimeAlarms Library
 #include <OneWire.h>				//OneWire Library for the DS Sensors
 #include <DallasTemperature.h>		//Dallas Temperature library
@@ -17,13 +17,13 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 39;			//  Sets the build number for the current program
-byte subbuild = 10;			//	Sets the sub build number between major version releases
+byte subbuild = 11;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
 //  ***********************************************
 #define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
-EEprom eeprom(EEPROM_DEV_ADDR);
+EEprom eeprom(EEPROM_DEV_ADDR);	//	start an instance of the EEprom class
 
 //  INITIALIZE THE RTC
 //  ***********************************************
@@ -157,13 +157,14 @@ String strExiting = "Exiting";
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
 // define the DS18B20 global variables
+
+//	Set the pin to 8 for the Due or 4 for the Mega
 #define TEMP_SENSOR_PIN 8				//	define which pin you will use for the one wire bus
-#define TEMP_SENSOR_PRECISION 10		//	set the temperature precision to 9 -12 bits
+#define TEMP_SENSOR_PRECISION 11		//	set the temperature precision to 11 bits.  this is needed to get the proper precision for 1 decimal
 
 OneWire oneWire(TEMP_SENSOR_PIN);			//  Setup oneWire instances to communicate with any OneWire Devices
 DallasTemperature tempSensors(&oneWire);	//	pass onewire reference to Dallas temperatures.
 DeviceAddress tempSensorAddr[4];			//  arrays to hold device addresses for 4 sensors
-
 
 byte numberOfSensors = 0;	//	define the byte to store the number of sensors that is found on the pin
 byte tempType;				//  initializes the byte tempType
@@ -238,16 +239,17 @@ File SDLogfile;							//	initialize the file to log to
 
 void setup()
 {
-	delay(1000);	//	wait 5 seconds for things to settle down
+	delay(1000);	//	wait 1 seconds for things to settle down
 //  SETUP THE SERIAL PORT
 //  ***********************************************
 	Wire.begin();
-	Serial.begin(115200);				//  start the serial port if debugging is on
+
+	Serial.begin(115200);			//  start the serial port
 
 	//  SETUP THE RTC
 	setSyncProvider(RTC.get);		//  this function get the time from the RTC
-	if (timeStatus() != timeSet)		//  checks to see if it can read the RTC
-	{
+
+	if (timeStatus() != timeSet) {	//  checks to see if it can read the RTC
 		RTC_Status = 0;
 		Serial.println("Unable to get the RTC");
 		Serial.println();
@@ -285,7 +287,7 @@ void setup()
 	{
 		Serial.println();
 		Serial.println("ALARM EEPROM SETTINGS");
-		Serial.println("ID ON OFF  En  Typ  ON     OFF   Relay");
+		Serial.println("ID ON  OFF En  Typ  ON     OFF   Relay");
 	}
 
 	for (uint8_t id = 0; id <= relayCount; id++)		//  read each of the alarms values out of the EEPROM
@@ -302,37 +304,42 @@ void setup()
 
 		if ((serialDebug & 4) == 4)
 		{
-			Serial.print(id);
-			Serial.print("  ");
-			Serial.print(AlarmIDOn[id]);
-			if (AlarmIDOn[id] >= 10) { Serial.print("  "); }
-			else { Serial.print("   "); }
-			Serial.print(AlarmIDOff[id]);
-			if (AlarmIDOff[id] >= 10) { Serial.print(" "); }
-			else { Serial.print("  "); }
-			if ((AlarmEnable & (1 << id)) == (1 << id)) { Serial.print(" ON   "); }
-			else { Serial.print(" OFF  "); }
-			Serial.print(AlarmType[id]);
-			Serial.print("  ");
+			//			   ID   ON   OFF
+			Serial.printf("%d  %-2d %-2d ", id, AlarmIDOn[id], AlarmIDOff[id]);
 
-			if (AlarmHourOn[id] < 10) { Serial.print(" "); }
-			Serial.print(AlarmHourOn[id]);
-			Serial.print(":");
-			if (AlarmMinOn[id] < 10) {
-				Serial.print("0");
-				Serial.print(AlarmMinOn[id]);
-			}
-			else { Serial.print(AlarmMinOn[id]); }
-			Serial.print("  ");
-			if (AlarmHourOff[id] < 10) { Serial.print(" "); }
-			Serial.print(AlarmHourOff[id]);
-			Serial.print(":");
-			if (AlarmMinOff[id] < 10) {
-				Serial.print("0");
-				Serial.print(AlarmMinOff[id]);
-			}
-			else { Serial.print(AlarmMinOff[id]); }
-			Serial.print("  ");
+			//Serial.print(id);
+			//Serial.print("  ");
+			//Serial.print(AlarmIDOn[id]);
+			//if (AlarmIDOn[id] >= 10) { Serial.print("  "); }
+			//else { Serial.print("   "); }
+			//Serial.print(AlarmIDOff[id]);
+			//if (AlarmIDOff[id] >= 10) { Serial.print(" "); }
+			//else { Serial.print("  "); }
+			if ((AlarmEnable & (1 << id)) == (1 << id)) { Serial.print("ON "); }
+			else { Serial.print("OFF"); }
+			//			   TYP ON        OFF
+			Serial.printf("  %d  %2d:%02d  %2d:%02d  ", AlarmType[id], AlarmHourOn[id], AlarmMinOn[id], AlarmHourOff[id], AlarmMinOff[id]);
+			//Serial.print(AlarmType[id]);
+			//Serial.print("  ");
+
+			//if (AlarmHourOn[id] < 10) { Serial.print(" "); }
+			//Serial.print(AlarmHourOn[id]);
+			//Serial.print(":");
+			//if (AlarmMinOn[id] < 10) {
+			//	Serial.print("0");
+			//	Serial.print(AlarmMinOn[id]);
+			//}
+			//else { Serial.print(AlarmMinOn[id]); }
+			//Serial.print("  ");
+			//if (AlarmHourOff[id] < 10) { Serial.print(" "); }
+			//Serial.print(AlarmHourOff[id]);
+			//Serial.print(":");
+			//if (AlarmMinOff[id] < 10) {
+			//	Serial.print("0");
+			//	Serial.print(AlarmMinOff[id]);
+			//}
+			//else { Serial.print(AlarmMinOff[id]); }
+			//Serial.print("  ");
 			Serial.println(AlarmRelay[id], BIN);
 		}
 	}
@@ -805,7 +812,7 @@ void PrintTimeDisplay(String timestring, uint8_t col, uint8_t row, uint8_t maxle
 
 		TFT.setFont(GroteskBold24x48);	//	set the font
 		TFT.print(timestring, x, y);		//	print the date string to x and y coordinates
-		TFT.drawBitmap(10, 240, 32, 32, gear);	//	draw the settings gear
+		//TFT.drawBitmap(10, 240, 32, 32, gear);	//	draw the settings gear
 	}
 }
 
@@ -927,6 +934,9 @@ void ReadTempSensors()
 	{
 		String addrString;				//	string to print the address
 		uint8_t sensorConnected = 0;	//	int to compare if the current sensor is connected and readable
+		int i = 0;	//	integer to store the integer portion of the sensor reading
+		int d = 0;	//	integer to store the decimal portion of the sensor reading
+		int nodec = 0;
 
 		//	convert the address of the sensor to a string
 		addrString = convertTempSensorAddress(tempSensorAddr[j]);
@@ -939,6 +949,10 @@ void ReadTempSensors()
 		}
 		else sensorConnected = 0;
 
+		//	convert the float to 2 integer parts.  this is necessary because the mega board cannot handle a printf with a float
+		i = int(tempRead[j]);		//	get the integer portion of the reading
+		d = round((tempRead[j] - i) * 10);	//	round the decimal portion of the reading and make it an integer
+
 		//	Print to the character LCD screen
 		//	***************************************
 		if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
@@ -947,12 +961,12 @@ void ReadTempSensors()
 			switch (tempPrecision) {
 			case 0:	//	0 decimal
 				lcd.setCursor(13, j);	//  Set the lcd cursor depending on what sensor your are reading
-				if (sensorConnected == 1) lcd.printf("%s%3.0f", tempSensorNameChar[j + 1], tempRead[j]);	//	print the sensor name and temp
+				if (sensorConnected == 1) lcd.printf("%s%3d", tempSensorNameChar[j + 1], round(tempRead[j]));	//	print the sensor name and temp
 				else lcd.printf("%s --", tempSensorNameChar[j + 1]);	//	print the sensor name and blanks
 				break;
 			case 1:	//	1 decimal
 				lcd.setCursor(11, j);	//  Set the lcd cursor depending on what sensor your are reading
-				if (sensorConnected == 1) lcd.printf("%s%5.1f", tempSensorNameChar[j], tempRead[j]);	//	print the sensor name and temp
+				if (sensorConnected == 1) lcd.printf("%s%3d.%d", tempSensorNameChar[j], i, d);	//	print the sensor name and temp
 				else lcd.printf("%s ----", tempSensorNameChar[j + 1]);	//	print the sensor name and blanks
 				break;
 			}
@@ -973,15 +987,15 @@ void ReadTempSensors()
 			switch (tempPrecision) {	//	decide what temp precision to print
 			case 0:	//	0 decimal
 				if (sensorConnected == 1) {	//	if there is a sensor connected then print the following
-					if (tempType == 0)	sprintf(buffer, "  %s%3.0f`C", tempSensorNameGraph[j], tempRead[j]);	//	assemble the string to print if C and no decimal point
-					else  sprintf(buffer, "  %s%3.0f`F", tempSensorNameGraph[j], tempRead[j]);					//	assemble the string to print if F and no decimal point
+					if (tempType == 0)	sprintf(buffer, "  %s%3d`C", tempSensorNameGraph[j], round(tempRead[j]));	//	assemble the string to print if C and no decimal point
+					else  sprintf(buffer, "  %s%3d`F", tempSensorNameGraph[j], round(tempRead[j]));					//	assemble the string to print if F and no decimal point
 				}
 				else sprintf(buffer, "  %s ----", tempSensorNameGraph[j]);	//	print nothing if there isnt a sensor connected
 				break;
 			case 1:	//	1 decimal
 				if (sensorConnected == 1) {	//	if there is a sensor connected then print the following
-					if (tempType == 0)	sprintf(buffer, "%s%5.1f`C", tempSensorNameGraph[j], tempRead[j]);	//	assemble the string to print if C and 1 decimal point
-					else  sprintf(buffer, "%s%5.1f`F", tempSensorNameGraph[j], tempRead[j]);				//	assemble the string to print if F and 1 decimal point
+					if (tempType == 0)	sprintf(buffer, "%s%3d.%d`C", tempSensorNameGraph[j], i, d);	//	assemble the string to print if C and 1 decimal point
+					else  sprintf(buffer, "%s%3d.%d`F", tempSensorNameGraph[j], i, d);				//	assemble the string to print if F and 1 decimal point
 				}
 				else sprintf(buffer, "%s ------", tempSensorNameGraph[j]);	//	print nothing if there isnt a sensor connected
 				break;
@@ -998,7 +1012,7 @@ void ReadTempSensors()
 		if ((serialDebug & 1) == 1) {
 			if (sensorConnected == 1) {			//	if there is a sensor connected then print the following
 				Serial.print(addrString);		//	print the string for the address
-				Serial.printf(", %s %5.1f", tempSensorNameGraph[j], tempRead[j]);  //	print the name of the sensor and the reading
+				Serial.printf(", %s %3d.%d", tempSensorNameGraph[j], i, d);  //	print the name of the sensor and the reading
 				if (tempType == 0) Serial.println("C");		//	print the type in C
 				else Serial.println("F");					//	print the type in F
 			}

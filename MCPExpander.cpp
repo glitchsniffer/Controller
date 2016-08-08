@@ -1,7 +1,7 @@
 #include "MCPExpander.h"
 #include "Wire.h"
 
-MCPExpander::MCPExpander(byte address)
+MCPExpander::MCPExpander(int address)
 //	initialization function to start the class and set the device address of the eeprom
 //	addr = the I2C device address of the eeprom
 {

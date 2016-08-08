@@ -36,13 +36,13 @@
 class MCPExpander
 {
 public:
-	MCPExpander(byte address);
+	MCPExpander(int address);
 	void writeByte(byte reg, byte data);
 	byte readByte(byte reg);
 	byte writeBit(byte bank, byte port, byte state);
 	byte readBit(byte bank, byte port);
 
-	uint16_t _Addr;
+	int _Addr;
 
 private:
 
