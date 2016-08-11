@@ -14,124 +14,121 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="src">
-      <UniqueIdentifier>{bd7b6e6f-1a39-451e-b7a2-5cd38551626d}</UniqueIdentifier>
+      <UniqueIdentifier>{e9205eae-548f-45aa-a877-db147693d379}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly">
-      <UniqueIdentifier>{b6d1e685-a824-4e94-91c0-e4cdb3b58085}</UniqueIdentifier>
+      <UniqueIdentifier>{6d406009-7ae7-4095-b0f1-f699ed86b2c6}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\core">
-      <UniqueIdentifier>{f49531f5-1587-490f-882c-1f3ba918905f}</UniqueIdentifier>
+      <UniqueIdentifier>{12b2ebc8-e713-4fe3-9beb-f44056e7db05}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\variants">
-      <UniqueIdentifier>{257e3f05-bf5e-4bbf-8f6d-25196827a074}</UniqueIdentifier>
+      <UniqueIdentifier>{0f764c5a-80c7-48e5-9a85-b0510f21fd37}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\_micro-api-readonly\variants\arduino_due_x">
-      <UniqueIdentifier>{eca1161b-0206-4267-96f0-982880c43102}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\_micro-api-readonly\core\avr">
-      <UniqueIdentifier>{c2f9d62d-859b-4b2e-8183-d4a7b84c2339}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\_micro-api-readonly\core\USB">
-      <UniqueIdentifier>{98e300be-57b3-4715-b45e-23f97670e65f}</UniqueIdentifier>
+    <Filter Include="src\_micro-api-readonly\variants\mega">
+      <UniqueIdentifier>{64cb8ba8-d2d2-4548-8f7f-528e528ded60}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries">
-      <UniqueIdentifier>{5fd87d23-40a5-4943-9da5-6a214c84c00c}</UniqueIdentifier>
+      <UniqueIdentifier>{d7f0ab50-c0f6-477f-bd76-8c6207b81a92}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\DallasTemperature">
-      <UniqueIdentifier>{00ddb250-203c-42c8-9ac9-2d489a576a59}</UniqueIdentifier>
+      <UniqueIdentifier>{f7b373ff-a692-4473-bea9-e50b5bcb3fee}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\DS1307RTC-master">
-      <UniqueIdentifier>{d161e984-5b4f-496c-905b-f2abe1cc996c}</UniqueIdentifier>
+      <UniqueIdentifier>{6606cb71-79e0-4e56-8cbb-da1cb297cab4}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\LiquidCrystal">
-      <UniqueIdentifier>{3c5fffd8-eed6-445a-b109-86a32b1510b9}</UniqueIdentifier>
+      <UniqueIdentifier>{20a8d2cc-5cfe-4e92-bf64-bc0763c9cbe6}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\OneWire">
-      <UniqueIdentifier>{027bd03e-40f2-47f4-b5b8-6cc843779831}</UniqueIdentifier>
+      <UniqueIdentifier>{399b229b-059e-46aa-b091-418a2838007e}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD">
-      <UniqueIdentifier>{8dd46c2b-c85c-44eb-be11-b9a85db8fa4e}</UniqueIdentifier>
+      <UniqueIdentifier>{daafbc04-0c42-47a0-8350-c418fc7338be}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD\examples">
-      <UniqueIdentifier>{cc50e3cf-f442-4562-be70-32f1ddcd8ffc}</UniqueIdentifier>
+      <UniqueIdentifier>{94530d3f-f38e-4356-b9fe-c832b9ef608d}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD\examples\CardInfo">
-      <UniqueIdentifier>{bcee2416-83b0-4e2a-a46f-4d3cafd09d80}</UniqueIdentifier>
+      <UniqueIdentifier>{83ea84cb-72f0-4957-a043-48dace3bf550}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD\examples\Datalogger">
-      <UniqueIdentifier>{9df0018c-2fda-48db-9ba9-92f0b9ca87f9}</UniqueIdentifier>
+      <UniqueIdentifier>{1d08c121-c9e1-4cda-89e6-1b859682d5b5}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD\examples\DumpFile">
-      <UniqueIdentifier>{8662c4c5-1b5d-4a8f-8096-60549a1e38b9}</UniqueIdentifier>
+      <UniqueIdentifier>{a691b9c8-b53d-4b12-aea4-13866343d065}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD\examples\Files">
-      <UniqueIdentifier>{579e157c-e444-4233-bade-95beff211908}</UniqueIdentifier>
+      <UniqueIdentifier>{347d5d00-41ba-40ad-be80-6a4f9870f0de}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD\examples\listfiles">
-      <UniqueIdentifier>{510eb528-ddc5-4fa8-81f8-e46b47d8a4bf}</UniqueIdentifier>
+      <UniqueIdentifier>{28cdbcf9-fc70-4065-b290-bb33aa3e12e0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD\examples\ReadWrite">
-      <UniqueIdentifier>{6c323c51-94b8-42c8-b51b-2bece297008b}</UniqueIdentifier>
+      <UniqueIdentifier>{236a688b-b7c1-4885-bfc1-05cf9cacebe9}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD\src">
-      <UniqueIdentifier>{977fc462-d2a1-406f-ad5d-f7b6b90c0026}</UniqueIdentifier>
+      <UniqueIdentifier>{1bf2702a-07d5-492e-ac2f-11cea9df9929}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SD\src\utility">
-      <UniqueIdentifier>{6c75b888-e1a7-4f2b-9b82-fc460061d984}</UniqueIdentifier>
+      <UniqueIdentifier>{3cdd1d73-c0ba-410d-bb29-ba12ecf14762}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SPI">
-      <UniqueIdentifier>{efc64d58-c3a2-4c81-ab5d-673783143915}</UniqueIdentifier>
+      <UniqueIdentifier>{9506f492-7225-4229-9c64-874d2f1b04b9}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SPI\examples">
-      <UniqueIdentifier>{3c0ba5e2-aa70-476d-b7e1-23aa275ffa1a}</UniqueIdentifier>
+      <UniqueIdentifier>{0f5836f9-1d80-4626-8e82-c234566c136b}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SPI\examples\BarometricPressureSensor">
-      <UniqueIdentifier>{e02bbe70-79fb-4df7-9ce4-f028612aee85}</UniqueIdentifier>
+      <UniqueIdentifier>{a4ae2caa-5fbf-49c4-8e25-aff2d97e370d}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SPI\examples\DigitalPotControl">
-      <UniqueIdentifier>{e5735af2-746b-4c6c-9923-7168c51a5fee}</UniqueIdentifier>
+      <UniqueIdentifier>{504bc62a-9bed-4519-b350-ba989c81e403}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\SPI\src">
-      <UniqueIdentifier>{5c190803-9eab-47b3-b6ac-851030f9ac7a}</UniqueIdentifier>
+      <UniqueIdentifier>{828440c8-3a5a-473f-b3b9-3f5acab05479}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\TimeAlarms">
-      <UniqueIdentifier>{c03f94e4-8f98-4a31-afda-e18d47d53325}</UniqueIdentifier>
+      <UniqueIdentifier>{71ab5827-4224-4ba1-ae4e-2f6c467bbcb9}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Time-master">
-      <UniqueIdentifier>{b48d7a24-a189-4e27-b068-788a45bd065c}</UniqueIdentifier>
+      <UniqueIdentifier>{a4e6c175-e0b0-4444-9da7-ca2a8df4d428}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\UTFT">
-      <UniqueIdentifier>{12f97321-9591-46ce-81ed-a35e6940ce60}</UniqueIdentifier>
+      <UniqueIdentifier>{dfb16d92-010c-4945-b9c0-a8a60dc253cc}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\UTouch">
-      <UniqueIdentifier>{8de03300-0777-4394-8c20-6b242d97407e}</UniqueIdentifier>
+      <UniqueIdentifier>{266d317d-ed99-4ad9-bb18-edd2af3ae590}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Wire">
-      <UniqueIdentifier>{5bba6799-88f2-49b9-a2cf-31c5d85199ee}</UniqueIdentifier>
+      <UniqueIdentifier>{31ab1d8b-7c70-43c5-a601-25af67f49d69}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Wire\examples">
-      <UniqueIdentifier>{80f84d05-947b-4ab6-82de-a5b4d852c8eb}</UniqueIdentifier>
+      <UniqueIdentifier>{aa043262-7c8e-404a-a797-a9ef380c307b}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Wire\examples\digital_potentiometer">
-      <UniqueIdentifier>{63a0b9c6-2221-45f4-ab80-0bbfca163639}</UniqueIdentifier>
+      <UniqueIdentifier>{1066b792-ce8c-48e0-ab4b-849fd65c8a23}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Wire\examples\master_reader">
-      <UniqueIdentifier>{e6c153b9-1267-48d2-b6d4-52b033631445}</UniqueIdentifier>
+      <UniqueIdentifier>{5f4d6429-bddb-498a-976d-20dbcfb9bd65}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Wire\examples\master_writer">
-      <UniqueIdentifier>{1ee3bf8d-c4f1-456b-be37-dad00472cedc}</UniqueIdentifier>
+      <UniqueIdentifier>{b6c6f170-8fc0-4eab-ae8e-7306aae90214}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Wire\examples\SFRRanger_reader">
-      <UniqueIdentifier>{4712e02c-056f-4e73-ba0c-9920dde74218}</UniqueIdentifier>
+      <UniqueIdentifier>{5563c895-d044-498b-a867-bfcd7f1bb850}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Wire\examples\slave_receiver">
-      <UniqueIdentifier>{80bbbf63-6e56-44e8-a022-8f0347aae5f2}</UniqueIdentifier>
+      <UniqueIdentifier>{ac6b248e-75d0-4fd9-84c4-48e05529e486}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Wire\examples\slave_sender">
-      <UniqueIdentifier>{f818c919-6bd5-49f8-ba41-3bc29909ac33}</UniqueIdentifier>
+      <UniqueIdentifier>{99f16dc9-40e4-45f0-8141-c5d79701b575}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\_micro-api-readonly\libraries\Wire\src">
-      <UniqueIdentifier>{5d55ebf6-03bf-46fc-a4bc-71e6c1c8fea7}</UniqueIdentifier>
+      <UniqueIdentifier>{43fda3b6-0891-4d7e-ac1d-0836860691bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\_micro-api-readonly\libraries\Wire\src\utility">
+      <UniqueIdentifier>{981ed6c2-96f8-4f15-bc2e-d70a303bdf21}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -147,119 +144,65 @@
     <ClInclude Include="__vm\.Controller.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Arduino.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Arduino.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\binary.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\binary.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Client.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Client.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\HardwareSerial.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\IPAddress.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial_private.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\itoa.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\IPAddress.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Print.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\new.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Printable.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\PluggableUSB.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Reset.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Print.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\RingBuffer.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Printable.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Server.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Server.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Stream.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Stream.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\syscalls.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Udp.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Tone.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\USBAPI.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\UARTClass.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\USBCore.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Udp.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\USBDesc.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\USARTClass.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WCharacter.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\watchdog.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_private.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\WCharacter.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WString.h">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\WInterrupts.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_analog.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_constants.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_digital.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_private.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_pulse.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_shift.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\WMath.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\WString.h">
-      <Filter>src\_micro-api-readonly\core</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\avr\dtostrf.h">
-      <Filter>src\_micro-api-readonly\core\avr</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\avr\interrupt.h">
-      <Filter>src\_micro-api-readonly\core\avr</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\avr\pgmspace.h">
-      <Filter>src\_micro-api-readonly\core\avr</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\USB\PluggableUSB.h">
-      <Filter>src\_micro-api-readonly\core\USB</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\USB\USBAPI.h">
-      <Filter>src\_micro-api-readonly\core\USB</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\USB\USBCore.h">
-      <Filter>src\_micro-api-readonly\core\USB</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\USB\USBDesc.h">
-      <Filter>src\_micro-api-readonly\core\USB</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\variants\arduino_due_x\pins_arduino.h">
-      <Filter>src\_micro-api-readonly\variants\arduino_due_x</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\variants\arduino_due_x\variant.h">
-      <Filter>src\_micro-api-readonly\variants\arduino_due_x</Filter>
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\mega\pins_arduino.h">
+      <Filter>src\_micro-api-readonly\variants\mega</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Arduino\libraries\DallasTemperature\DallasTemperature.h">
       <Filter>src\_micro-api-readonly\libraries\DallasTemperature</Filter>
@@ -318,7 +261,7 @@
     <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\SdInfo.h">
       <Filter>src\_micro-api-readonly\libraries\SD\src\utility</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\libraries\SPI\src\SPI.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries\SPI\src\SPI.h">
       <Filter>src\_micro-api-readonly\libraries\SPI\src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Arduino\libraries\TimeAlarms\TimeAlarms.h">
@@ -342,15 +285,18 @@
     <ClInclude Include="..\..\Arduino\libraries\UTouch\UTouchCD.h">
       <Filter>src\_micro-api-readonly\libraries\UTouch</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\libraries\Wire\src\Wire.h">
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries\Wire\src\Wire.h">
       <Filter>src\_micro-api-readonly\libraries\Wire\src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries\Wire\src\utility\twi.h">
+      <Filter>src\_micro-api-readonly\libraries\Wire\src\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Alarms.ino" />
     <None Include="Controller.ino" />
     <None Include="20x4_Menu_System.ino" />
-    <None Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_pulse_asm.S">
+    <None Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_pulse.S">
       <Filter>src\_micro-api-readonly\core</Filter>
     </None>
   </ItemGroup>
@@ -370,89 +316,77 @@
     <ClCompile Include="gear.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\abi.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\abi.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\cortex_handlers.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\CDC.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\hooks.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\iar_calls_sam3.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial0.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\IPAddress.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial1.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\itoa.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial2.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\main.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\HardwareSerial3.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\new.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\hooks.c">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Print.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\IPAddress.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Reset.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\main.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\RingBuffer.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\new.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\Stream.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\PluggableUSB.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\syscalls_sam3.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Print.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\UARTClass.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Stream.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\USARTClass.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\Tone.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\watchdog.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\USBCore.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\WInterrupts.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WInterrupts.c">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring.c">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_analog.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_analog.c">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_digital.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_digital.c">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_pulse.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_pulse.c">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_shift.c">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\wiring_shift.c">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\WMath.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WMath.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\WString.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\WString.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\avr\dtostrf.c">
-      <Filter>src\_micro-api-readonly\core\avr</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\USB\CDC.cpp">
-      <Filter>src\_micro-api-readonly\core\USB</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\USB\PluggableUSB.cpp">
-      <Filter>src\_micro-api-readonly\core\USB</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\USB\USBCore.cpp">
-      <Filter>src\_micro-api-readonly\core\USB</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Arduino\libraries\DallasTemperature\DallasTemperature.cpp">
       <Filter>src\_micro-api-readonly\libraries\DallasTemperature</Filter>
@@ -502,7 +436,7 @@
     <ClCompile Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\SdVolume.cpp">
       <Filter>src\_micro-api-readonly\libraries\SD\src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\libraries\SPI\src\SPI.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries\SPI\src\SPI.cpp">
       <Filter>src\_micro-api-readonly\libraries\SPI\src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Arduino\libraries\TimeAlarms\TimeAlarms.cpp">
@@ -523,8 +457,11 @@
     <ClCompile Include="..\..\Arduino\libraries\UTouch\UTouch.cpp">
       <Filter>src\_micro-api-readonly\libraries\UTouch</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\libraries\Wire\src\Wire.cpp">
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries\Wire\src\Wire.cpp">
       <Filter>src\_micro-api-readonly\libraries\Wire\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries\Wire\src\utility\twi.c">
+      <Filter>src\_micro-api-readonly\libraries\Wire\src\utility</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
