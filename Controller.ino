@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 39;			//  Sets the build number for the current program
-byte subbuild = 12;			//	Sets the sub build number between major version releases
+byte subbuild = 13;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -160,9 +160,9 @@ String strExiting = "Exiting";
 
 //	Set the pin that the temp sensors are connected to
 #if defined(__AVR__)
-#define TEMP_SENSOR_PIN 4		//	define which pin for the Due
+#define TEMP_SENSOR_PIN 4		//	define which pin for the Mega
 #else
-#define TEMP_SENSOR_PIN 8		//	define which pin for the Mega
+#define TEMP_SENSOR_PIN 8		//	define which pin for the Due
 #endif
 
 #define TEMP_SENSOR_PRECISION 11		//	set the temperature precision to 11 bits.  this is needed to get the proper precision for 1 decimal
@@ -519,28 +519,15 @@ void loop()
 		Serial.println("Exiting Menu");
 	}
 
-	if (RTC_Status == 1){ LCDDateDisplay(0, 0, 1, 0); }		//  only calls LCDDateDisplay if the RTC has been set
+	//  only calls LCDDateDisplay if the RTC has been set
+	if (RTC_Status == 1){ LCDDateDisplay(0, 0, 1, 0); }
 
-	TimeDisplay();		//	update the time
+	//	update the time
+	TimeDisplay();
 
 	//	check to see if the settings icon was touched
-	if (Touch.dataAvailable()) {	//	check to see if new data is availiable from the touch screen
-		Touch.read();	//	request the coordinates from the touch screen
-		int x = Touch.getX();	//	get the x coordinate from the touch screen
-		int y = Touch.getY();	//	get the y coordinate from the touch screen
+	if (Touch.dataAvailable()) { ReadTouchScreen();	}	//	read the data from the touchscreen
 
-		//	if the settings button location was touched, run the menu
-		if ((y >= 240) && (y <= 272));	{	//	y location of the button
-			if ((x >= 10) && (x <= 42)) {	//	x location of the button
-				//	Test code to change the color of the screen
-				TFT.clrScr();
-				TFT.fillScr(255, 0, 0);
-				delay(1000);
-				TFT.fillScr(VGA_BLUE);
-				//menuMode = 1;
-			}
-		}
-	}
 	//	delay for the ammount of time selected between readings
 	Alarm.delay(((LOOP_INTERVAL - 1) - (millis() % LOOP_INTERVAL)));	//  uses the Alarm.delay to use the timer
 }
@@ -552,23 +539,13 @@ void AlarmON()
 	id = Alarm.getTriggeredAlarmId();
 	id = ((id - 1) / 2);
 
-	Serial.printf("Alarm $d ON @ %d:%02d\n", id, hour(), minute());
-	//Serial.print("Alarm ");
-	//Serial.print(id);
-	//Serial.print(" ON @ ");
-	//Serial.print(hour());
-	//Serial.print(":");
-	//Serial.println(minute());
-
+	Serial.printf("Alarm %d ON @ %d:%02d\n", id, hour(), minute());
 	RelayToggle(AlarmRelay[id], 1);
 
 	if ((serialDebug & 4) == 4)	{
 		uint8_t trigger;
 		trigger = Alarm.getNextTrigger();
 		Serial.printf("Next %d\nAlarm State ", trigger);
-		//Serial.print("Next ");
-		//Serial.println(trigger);
-		//Serial.print("Alarm State ");
 		Serial.println(AlarmState, BIN);
 		Serial.println();
 	}
@@ -578,22 +555,13 @@ void AlarmOFF()
 	uint8_t id;
 	id = Alarm.getTriggeredAlarmId();
 	id = ((id - 2) / 2);
-	Serial.printf("Alarm $d OFF @ %d:%02d\n", id, hour(), minute());
-	//Serial.print("Alarm ");
-	//Serial.print(id);
-	//Serial.print(" OFF @ ");
-	//Serial.print(hour());
-	//Serial.print(":");
-	//Serial.println(minute());
+	Serial.printf("Alarm %d OFF @ %d:%02d\n", id, hour(), minute());
 	RelayToggle(AlarmRelay[id], 0);
 
 	if ((serialDebug & 4) == 4)	{
 		uint8_t trigger;
 		trigger = Alarm.getNextTrigger();
 		Serial.printf("Next %d\nAlarm State ", trigger);
-		//Serial.print("Next ");
-		//Serial.println(trigger);
-		//Serial.print("Alarm State ");
 		Serial.println(AlarmState, BIN);
 		Serial.println();
 	}
@@ -685,6 +653,25 @@ void RelayStatusDisplay(uint8_t col, uint8_t row)
 	int x = (col * 24);
 	int y = ((row + 1) * 48) + 35;
 	TFT.print(relayString, RIGHT, y);
+}
+
+void ReadTouchScreen()
+{
+	Touch.read();	//	request the coordinates from the touch screen
+	int x = Touch.getX();	//	get the x coordinate from the touch screen
+	int y = Touch.getY();	//	get the y coordinate from the touch screen
+
+							//	if the settings button location was touched, run the menu
+	if ((y >= 240) && (y <= 272)); {	//	y location of the button
+		if ((x >= 10) && (x <= 42)) {	//	x location of the button
+										//	Test code to change the color of the screen
+			TFT.clrScr();
+			TFT.fillScr(255, 0, 0);
+			delay(1000);
+			TFT.fillScr(VGA_BLUE);
+			//menuMode = 1;
+		}
+	}
 }
 
 void StartScreen()
