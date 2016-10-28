@@ -345,6 +345,9 @@
     <ClInclude Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\libraries\Wire\src\Wire.h">
       <Filter>src\_micro-api-readonly\libraries\Wire\src</Filter>
     </ClInclude>
+    <ClInclude Include="TouchMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Alarms.ino" />
@@ -525,6 +528,9 @@
     </ClCompile>
     <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\libraries\Wire\src\Wire.cpp">
       <Filter>src\_micro-api-readonly\libraries\Wire\src</Filter>
+    </ClCompile>
+    <ClCompile Include="TouchMenu.cpp">
+      <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -12,12 +12,13 @@
 #include <DS1307RTC.h>
 #include "EEprom.h"
 #include "MCPExpander.h"
+#include "TouchMenu.h"
 
 //	VERSIONING VARIABLES
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 40;			//  Sets the build number for the current program
-byte subbuild = 0;			//	Sets the sub build number between major version releases
+byte subbuild = 1;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -75,7 +76,9 @@ byte clock[8] = { B00000,B01110,B10101,B10111,B10001,B01110,B00000, };		//	set t
 //  INITIALIZE THE 4.3" TFT TOUCHSCREEN
 //  ***********************************************
 UTFT TFT(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
-UTouch Touch(6, 5, 32, 3, 2);			//	start an instance of the UTouch class using the pins used
+UTouch Touch(6, 5, 32, 3, 2);		//	start an instance of the UTouch class using the pins used
+TouchMenu Menu(1);					//	start an instance of the TouchMenu class using a dummy variable
+
 
 //	set the fonts that we will be using
 extern uint8_t BigFont[];
@@ -669,7 +672,7 @@ void ReadTouchScreen()
 			TFT.fillScr(255, 0, 0);
 			delay(1000);
 			TFT.fillScr(VGA_BLUE);
-			//menuMode = 1;
+			Menu.MainMenu(0);
 		}
 	}
 }
