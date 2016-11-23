@@ -4,28 +4,15 @@
 
 UTFT Display(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
 
-
-
-TouchMenu::TouchMenu(byte init)
+TouchMenu::TouchMenu()
 {
+	//	only here to initialize the class
 }
 
-void TouchMenu::MainMenu(byte enter)
+void TouchMenu::MainMenu()
 {
-	if (enter == 1)
-	{
-		Display.fillScr(VGA_SILVER);
-		enter = 0;
-		delay(500);
-	}
-	else
-	{
-		Display.fillScr(VGA_GREEN);
-		delay(500);
-	}
-
-	Display.fillScr(VGA_BLUE);
-
+	TFT.fillScr(VGA_NAVY);
+	DrawMenuButtonArray(8);
 }
 
 void TouchMenu::UserSetup()
@@ -98,4 +85,48 @@ void TouchMenu::EraseEEPROM()
 
 void TouchMenu::RestorDefaults()
 {
+}
+
+void TouchMenu::DrawMenuButtonArray(uint8_t maxbuttons) {
+	//	This function will draw a button array depending on the number of buttons
+	//	maxbuttons is the total number of buttons needed
+
+	//	initalize variables
+	uint8_t xs;					//	horizontal start position
+	uint8_t ys = 68;			//	vertical start position
+	uint8_t width = 210;		//	button width
+	uint8_t height = 40;		//	button height
+	uint8_t xspace = 20;		//	horizontal space between buttons
+	uint8_t yspace = 8;			//	vertical space between buttons
+	uint8_t columns;			//	number of columns that will be needed
+	uint8_t buttoncount = 0;	//	counter for the number of buttons printed
+
+	//	determine you need 1 or 2 columns of buttons depending on the size of max buttons
+	//	and set the horizontal start position
+	if (maxbuttons <= 4) {
+		xs = 135;
+		columns = 1;
+	}
+	else {
+		xs = 20;
+		columns = 2;
+	}
+
+	//	loop through and start printing the buttons up to maxbuttons
+	for (uint8_t r = 0; r < 4; r++) {
+		if (buttoncount == maxbuttons) { break; }
+		uint16_t rowstart = ys + (r * (height + yspace));
+
+		for (uint8_t c = 0; c < columns; c++) {
+			TFT.setColor(VGA_BLUE);
+			TFT.fillRoundRect(xs + (c * (width + xspace)), rowstart, xs + width + (c * (width + xspace)), rowstart + height);
+			TFT.setColor(VGA_WHITE);
+			TFT.drawRoundRect(xs + (c * (width + xspace)), rowstart, xs + width + (c * (width + xspace)), rowstart + height);
+			buttoncount++;
+			Serial.println(buttoncount);
+
+			if (buttoncount == maxbuttons) { break; }
+		}
+	}
+	delay(5000);	//	small delay to continue showing the buttons
 }

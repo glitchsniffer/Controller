@@ -3,7 +3,6 @@
 #include <SD.h>
 #include <SPI.h>
 #include <TimeLib.h>
-//#include <Time.h>					//Time Library
 #include <TimeAlarms.h>				//TimeAlarms Library
 #include <OneWire.h>				//OneWire Library for the DS Sensors
 #include <DallasTemperature.h>		//Dallas Temperature library
@@ -77,7 +76,7 @@ byte clock[8] = { B00000,B01110,B10101,B10111,B10001,B01110,B00000, };		//	set t
 //  ***********************************************
 UTFT TFT(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
 UTouch Touch(6, 5, 32, 3, 2);		//	start an instance of the UTouch class using the pins used
-TouchMenu Menu(1);					//	start an instance of the TouchMenu class using a dummy variable
+TouchMenu Menu;					//	start an instance of the TouchMenu class using a dummy variable
 
 
 //	set the fonts that we will be using
@@ -493,6 +492,7 @@ void setup()
 	//else
 		TFT.clrScr();
 		TFT.fillScr(VGA_BLUE);
+		TFT.drawBitmap(10, 240, 32, 32, gear);
 	}
 
 	//	SETUP THE RELAYS TO DISPLY AND TURN THEM ON IF NEEDED
@@ -664,15 +664,14 @@ void ReadTouchScreen()
 	int x = Touch.getX();	//	get the x coordinate from the touch screen
 	int y = Touch.getY();	//	get the y coordinate from the touch screen
 
-							//	if the settings button location was touched, run the menu
+	//	if the settings button location was touched, run the menu
 	if ((y >= 240) && (y <= 272)); {	//	y location of the button
 		if ((x >= 10) && (x <= 42)) {	//	x location of the button
 										//	Test code to change the color of the screen
 			TFT.clrScr();
-			TFT.fillScr(255, 0, 0);
-			delay(1000);
+			Menu.MainMenu();
 			TFT.fillScr(VGA_BLUE);
-			Menu.MainMenu(0);
+			TFT.drawBitmap(10, 240, 32, 32, gear);
 		}
 	}
 }

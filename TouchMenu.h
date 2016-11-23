@@ -8,11 +8,13 @@
 
 #include "Arduino.h"
 
+extern UTFT TFT;
+
 class TouchMenu
 {
 public:
-	TouchMenu(byte init);			//	function to start an instance of the class
-	void MainMenu(byte enter);		//	function to enter the main menu
+	TouchMenu();			//	function to start an instance of the class
+	void MainMenu();		//	function to enter the main menu
 
 
 private:
@@ -34,5 +36,6 @@ private:
 			void SerialDebugging();
 			void EraseEEPROM();
 			void RestorDefaults();
+		void DrawMenuButtonArray(uint8_t buttons);
 };
 #endif	//	!TouchMenu
