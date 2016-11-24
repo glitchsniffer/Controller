@@ -8,14 +8,19 @@
 
 #include "Arduino.h"
 
-extern UTFT TFT;
+extern UTFT TFT;		//	transfers the TFT instance to the touch menu
+extern UTouch Touch;	//	transfers the Touch instance to the touch men
+
+extern uint8_t GroteskBold16x32[];	//	make the font availiable to use
+extern uint8_t GroteskBold24x48[];	//	make the font availiable to use
+
+extern uint8_t today;	//	variable used to force the date to be displayed
 
 class TouchMenu
 {
 public:
 	TouchMenu();			//	function to start an instance of the class
 	void MainMenu();		//	function to enter the main menu
-
 
 private:
 		void UserSetup();

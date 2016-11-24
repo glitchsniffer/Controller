@@ -2,8 +2,6 @@
 #include "UTFT.h"
 #include <SPI.h>
 
-UTFT Display(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
-
 TouchMenu::TouchMenu()
 {
 	//	only here to initialize the class
@@ -12,7 +10,11 @@ TouchMenu::TouchMenu()
 void TouchMenu::MainMenu()
 {
 	TFT.fillScr(VGA_NAVY);
+	TFT.setBackColor(VGA_NAVY);
+	TFT.setFont(GroteskBold24x48);
+	TFT.print("MAIN MENU", CENTER, 10, 0);
 	DrawMenuButtonArray(8);
+	today = 0;	//  set today to 0 so that the date function gets called
 }
 
 void TouchMenu::UserSetup()

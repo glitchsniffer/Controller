@@ -39,7 +39,7 @@ byte RTC_Status = 1;		//	initializes the byte for the RTC status
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout
 byte secondsDisplay;		//	initializes the byte secondsDisplay
-byte today = 0;				//  Sets the today to the current date to display on the RTC
+uint8_t today = 0;				//  Sets the today to the current date to display on the RTC
 String timestr = "";		//	initialize the string for assembling a time to be displayed and manipulated
 
 
@@ -671,6 +671,7 @@ void ReadTouchScreen()
 			TFT.clrScr();
 			Menu.MainMenu();
 			TFT.fillScr(VGA_BLUE);
+			TFT.setBackColor(VGA_BLUE);
 			TFT.drawBitmap(10, 240, 32, 32, gear);
 		}
 	}
