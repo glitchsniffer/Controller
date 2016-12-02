@@ -2,6 +2,79 @@
 #include "UTFT.h"
 #include <SPI.h>
 
+//  ***********************************************
+//  Variables
+//  ***********************************************
+uint8_t TotalButtons;
+uint16_t Touchx;
+uint16_t Touchy;
+
+//  ***********************************************
+//  Function prototypes
+//  ***********************************************
+		void UserSetup(void);
+			void TempType();
+			void TempPrecision();
+			void TempReadDelay();
+			void Brightness();
+			void TimeFormat();
+			void SecondsDisplay();
+			void FlowOnOff();
+		void TimerSetup();
+			void SetTimer(short numbertoset);
+		void SensorSetup();
+			void TempSensorCalib(byte numbertocalib);
+			void FlowSensorCalib();
+			void SensorAddrConfig();
+		void SystemSetup();
+			void SerialDebugging();
+			void EraseEEPROM();
+			void RestorDefaults();
+		void DrawMenuButtonArray(uint8_t buttons);
+		void MenuLoop();
+		void ReadTouchData();
+		void AnalyzeTouchData();
+
+
+//  ***********************************************
+//  Menu Array Definitions
+//  ***********************************************
+typedef struct MENU_ITEM {
+	byte Menu_Number;
+	char Menu_Name[20];
+	byte Menu_Size;
+	void (*function)(void);
+};
+
+//  ***********************************************
+//  Menu Array Definitions
+//  ***********************************************
+typedef struct TOUCH_LOC_8 {
+	int Button_Number;
+	int X_Start;
+	int Y_Start;
+	int X_End;
+	int Y_End;
+};
+
+//  ***********************************************
+//  Menu Arrays
+//  ***********************************************
+
+//	Main Menu Array
+MENU_ITEM MainMenu[] = {
+	{1, "User Setup",			7, UserSetup},
+	{2, "Timers Setup",			8, TimerSetup},
+	{3, "Sensor Addr Setup",	5, SensorSetup},
+	{4, "System Setup",			3, SystemSetup}
+};
+
+//	TouchArea Array
+TOUCH_LOC_8 Buttons[] = {
+	{1, 20, 20, 230, 60},
+};
+
+
 TouchMenu::TouchMenu()
 {
 	//	only here to initialize the class
@@ -17,79 +90,7 @@ void TouchMenu::MainMenu()
 	today = 0;	//  set today to 0 so that the date function gets called
 }
 
-void TouchMenu::UserSetup()
-{
-}
-
-void TouchMenu::TempType()
-{
-}
-
-void TouchMenu::TempPrecision()
-{
-}
-
-void TouchMenu::TempReadDelay()
-{
-}
-
-void TouchMenu::Brightness()
-{
-}
-
-void TouchMenu::TimeFormat()
-{
-}
-
-void TouchMenu::SecondsDisplay()
-{
-}
-
-void TouchMenu::FlowOnOff()
-{
-}
-
-void TouchMenu::TimerSetup()
-{
-}
-
-void TouchMenu::SetTimer(short numbertoset)
-{
-}
-
-void TouchMenu::SensorSetup()
-{
-}
-
-void TouchMenu::TempSensorCalib(byte numbertocalib)
-{
-}
-
-void TouchMenu::FlowSensorCalib()
-{
-}
-
-void TouchMenu::SensorAddrConfig()
-{
-}
-
-void TouchMenu::SystemSetup()
-{
-}
-
-void TouchMenu::SerialDebugging()
-{
-}
-
-void TouchMenu::EraseEEPROM()
-{
-}
-
-void TouchMenu::RestorDefaults()
-{
-}
-
-void TouchMenu::DrawMenuButtonArray(uint8_t maxbuttons) {
+void DrawMenuButtonArray(uint8_t maxbuttons) {
 	//	This function will draw a button array depending on the number of buttons
 	//	maxbuttons is the total number of buttons needed
 
@@ -103,8 +104,8 @@ void TouchMenu::DrawMenuButtonArray(uint8_t maxbuttons) {
 	uint8_t columns;			//	number of columns that will be needed
 	uint8_t buttoncount = 0;	//	counter for the number of buttons printed
 
-	//	determine you need 1 or 2 columns of buttons depending on the size of max buttons
-	//	and set the horizontal start position
+								//	determine you need 1 or 2 columns of buttons depending on the size of max buttons
+								//	and set the horizontal start position
 	if (maxbuttons <= 4) {
 		xs = 135;
 		columns = 1;
@@ -131,4 +132,98 @@ void TouchMenu::DrawMenuButtonArray(uint8_t maxbuttons) {
 		}
 	}
 	delay(5000);	//	small delay to continue showing the buttons
+}
+
+void MenuLoop()
+{
+	if (Touch.dataAvailable()) { ReadTouchData(); }	//	read the data from the touchscreen
+}
+
+void ReadTouchData()
+{
+	Touch.read();	//	request the coordinates from the touch screen
+	Touchx = Touch.getX();	//	get the x coordinate from the touch screen
+	Touchy = Touch.getY();	//	get the y coordinate from the touch screen
+}
+
+void AnalyzeTouchData()
+{
+	for (int i = 0; i == TotalButtons; i++) {
+
+	}
+}
+
+void UserSetup()
+{
+	TFT.clrScr();
+	TFT.fillScr(VGA_BLUE);
+	TFT.print("User Setup", CENTER, 50, 0);
+}
+
+void TempType()
+{
+}
+
+void TempPrecision()
+{
+}
+
+void TempReadDelay()
+{
+}
+
+void Brightness()
+{
+}
+
+void TimeFormat()
+{
+}
+
+void SecondsDisplay()
+{
+}
+
+void FlowOnOff()
+{
+}
+
+void TimerSetup()
+{
+}
+
+void SetTimer(short numbertoset)
+{
+}
+
+void SensorSetup()
+{
+}
+
+void TempSensorCalib(byte numbertocalib)
+{
+}
+
+void FlowSensorCalib()
+{
+}
+
+void SensorAddrConfig()
+{
+}
+
+void SystemSetup()
+{
+}
+
+void SerialDebugging()
+{
+}
+
+void EraseEEPROM()
+{
+}
+
+void RestorDefaults()
+{
 }

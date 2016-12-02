@@ -2,7 +2,6 @@
 #define TouchMenu_h
 
 #include <UTFT.h>
-
 #include <UTouch.h>
 #include <SPI.h>
 
@@ -19,28 +18,29 @@ extern uint8_t today;	//	variable used to force the date to be displayed
 class TouchMenu
 {
 public:
-	TouchMenu();			//	function to start an instance of the class
+	TouchMenu(void);			//	function to start an instance of the class
 	void MainMenu();		//	function to enter the main menu
 
-private:
-		void UserSetup();
-			void TempType();
-			void TempPrecision();
-			void TempReadDelay();
-			void Brightness();
-			void TimeFormat();
-			void SecondsDisplay();
-			void FlowOnOff();
-		void TimerSetup();
-			void SetTimer(short numbertoset);
-		void SensorSetup();
-			void TempSensorCalib(byte numbertocalib);
-			void FlowSensorCalib();
-			void SensorAddrConfig();
-		void SystemSetup();
-			void SerialDebugging();
-			void EraseEEPROM();
-			void RestorDefaults();
-		void DrawMenuButtonArray(uint8_t buttons);
+//private:
+//		void UserSetup(void);
+//			void TempType();
+//			void TempPrecision();
+//			void TempReadDelay();
+//			void Brightness();
+//			void TimeFormat();
+//			void SecondsDisplay();
+//			void FlowOnOff();
+//		void TimerSetup();
+//			void SetTimer(short numbertoset);
+//		void SensorSetup();
+//			void TempSensorCalib(byte numbertocalib);
+//			void FlowSensorCalib();
+//			void SensorAddrConfig();
+//		void SystemSetup();
+//			void SerialDebugging();
+//			void EraseEEPROM();
+//			void RestorDefaults();
+//		void DrawMenuButtonArray(uint8_t buttons);
+//		void MenuLoop();
 };
 #endif	//	!TouchMenu
