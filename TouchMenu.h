@@ -14,6 +14,8 @@ extern uint8_t GroteskBold16x32[];	//	make the font availiable to use
 extern uint8_t GroteskBold24x48[];	//	make the font availiable to use
 
 extern uint8_t today;	//	variable used to force the date to be displayed
+extern volatile int8_t menuMode;
+extern uint16_t menuTimeout;
 
 class TouchMenu
 {
