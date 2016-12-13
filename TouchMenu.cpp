@@ -46,12 +46,6 @@ uint16_t Touchy;
 //  ***********************************************
 //  Menu Array Definitions
 //  ***********************************************
-//typedef struct MENU_ITEM {
-//	char Menu_Name[20];
-//	byte Menu_Size;
-//	void (*function)(void);
-//};
-
 struct MENU_ITEM {
 	char Menu_Name[20];
 	byte Menu_Size;
@@ -77,7 +71,7 @@ struct TOUCH_LOC {
 MENU_ITEM Main_Menu[] = {
 	{"User Setup",		7, UserSetup},
 	{"Timers Setup",	8, TimerSetup},
-	{"Sensor Setup",	5, SensorSetup},
+	{"Sensor Addr Setup",	5, SensorSetup},
 	{"System Setup",	3, SystemSetup},
 	{"DELETE ME",		1, UserSetup}
 };
@@ -115,6 +109,7 @@ void TouchMenu::MainMenu(){
 	DrawMenuButtonArray(4);
 	menuMode = 1;
 	MenuLoop();
+	menuMode = 0;
 	today = 0;	//  set today to 0 so that the date function gets called
 }
 
@@ -132,6 +127,7 @@ void DrawMenuButtonArray(uint8_t maxbuttons) {
 
 			//	determine where the starting point will be for the text based on the length of the menu item
 			String menustring = Main_Menu[i].Menu_Name;
+			if (menustring.length() > 13) { menustring = "Too Many Char"; }
 			int size = menustring.length();
 			int startoffset = (208 - (size * 16)) / 2;
 
@@ -147,7 +143,7 @@ void DrawMenuButtonArray(uint8_t maxbuttons) {
 			TFT.setColor(VGA_WHITE);
 
 			//	print the menu strings
-			TFT.print(Main_Menu[i].Menu_Name, Buttons_4[i].X_Start + 1 + startoffset, Buttons_4[i].Y_Start + 5);
+			TFT.print(menustring, Buttons_4[i].X_Start + 1 + startoffset, Buttons_4[i].Y_Start + 5);
 
 			//	increment the buttoncount and break if needed
 			buttoncount++;
@@ -184,17 +180,19 @@ void DrawMenuButtonArray(uint8_t maxbuttons) {
 			if (buttoncount == maxbuttons) { break; }
 		}
 	}
-	delay(5000);	//	small delay to continue showing the buttons
+	//delay(5000);	//	small delay to continue showing the buttons
 }
 
 void MenuLoop(){
 	while (menuMode == 1)		//  scans for a button press to do the appropriate action
 	{
 		menuTimeout++;
-		if (menuTimeout == 10000) { menuMode = 0; }		//	this will exit the menu system after approx 20 seconds after a button has not been pushed
+/*		if (menuTimeout == 10000) { menuMode = 0; }	*/	//	this will exit the menu system after approx 20 seconds after a button has not been pushed
 		if (Touch.dataAvailable()) {
 			ReadTouchData();	//	read the data from the touchscreen
 			AnalyzeMenuTouchData();
+			Serial.printf("menuTimeout = %d\n\n", menuTimeout);
+			delay(250);		//	small debounce delay for a touch
 		}
 	}
 }
@@ -204,14 +202,27 @@ void ReadTouchData(){
 	Touchx = Touch.getX();	//	get the x coordinate from the touch screen
 	Touchy = Touch.getY();	//	get the y coordinate from the touch screen
 	Serial.printf("Read Touch Data x=%d, y=%d\n", Touchx, Touchy);
-	menuTimeout = 0;
+	//menuTimeout = 0;
 }
 
 void AnalyzeMenuTouchData() {
-	for (int i = 0; i == TotalButtons; i++) {
-		if ((Touchy >= 68) && (Touchy <= 108)) {	//	y location of the button
-			if ((Touchx >= 20) && (Touchx <= 230)) {	//	x location of the button
-				//TFT.fillRoundRect(xs + (c * (width + xspace)), rowstart, xs + width + (c * (width + xspace)), rowstart + height);
+	Serial.println("Analyzing data");
+	for (int x = 0; x == TotalButtons; x++) {
+		if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End)) {	//	x location of the button
+			Serial.println("X pass");
+			for (int y = 0; y == 10; y++) {
+				Serial.println("Y pass");
+				Serial.printf("Y round %d\n", y);
+				//if ((Touchy >= Buttons_4[y].Y_Start) && (Touchy <= Buttons_4[y].Y_End)) {	//	y location of the button
+				//	Serial.println("Y pass");
+				//	TFT.setColor(VGA_RED);
+				//	TFT.drawRoundRect(Buttons_4[x].X_Start, Buttons_4[y].Y_Start, Buttons_4[x].X_End, Buttons_4[y].Y_End);
+
+				//	delay(500);
+
+				//	TFT.setColor(VGA_WHITE);
+				//	TFT.drawRoundRect(Buttons_4[x].X_Start, Buttons_4[y].Y_Start, Buttons_4[x].X_End, Buttons_4[y].Y_End);
+				//}
 			}
 		}
 	}
