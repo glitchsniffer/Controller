@@ -206,24 +206,34 @@ void ReadTouchData(){
 }
 
 void AnalyzeMenuTouchData() {
-	Serial.println("Analyzing data");
-	for (int x = 0; x == TotalButtons; x++) {
-		if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End)) {	//	x location of the button
-			Serial.println("X pass");
-			for (int y = 0; y == 10; y++) {
-				Serial.println("Y pass");
-				Serial.printf("Y round %d\n", y);
-				//if ((Touchy >= Buttons_4[y].Y_Start) && (Touchy <= Buttons_4[y].Y_End)) {	//	y location of the button
-				//	Serial.println("Y pass");
-				//	TFT.setColor(VGA_RED);
-				//	TFT.drawRoundRect(Buttons_4[x].X_Start, Buttons_4[y].Y_Start, Buttons_4[x].X_End, Buttons_4[y].Y_End);
+	//int x = 0;
+	//Serial.println("Analyzing data");
+	//	if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End) && (Touchy >= Buttons_4[x].Y_Start) && (Touchy <= Buttons_4[x].Y_End)) {	//	x location of the button
+	//		Serial.printf("%d pass\n", x);
+	//	}
+	//	x++;
+	//	if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End) && (Touchy >= Buttons_4[x].Y_Start) && (Touchy <= Buttons_4[x].Y_End)) {	//	x location of the button
+	//		Serial.printf("%d pass\n", x);
+	//	}
+	//	x++;
+	//	if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End) && (Touchy >= Buttons_4[x].Y_Start) && (Touchy <= Buttons_4[x].Y_End)) {	//	x location of the button
+	//		Serial.printf("%d pass\n", x);
+	//	}
+	//	x++;
+	//	if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End) && (Touchy >= Buttons_4[x].Y_Start) && (Touchy <= Buttons_4[x].Y_End)) {	//	x location of the button
+	//		Serial.printf("%d pass\n", x);
+	//	}
+	//	x = 0;
+	Serial.printf("Before: x=%d, y=%d\n", Touchx, Touchy);
+	for (int i = 0; i <= 4; i++) {
+		if ((Touchx >= Buttons_4[i].X_Start) && (Touchx <= Buttons_4[i].X_End) && (Touchy >= Buttons_4[i].Y_Start) && (Touchy <= Buttons_4[i].Y_End)) {
+			TFT.setColor(VGA_RED);
+			TFT.drawRoundRect(Buttons_4[i].X_Start, Buttons_4[i].Y_Start, Buttons_4[i].X_End, Buttons_4[i].Y_End);
 
-				//	delay(500);
+			delay(250);
 
-				//	TFT.setColor(VGA_WHITE);
-				//	TFT.drawRoundRect(Buttons_4[x].X_Start, Buttons_4[y].Y_Start, Buttons_4[x].X_End, Buttons_4[y].Y_End);
-				//}
-			}
+			TFT.setColor(VGA_WHITE);
+			TFT.drawRoundRect(Buttons_4[i].X_Start, Buttons_4[i].Y_Start, Buttons_4[i].X_End, Buttons_4[i].Y_End);
 		}
 	}
 }
