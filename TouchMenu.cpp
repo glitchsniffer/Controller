@@ -26,22 +26,30 @@ uint16_t Touchy;
 			void Brightness();
 			void TimeFormat();
 			void SecondsDisplay();
+			void SetDateTime();
 			void FlowOnOff();
 		void TimerSetup();
-			void SetTimer(short numbertoset);
+			void SetTimer();
 		void SensorSetup();
-			void TempSensorCalib(byte numbertocalib);
-			void FlowSensorCalib();
-			void SensorAddrConfig();
+			void TempSensorCalib();
+		void SensorAddrConfig();
+		void SetupFlowSensor();
+			void FlowOnOff();
+			void CalibrateFlowSensor();
+			void SetMinFlow();
 		void SystemSetup();
 			void SerialDebugging();
 			void EraseEEPROM();
 			void RestorDefaults();
+
+
+		void ExitMenu();
 		void DrawMenuButtonArray(uint8_t buttons);
 		void MenuLoop();
 		void ReadTouchData();
 		void AnalyzeMenuTouchData();
 
+		void REPLACEME();
 
 //  ***********************************************
 //  Menu Array Definitions
@@ -69,11 +77,61 @@ struct TOUCH_LOC {
 
 //	Main Menu Array
 MENU_ITEM Main_Menu[] = {
-	{"User Setup",		7, UserSetup},
-	{"Timers Setup",	8, TimerSetup},
-	{"Sensor Addr Setup",	5, SensorSetup},
-	{"System Setup",	3, SystemSetup},
-	{"DELETE ME",		1, UserSetup}
+	{ "User Setup",		7, UserSetup },
+	{ "Timers Setup",	8, TimerSetup },
+	{ "Sensor Setup",	5, SensorSetup },
+	{ "Sensor Calib",	8, TempSensorCalib },
+	{ "Setup Flow",		4, SetupFlowSensor },
+	{ "System Setup",	3, SystemSetup },
+	{ "Exit",			0, ExitMenu }
+};
+
+MENU_ITEM User_Setup[] = {
+	{ "Brightness",			1, Brightness },
+	{ "Time Format",		2, TimeFormat },
+	{ "Display Sec",		2, SecondsDisplay },
+	{ "Set Date/Time",		2, SetDateTime },
+	{ "Back",				7, UserSetup }
+};
+
+MENU_ITEM Timer_Setup[] = {
+	{ "Set Timer 1",	2, SetTimer },
+	{ "Set Timer 2",	2, SetTimer },
+	{ "Set Timer 3",	2, SetTimer },
+	{ "Set Timer 4",	2, SetTimer },
+	{ "Set Timer 5",	2, SetTimer },
+	{ "Set Timer 6",	2, SetTimer },
+	{ "Set Timer 7",	2, SetTimer },
+	{ "Set Timer 8",	2, SetTimer }
+};
+
+MENU_ITEM Sensor_Setup[] = {
+	{ "Temp Unit",		2, REPLACEME },
+	{ "Precision",		2, REPLACEME },
+	{ "Read Delay",		2, REPLACEME },
+	{ "Sensor Names",	2, REPLACEME },
+	{ "Back",			2, REPLACEME }
+};
+
+MENU_ITEM Sensor_Calib[] = {
+	{ "Calib Temp 1",	2, REPLACEME },
+	{ "Calib Temp 2",	2, REPLACEME },
+	{ "Calib Temp 3",	2, REPLACEME },
+	{ "Calib Temp 4",	2, REPLACEME },
+	{ "Back",			2, REPLACEME }
+};
+
+MENU_ITEM Setup_Flow[] = {
+	{ "On/Off",			2, FlowOnOff},
+	{ "Calib Flow",		2, CalibrateFlowSensor},
+	{ "Set Min Flow",	2, SetMinFlow}
+};
+
+MENU_ITEM System_Setup[] = {
+	{ "Debugging",			2, REPLACEME },
+	{ "Erase EEPROM",		2, REPLACEME },
+	{ "Restore Defaults",	2, REPLACEME },
+	{ "Back",				2, REPLACEME }
 };
 
 //	TouchArea Array
@@ -206,36 +264,23 @@ void ReadTouchData(){
 }
 
 void AnalyzeMenuTouchData() {
-	//int x = 0;
-	//Serial.println("Analyzing data");
-	//	if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End) && (Touchy >= Buttons_4[x].Y_Start) && (Touchy <= Buttons_4[x].Y_End)) {	//	x location of the button
-	//		Serial.printf("%d pass\n", x);
-	//	}
-	//	x++;
-	//	if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End) && (Touchy >= Buttons_4[x].Y_Start) && (Touchy <= Buttons_4[x].Y_End)) {	//	x location of the button
-	//		Serial.printf("%d pass\n", x);
-	//	}
-	//	x++;
-	//	if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End) && (Touchy >= Buttons_4[x].Y_Start) && (Touchy <= Buttons_4[x].Y_End)) {	//	x location of the button
-	//		Serial.printf("%d pass\n", x);
-	//	}
-	//	x++;
-	//	if ((Touchx >= Buttons_4[x].X_Start) && (Touchx <= Buttons_4[x].X_End) && (Touchy >= Buttons_4[x].Y_Start) && (Touchy <= Buttons_4[x].Y_End)) {	//	x location of the button
-	//		Serial.printf("%d pass\n", x);
-	//	}
-	//	x = 0;
-	Serial.printf("Before: x=%d, y=%d\n", Touchx, Touchy);
-	for (int i = 0; i <= 4; i++) {
+	for (int i = 0; i <= 3; i++) {
 		if ((Touchx >= Buttons_4[i].X_Start) && (Touchx <= Buttons_4[i].X_End) && (Touchy >= Buttons_4[i].Y_Start) && (Touchy <= Buttons_4[i].Y_End)) {
 			TFT.setColor(VGA_RED);
 			TFT.drawRoundRect(Buttons_4[i].X_Start, Buttons_4[i].Y_Start, Buttons_4[i].X_End, Buttons_4[i].Y_End);
 
-			delay(250);
+			delay(150);
 
 			TFT.setColor(VGA_WHITE);
 			TFT.drawRoundRect(Buttons_4[i].X_Start, Buttons_4[i].Y_Start, Buttons_4[i].X_End, Buttons_4[i].Y_End);
+
+			Serial.printf("x=%d, y=%d\n", Touchx, Touchy);
+			Serial.printf("%d pass\n", i);
 		}
 	}
+}
+
+void REPLACEME(){
 }
 
 void UserSetup(){
@@ -262,25 +307,40 @@ void TimeFormat(){
 void SecondsDisplay(){
 }
 
+void SetDateTime(){
+}
+
 void FlowOnOff(){
 }
 
 void TimerSetup(){
 }
 
-void SetTimer(short numbertoset){
+void SetTimer(){
 }
 
 void SensorSetup(){
 }
 
-void TempSensorCalib(byte numbertocalib){
+void TempSensorCalib(){
 }
 
 void FlowSensorCalib(){
 }
 
 void SensorAddrConfig(){
+}
+
+void SetupFlowSensor(){
+}
+
+void CalibrateFlowSensor(){
+}
+
+void SetMinFlow(){
+}
+
+void DisableFlow(){
 }
 
 void SystemSetup(){
@@ -293,4 +353,7 @@ void EraseEEPROM(){
 }
 
 void RestorDefaults(){
+}
+
+void ExitMenu(){
 }
