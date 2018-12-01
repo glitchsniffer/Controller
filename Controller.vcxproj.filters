@@ -532,5 +532,8 @@
     <ClCompile Include="TouchMenu.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="Retro8x16.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

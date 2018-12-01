@@ -76,14 +76,15 @@ byte clock[8] = { B00000,B01110,B10101,B10111,B10001,B01110,B00000, };		//	set t
 //  ***********************************************
 UTFT TFT(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
 UTouch Touch(6, 5, 32, 3, 2);		//	start an instance of the UTouch class using the pins used
-TouchMenu Menu;					//	start an instance of the TouchMenu class using a dummy variable
+TouchMenu Menu;					    //	start an instance of the TouchMenu class using a dummy variable
 
 
-//	set the fonts that we will be using
+//	set the fonts that we will be using for the 4.3" TOUCHSCREEN
 extern uint8_t BigFont[];
 extern uint8_t SevenSegNumFont[];
 extern uint8_t GroteskBold16x32[];
 extern uint8_t GroteskBold24x48[];
+extern uint8_t Retro8x16[];
 extern unsigned short gear[0x400];
 
 //  DEFINE THE MCP23017 IO EXPANDER
@@ -93,7 +94,7 @@ MCPExpander mcpA(MCP17A);
 MCPExpander mcpB(MCP17A);
 
 
-//  DEFINE BUTTON PINS
+//  DEFINE BUTTON PINS ON THE MCP23017 IO EXPANDER
 //  ***********************************************
 #define menubuttonbank 0		//	this is the bank of ports that the switches are on
 #define upButton 5				//  set the up button to port 0.5
@@ -158,7 +159,7 @@ String strExiting = "Exiting";
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
-// define the DS18B20 global variables
+//  define the DS18B20 global variables
 
 //	Set the pin that the temp sensors are connected to
 #if defined(__AVR__)
@@ -254,6 +255,7 @@ File SDLogfile;							//	initialize the file to log to
 void setup()
 {
 	delay(1000);	//	wait 1 seconds for things to settle down
+
 //  SETUP THE SERIAL PORT
 //  ***********************************************
 	Wire.begin();
@@ -669,7 +671,8 @@ void ReadTouchScreen()
 		if ((x >= 10) && (x <= 42)) {	//	x location of the button
 										//	Test code to change the color of the screen
 			TFT.clrScr();
-			Menu.MainMenu();
+			Menu.EnterMenu();
+			readEepromVariables();
 			TFT.fillScr(VGA_BLUE);
 			TFT.setBackColor(VGA_BLUE);
 			TFT.drawBitmap(10, 240, 32, 32, gear);
@@ -1213,13 +1216,94 @@ void MenuButtonPress()
 	}
 }
 
+void readEepromVariables()
+//  READ THE VARIABLES OUT OF THE EEPROM
+{
+//  READ NON USER SETTINGS FROM EEPROM
+
+	serialDebug = eeprom.read(5);		//	reads out user setting to turn serial debugging on for each type of debugging
+
+	//  READ USER SETTINGS FROM EEPROM
+	tempType = eeprom.read(20);			//  reads out user setting to selects between 0 = Celsius or 1 = Fahrenheit
+	tempPrecision = eeprom.read(21);		//	reads out user setting to selece the decimal precision of the temp sensors 0 = No Decimal or 1 = 1 Decimal
+	tempReadDelay = eeprom.read(22);		//	reads out user setting for the amount of time in seconds between reading the temp sensors
+	timeFormat = eeprom.read(23);		//	reads out user setting for the time format 0 = 24 hour and 1 = 12 hour
+	secondsDisplay = eeprom.read(24);	//	reads out user setting to display seconds 0 = No and 1 = Yes
+	backlightLevel = eeprom.read(25);	//	reads out the user setting to control the backlight level
+	backlightTimeout = eeprom.read(26);	//	reads out the user setting to control when the backlight level times out
+	flowSensorEnable = eeprom.read(27);	//	reads out the user setting to determine if the flow sensor is enabled
+	flowRateMax = eeprom.read(28);		//	reads out the user setting that is set for the max flow rate as an integer
+	flowRateMin = eeprom.read(29);		//	reads out the user setting for the minimum flow rate
+
+	//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
+	tempReadID = Alarm.timerRepeat(tempReadDelay, ReadTempSensors);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
+	AlarmEnable = eeprom.read(100);		//	reads out the byte for the enable flags for all 8 alarms
+	AlarmState = eeprom.read(101);		//	reads out the byte for the state flags for all 8 alarms
+	RelayState = eeprom.read(150);
+
+	if ((serialDebug & 4) == 4) {
+		Serial.println();
+		Serial.println("ALARM EEPROM SETTINGS");
+		Serial.println("ID ON  OFF En  Typ  ON     OFF   Relay");
+	}
+
+	for (uint8_t id = 0; id <= relayCount; id++) {		//  read each of the alarms values out of the EEPROM
+		if ((serialDebug & 8) == 8) { serialDebug = serialDebug - 8; }	//	Supress the EEPROM serial prints during this loop			
+		AlarmType[id] = eeprom.read(102 + (id * 6));
+		AlarmRelay[id] = eeprom.read(103 + (id * 6));
+		AlarmHourOn[id] = eeprom.read(104 + (id * 6));
+		AlarmMinOn[id] = eeprom.read(105 + (id * 6));
+		AlarmHourOff[id] = eeprom.read(106 + (id * 6));
+		AlarmMinOff[id] = eeprom.read(107 + (id * 6));
+		AlarmIDOn[id] = Alarm.alarmRepeat(AlarmHourOn[id], AlarmMinOn[id], 0, AlarmON);
+		AlarmIDOff[id] = Alarm.alarmRepeat(AlarmHourOff[id], AlarmMinOff[id], 30, AlarmOFF);
+
+		if ((serialDebug & 4) == 4) {
+			//			   ID   ON   OFF
+			Serial.printf("%d  %-2d  %-2d  ", id, AlarmIDOn[id], AlarmIDOff[id]);
+			if ((AlarmEnable & (1 << id)) == (1 << id)) { Serial.print("ON "); }
+			else { Serial.print("OFF"); }
+			//			   TYP    ON        OFF
+			Serial.printf("  %d  %2d:%02d  %2d:%02d  ", AlarmType[id], AlarmHourOn[id], AlarmMinOn[id], AlarmHourOff[id], AlarmMinOff[id]);
+			Serial.println(AlarmRelay[id], BIN);
+		}
+	}
+
+	flowReadID = Alarm.timerRepeat(flowReadDelay, FlowSensorRead);		//	sets an alarm to read the flow sensor at the specified dalay and returns the Alarm_IS to flowReadID
+	if (flowSensorEnable == 0) {
+		Alarm.disable(flowReadID);
+		Serial.println("Flow Readings Disabled");
+	}
+	else {
+		Alarm.enable(flowReadID);
+		Serial.println("Flow Readings Enabled");
+	}
+
+	serialDebug = eeprom.read(5);		//	read out the serial debug again in case it was disable during the alarm print
+
+	if ((serialDebug & 4) == 4) {
+		//uint8_t rd;
+		Serial.println();
+		Serial.print("AlarmEnable ");
+		Serial.println(AlarmEnable, BIN);
+		Serial.print("AlarmState ");
+		Serial.println(AlarmState, BIN);
+		Serial.print("RelayState ");
+		Serial.println(RelayState, BIN);
+		Serial.printf("# of Alarms %d\n", Alarm.count());
+		Serial.printf("tempReadID %d, %d\n", tempReadID, Alarm.read(tempReadID));
+		Serial.printf("flowReadID %d, %d\n", flowReadID, Alarm.read(flowReadID));
+		Serial.println();
+	}
+}
+
 void factoryDefaultset()
 {
 	Serial.println("Writing Factory Defaults to EEPROM");
 
 	//  Non User Settings
-	eeprom.write(0, 1);		//	writes the e2Empty value = 1 or Set
-	eeprom.write(1, 1);		//  determines if this is the first run or not
+	eeprom.write(0, 1);			//	writes the e2Empty value = 1 or Set
+	eeprom.write(1, 1);			//  determines if this is the first run or not
 	eeprom.write(2, 14);		//  writes the build year
 	eeprom.write(3, 10);		//  writes the build month
 	eeprom.write(4, 12);		//  writes the build day
@@ -1228,14 +1312,14 @@ void factoryDefaultset()
 	//  User Settings
 	eeprom.write(20, 1);		//  writes the tempType value = 1 or Fahrenheit
 	eeprom.write(21, 1);		//	writes the tempPrecision value = 0 or No Decimal
-	eeprom.write(22, 10);	//	writes the tempReadDelay value = 10 or 10 Seconds
+	eeprom.write(22, 10);		//	writes the tempReadDelay value = 10 or 10 Seconds
 	eeprom.write(23, 1);		//	writes the timeFormat value =  1 or 12 hour
 	eeprom.write(24, 1);		//	writes the secondsDisplay value to 1 or Display seconds
-	eeprom.write(25, 100);	//	writes the backlightLevel value = 100 or half
-	eeprom.write(26, 30);	//  writes the backlightTimeout to be 30 seconds
+	eeprom.write(25, 100);		//	writes the backlightLevel value = 100 or half
+	eeprom.write(26, 30);		//  writes the backlightTimeout to be 30 seconds
 	eeprom.write(27, 0);		//	writes the flowSensorEnable to be disabled
-	eeprom.write(28, 55);	//	writes the 1st bit of the flow sensor 100% value to 0
-	eeprom.write(29, 75);	//  writes the flow sensor user level to 75 or 75% 
+	eeprom.write(28, 55);		//	writes the 1st bit of the flow sensor 100% value to 0
+	eeprom.write(29, 75);		//  writes the flow sensor user level to 75 or 75% 
 	eeprom.write(30, 0);
 	eeprom.write(32, 0);
 
@@ -1249,7 +1333,7 @@ void factoryDefaultset()
 		eeprom.write(102 + (i * 6), 0);			//  writes the alarm type to 0, Day Lights
 		int bit = 1 << i;
 		eeprom.write(103 + (i * 6), (0 ^ bit));	//	writes the relay trigger to relay to match the id
-		eeprom.write(104 + (i * 6), 0);		//  writes the alarm on hour 12
+		eeprom.write(104 + (i * 6), 0);			//  writes the alarm on hour 12
 		eeprom.write(105 + (i * 6), 28+i);		//  writes the alarm on minute 1
 		eeprom.write(106 + (i * 6), 00);		//  writes the alarm off hour 23
 		eeprom.write(107 + (i * 6), 32+i);		//  writes the alarm off minute 11
