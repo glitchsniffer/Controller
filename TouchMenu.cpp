@@ -27,6 +27,7 @@ void(*function)(void);	//	stores the function name to be called from the arrays
 #define SENSOR_CALIB_SIZE 5
 #define	SETUP_FLOW_SIZE 4
 #define SYSTEM_SETUP_SIZE 4
+#define TFT_B_LIGHT_PIN 9
 
 //  ***********************************************
 //  Function prototypes
@@ -110,16 +111,23 @@ MENU_ITEM User_Setup[] = {
 	{ "Back",				7, BackMenu }
 };
 
+	MENU_ITEM Backlight_Brightness[] = {
+		{ "High",	0,	REPLACEME },
+		{ "Medium",	0,	REPLACEME },
+		{ "Low",	0,	REPLACEME },
+		{ "Back", 	0,	REPLACEME }
+	};
+
 	MENU_ITEM Time_Format[] = {
-			{ "24 Hour",	0,	REPLACEME },
-			{ "12 Hour",	0,	REPLACEME },
-			{ "Back",		0,	REPLACEME }
+		{ "24 Hour",	0,	REPLACEME },
+		{ "12 Hour",	0,	REPLACEME },
+		{ "Back",		0,	REPLACEME }
 	};
 
 	MENU_ITEM Seconds_Display[] = {
-			{ "Off",			0,	REPLACEME },
-			{ "On",				0,	REPLACEME },
-			{ "Back",			0,	REPLACEME },
+		{ "Off",			0,	REPLACEME },
+		{ "On",				0,	REPLACEME },
+		{ "Back",			0,	REPLACEME },
 	};
 
 //	Timer Setup Arrays
@@ -410,7 +418,7 @@ void MainMenu() {
 	{
 		Serial.print("Main Menu Entered\n");
 		ClearScreenHeader();								//	clear the touch screen
-		TFT.print("MAIN MENU", CENTER, 10, 0);				//  prints the menu name and centers it with the specified number of digits
+		TFT.print("MAIN MENU", CENTER, 10, 0);				//  prints the menu name and centers it
 		DrawMenuButtonArray(MAIN_MENU_SIZE, Main_Menu);		//	draws the menu buttons for the specified menu size and array
 
 		//	loop while we wait for touch screen data
@@ -433,7 +441,7 @@ void UserSetup(){
 	{
 		Serial.print("User Setup Entered\n");
 		ClearScreenHeader();								//	clear the touch screen
-		TFT.print("USER SETUP", CENTER, 10, 0);				//  prints the menu name and centers it with the specified number of digits
+		TFT.print("USER SETUP", CENTER, 10, 0);				//  prints the menu name and centers it
 		DrawMenuButtonArray(USER_SETUP_SIZE, User_Setup);	//	draws the menu buttons for the specified menu size and array
 
 		//	loop while we wait for touch screen data
@@ -449,6 +457,63 @@ void UserSetup(){
 }
 
 void Brightness(){
+	//  Sets the brightness of the lcd screen
+	{
+		uint8_t menusize = 4;	//  Set how many buttons there are
+
+		Serial.print("Change Brightness Level Entered\n");
+		ClearScreenHeader();									//	clear the touch screen
+		TFT.print("BRIGHTNESS", CENTER, 10, 0);					//  prints the menu name and centers it
+		DrawMenuButtonArray(menusize, Backlight_Brightness);	//	draws the menu buttons for the specified menu size and array
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;	//	enables the menu to loop
+		MenuLoop(menusize);	//	call the menu loop
+
+		//	call the function depending on the button pressed
+		Serial.printf("Brightness Level %d pressed\n", ButtonPressed);
+		ClearScreenHeader();	//	clear the touch screen
+		byte brightness;
+		switch (ButtonPressed)	//	switch depending on which button was pressed
+		{
+		case 0:
+			eeprom.write(25, 255);	//	write the data to the eeprom for High
+
+			brightness = eeprom.read(25);
+			analogWrite(TFT_B_LIGHT_PIN, brightness);
+
+			//	print to the display to see what was done
+			TFT.print("Backlight Level Set", CENTER, 70, 0);
+			TFT.print("to High", CENTER, 130, 0);
+			delay(1000);
+			break;
+		case 1:
+			eeprom.write(25, 170);	//	write the data to the eeprom for High
+
+			brightness = eeprom.read(25);
+			analogWrite(TFT_B_LIGHT_PIN, brightness);
+
+			//	print to the display to see what was done
+			TFT.print("Backlight Level Set", CENTER, 70, 0);
+			TFT.print("to Medium", CENTER, 130, 0);
+			delay(1000);
+			break;
+		case 2:
+			eeprom.write(25, 85);	//	write the data to the eeprom for High
+
+			brightness = eeprom.read(25);
+			analogWrite(TFT_B_LIGHT_PIN, brightness);
+
+			//	print to the display to see what was done
+			TFT.print("Backlight Level Set", CENTER, 70, 0);
+			TFT.print("to Low", CENTER, 130, 0);
+			delay(1000);
+			break;
+		default:
+			break;
+		}
+		Serial.println();
+	}
 }
 
 void TimeFormat()
@@ -458,7 +523,7 @@ void TimeFormat()
 
 	Serial.print("Change Time Format Entered\n");
 	ClearScreenHeader();							//	clear the touch screen
-	TFT.print("TIME FORMAT", CENTER, 10, 0);		//  prints the menu name and centers it with the specified number of digits
+	TFT.print("TIME FORMAT", CENTER, 10, 0);		//  prints the menu name and centers it
 	DrawMenuButtonArray(menusize, Time_Format);		//	draws the menu buttons for the specified menu size and array
 
 	//	loop while we wait for touch screen data
@@ -501,7 +566,7 @@ void SecondsDisplay(){
 
 	Serial.print("Change Seconds Display Entered\n");
 	ClearScreenHeader();								//	clear the touch screen
-	TFT.print("SECONDS DISPLAY", CENTER, 10, 0);		//  prints the menu name and centers it with the specified number of digits
+	TFT.print("SECONDS DISPLAY", CENTER, 10, 0);		//  prints the menu name and centers it
 	DrawMenuButtonArray(menusize, Seconds_Display);		//	draws the menu buttons for the specified menu size and array
 
 	//	loop while we wait for touch screen data
@@ -543,7 +608,7 @@ void TimerSetup(){
 	{
 		Serial.print("Timer Setup Entered\n");
 		ClearScreenHeader();								//	clear the touch screen
-		TFT.print("TIMER SETUP", CENTER, 11, 0);	//  prints the menu name and centers it with the specified number of digits
+		TFT.print("TIMER SETUP", CENTER, 11, 0);	//  prints the menu name and centers it
 		DrawMenuButtonArray(TIMER_SETUP_SIZE, Timer_Setup);		//	draws the menu buttons for the specified menu size and array
 
 		//	loop while we wait for touch screen data
@@ -581,10 +646,12 @@ void SensorSetup(){
 	TFT.fillScr(VGA_NAVY);			//  fill the screen
 	TFT.setBackColor(VGA_NAVY);		//  set the back color
 	TFT.setFont(GroteskBold24x48);	//  set the font to be used
-	TFT.print("SENSOR SETUP", CENTER, 12, 0);	//  prints the menu name and centers it with the specified number of digits
+	TFT.print("SENSOR SETUP", CENTER, 12, 0);	//  prints the menu name and centers it
 	DrawMenuButtonArray(SENSOR_SETUP_SIZE, Sensor_Setup);		//	draws the menu buttons for the specified menu size and array
 	MenuLoopFlag == 1;	//	enables the menu to loop
 	MenuLoop(SENSOR_SETUP_SIZE);
+
+	delay(2500);
 }
 
 void TempUnit() {

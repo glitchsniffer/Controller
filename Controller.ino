@@ -17,7 +17,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 40;			//  Sets the build number for the current program
-byte subbuild = 1;			//	Sets the sub build number between major version releases
+byte subbuild = 2;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -74,9 +74,11 @@ byte clock[8] = { B00000,B01110,B10101,B10111,B10001,B01110,B00000, };		//	set t
 
 //  INITIALIZE THE 4.3" TFT TOUCHSCREEN
 //  ***********************************************
+#define TFT_B_LIGHT_PIN 9				//	the pin used for the backlight of the lcd screen
 UTFT TFT(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
 UTouch Touch(6, 5, 32, 3, 2);		//	start an instance of the UTouch class using the pins used
 TouchMenu Menu;					    //	start an instance of the TouchMenu class using a dummy variable
+
 
 
 //	set the fonts that we will be using for the 4.3" TOUCHSCREEN
@@ -236,7 +238,8 @@ byte relayCount = 7;		//  Set the number of relays
 #if defined(__AVR__)
 #define SD_CHIP_SELECT 53	//	Mega
 #else
-#define SD_CHIP_SELECT 9	//	Due
+#define SD_CHIP_SELECT 11
+//	Due
 #endif
 
 uint32_t SDLastSyncTime = 0;			//	time of the last sync
@@ -382,11 +385,15 @@ void setup()
 	lcd.createChar(3, uarrow);				//  init custom characters as numbers
 	lcd.setBacklightPin(B_Light, POSITIVE); //  set the backlight pin and polarity
 	lcd.setBacklight(HIGH);					//  toggle the backlight on
-	pinMode(backlight, OUTPUT);				//	set the pin for the backlight as an output
-	analogWrite(backlight, backlightLevel);	//	write the backlightlevel to the pin for the backlight
+	//pinMode(backlight, OUTPUT);				//	set the pin for the backlight as an output
+	//analogWrite(backlight, backlightLevel);	//	write the backlightlevel to the pin for the backlight
 
 //	SETUP THE TFT LCD
 //  ***********************************************
+	// Set the backlight for the LCD
+	pinMode(TFT_B_LIGHT_PIN, OUTPUT);
+	analogWrite(TFT_B_LIGHT_PIN, backlightLevel);
+
 	TFT.InitLCD(LANDSCAPE);
 	TFT.clrScr();
 	TFT.setFont(BigFont);
@@ -1315,7 +1322,7 @@ void factoryDefaultset()
 	eeprom.write(22, 10);		//	writes the tempReadDelay value = 10 or 10 Seconds
 	eeprom.write(23, 1);		//	writes the timeFormat value =  1 or 12 hour
 	eeprom.write(24, 1);		//	writes the secondsDisplay value to 1 or Display seconds
-	eeprom.write(25, 100);		//	writes the backlightLevel value = 100 or half
+	eeprom.write(25, 128);		//	writes the backlightLevel value = 128 or half
 	eeprom.write(26, 30);		//  writes the backlightTimeout to be 30 seconds
 	eeprom.write(27, 0);		//	writes the flowSensorEnable to be disabled
 	eeprom.write(28, 55);		//	writes the 1st bit of the flow sensor 100% value to 0
