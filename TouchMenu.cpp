@@ -27,6 +27,7 @@ void(*function)(void);	//	stores the function name to be called from the arrays
 #define SENSOR_CALIB_SIZE 5
 #define	SETUP_FLOW_SIZE 4
 #define SYSTEM_SETUP_SIZE 4
+
 #define TFT_B_LIGHT_PIN 9
 
 //  ***********************************************
@@ -64,6 +65,7 @@ void MainMenu();
 		void ReadTouchData();
 		void AnalyzeMenuTouchData(int menuSize);
 		void ClearScreenHeader();
+		void Dummy();
 
 		void REPLACEME();
 
@@ -145,12 +147,39 @@ MENU_ITEM Timer_Setup[] = {
 
 //	Sensor Setup Arrays
 MENU_ITEM Sensor_Setup[] = {
-	{ "Temp Unit",		2, REPLACEME },
-	{ "Precision",		2, REPLACEME },
-	{ "Read Delay",		2, REPLACEME },
+	{ "Temp Unit",		2, TempUnit },
+	{ "Precision",		2, TempPrecision },
+	{ "Read Delay",		2, TempReadDelay },
 	{ "Sensor Names",	2, REPLACEME },
 	{ "Back",			2, BackMenu }
 };
+
+	MENU_ITEM Temp_Unit[] = {
+		{ "Celcius",		0,	REPLACEME },
+		{ "Fahrenheit",		0,	REPLACEME },
+		{ "Back",			0,	REPLACEME }
+	};
+
+	MENU_ITEM Temp_Precision[] = {
+		{ "No Decimal",		0,	REPLACEME },
+		{ "1 Decimal",		0,	REPLACEME },
+		{ "Back",			0,	REPLACEME }
+	};
+
+	MENU_ITEM Read_Delay[] = {
+		{ "10 Seconds",		0,	REPLACEME },
+		{ "20 Seconds",		0,	REPLACEME },
+		{ "30 Seconds",		0,	REPLACEME },
+		{ "Back",			0,	REPLACEME }
+	};
+
+	MENU_ITEM Sensor_Names[] = {
+		{ "!Implemented",	0,	REPLACEME },
+		{ "!Implemented",	0,	REPLACEME },
+		{ "!Implemented",	0,	REPLACEME },
+		{ "!Implemented",	0,	REPLACEME },
+		{ "Back",			0,	REPLACEME }
+	};
 
 //	Sensor Calibration Arrays
 MENU_ITEM Sensor_Calib[] = {
@@ -175,6 +204,11 @@ MENU_ITEM System_Setup[] = {
 	{ "Erase EEPROM",		2, REPLACEME },
 	{ "Restore Defaults",	2, REPLACEME },
 	{ "Back",				2, BackMenu }
+};
+
+MENU_ITEM CHANGE_ME[] = {
+	{ "DUMMY", 0, REPLACEME },
+	{ "DUMMY", 0, REPLACEME }
 };
 
 //  ***********************************************
@@ -226,6 +260,7 @@ TouchMenu::TouchMenu(){
 void TouchMenu::EnterMenu()
 //	Entry point to the menu system and keep looping till the menu times out or is exited.
 {
+	SubMenuLoopFlag = 1;
 	MainMenu();	//	call the main menu function
 	today = 0;	//  set today to 0 so that the date function gets called
 }
@@ -641,26 +676,160 @@ void SetTimer(){
 //  ***********************************************
 
 void SensorSetup(){
-	Serial.print("Sensor Setup Entered\n");
+	while (SubMenuLoopFlag == 1) {
+		Serial.print("Sensor Setup Entered\n");
 
-	TFT.fillScr(VGA_NAVY);			//  fill the screen
-	TFT.setBackColor(VGA_NAVY);		//  set the back color
-	TFT.setFont(GroteskBold24x48);	//  set the font to be used
-	TFT.print("SENSOR SETUP", CENTER, 12, 0);	//  prints the menu name and centers it
-	DrawMenuButtonArray(SENSOR_SETUP_SIZE, Sensor_Setup);		//	draws the menu buttons for the specified menu size and array
-	MenuLoopFlag == 1;	//	enables the menu to loop
-	MenuLoop(SENSOR_SETUP_SIZE);
+		ClearScreenHeader();								//	clear the touch screen
+		TFT.print("SENSOR SETUP", CENTER, 10, 0);				//  prints the menu name and centers it
+		DrawMenuButtonArray(SENSOR_SETUP_SIZE, Sensor_Setup);	//	draws the menu buttons for the specified menu size and array
 
-	delay(2500);
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;			//	enables the menu to loop
+		MenuLoop(SENSOR_SETUP_SIZE);	//	call the menu loop
+
+		//	call the function depending on the button pressed
+		Serial.printf("Sensor Setup Button %d pressed\n\n", ButtonPressed);
+		function = Sensor_Setup[ButtonPressed].function;		//	set the function to be called when the button is pressed
+		(function)();	//	call the function set
+	}
+	SubMenuLoopFlag = 1;
 }
 
 void TempUnit() {
+	//  Sets the temperature unit to celcius of fahrenheit
+	{
+		uint8_t menusize = 3;	//  Set how many buttons there are
+
+		Serial.print("Change Temp Unit Entered\n");
+		ClearScreenHeader();							//	clear the touch screen
+		TFT.print("TEMP UNIT", CENTER, 10, 0);		//  prints the menu name and centers it
+		DrawMenuButtonArray(menusize, Temp_Unit);		//	draws the menu buttons for the specified menu size and array
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;	//	enables the menu to loop
+		MenuLoop(menusize);	//	call the menu loop
+
+		//	call the function depending on the button pressed
+		Serial.printf("Temp Unit Button %d pressed\n", ButtonPressed);
+		ClearScreenHeader();	//	clear the touch screen
+
+		switch (ButtonPressed)	//	switch depending on which button was pressed
+		{
+		case 0:
+			eeprom.write(20, 0);	//	write the data to the eeprom for celcius
+
+			//	print to the display to see what was done
+			TFT.print("Temp Unit Set to", CENTER, 70, 0);
+			TFT.print("Celcius", CENTER, 130, 0);
+			delay(1000);
+			break;
+		case 1:
+			eeprom.write(20, 1);	//	write the data to the eeprom for fahrenheit
+
+			//	print to the display to see what was done
+			TFT.print("Temp Unit Set to", CENTER, 70, 0);
+			TFT.print("Fahrenheit", CENTER, 130, 0);
+			delay(1000);
+			break;
+		default:
+			break;
+		}
+		Serial.println();
+	}
 }
 
 void TempPrecision() {
+	//  Sets the temperature precision to 0, 1, or 2 decimals
+	{
+		uint8_t menusize = 3;	//  Set how many buttons there are
+
+		Serial.print("Temp Precision Entered\n");
+		ClearScreenHeader();							//	clear the touch screen
+		TFT.print("TEMP PRECISION", CENTER, 10, 0);		//  prints the menu name and centers it
+		DrawMenuButtonArray(menusize, Temp_Precision);		//	draws the menu buttons for the specified menu size and array
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;	//	enables the menu to loop
+		MenuLoop(menusize);	//	call the menu loop
+
+		//	call the function depending on the button pressed
+		Serial.printf("Temp Precision Button %d pressed\n", ButtonPressed);
+		ClearScreenHeader();	//	clear the touch screen
+
+		switch (ButtonPressed)	//	switch depending on which button was pressed
+		{
+		case 0:
+			eeprom.write(21, 0);	//	write the data to the eeprom for no decimal
+
+			//	print to the display to see what was done
+			TFT.print("Temp Precision Set", CENTER, 70, 0);
+			TFT.print("to No Decimal", CENTER, 130, 0);
+			delay(1000);
+			break;
+		case 1:
+			eeprom.write(21, 1);	//	write the data to the eeprom for 1 decimal
+
+			//	print to the display to see what was done
+			TFT.print("Temp Precision Set", CENTER, 70, 0);
+			TFT.print("to 1 Decimal", CENTER, 130, 0);
+			delay(1000);
+			break;
+		default:
+			break;
+		}
+		Serial.println();
+	}
 }
 
 void TempReadDelay() {
+	//  Sets the delay between reads of the temperature sensors
+	{
+		uint8_t menusize = 4;	//  Set how many buttons there are
+
+		Serial.print("Temp Read Delay Entered\n");
+		ClearScreenHeader();							//	clear the touch screen
+		TFT.print("TEMP READ DELAY", CENTER, 10, 0);		//  prints the menu name and centers it
+		DrawMenuButtonArray(menusize, Read_Delay);		//	draws the menu buttons for the specified menu size and array
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;	//	enables the menu to loop
+		MenuLoop(menusize);	//	call the menu loop
+
+		//	call the function depending on the button pressed
+		Serial.printf("Temp Read Delay Button %d pressed\n", ButtonPressed);
+		ClearScreenHeader();	//	clear the touch screen
+
+		switch (ButtonPressed)	//	switch depending on which button was pressed
+		{
+		case 0:
+			eeprom.write(22, 10);	//	write the data to the eeprom for 10 seconds between reads
+
+			//	print to the display to see what was done
+			TFT.print("Temp Read Delay", CENTER, 70, 0);
+			TFT.print("Set to 10 Sec", CENTER, 130, 0);
+			delay(1000);
+			break;
+		case 1:
+			eeprom.write(22, 20);	//	write the data to the eeprom for 20 sconds between reads
+
+			//	print to the display to see what was done
+			TFT.print("Temp Read Delay", CENTER, 70, 0);
+			TFT.print("Set to 20 Sec", CENTER, 130, 0);
+			delay(1000);
+			break;
+		case 2:
+			eeprom.write(22, 30);	//	write the data to the eeprom for 30 sconds between reads
+
+			//	print to the display to see what was done
+			TFT.print("Temp Read Delay", CENTER, 70, 0);
+			TFT.print("Set to 30 Sec", CENTER, 130, 0);
+			delay(1000);
+			break;
+		default:
+			break;
+		}
+		Serial.println();
+	}
 }
 
 void SensorNames() {
@@ -670,7 +839,23 @@ void SensorNames() {
 //  ***********************************************
 
 void SensorCalib(){
-	Serial.print("Sensor Calibration Entered\n");
+	while (SubMenuLoopFlag == 1) {
+		Serial.print("Sensor Calibration Entered\n");
+
+		ClearScreenHeader();								//	clear the touch screen
+		TFT.print("SENSOR CALIB", CENTER, 10, 0);				//  prints the menu name and centers it
+		DrawMenuButtonArray(SENSOR_CALIB_SIZE, Sensor_Calib);	//	draws the menu buttons for the specified menu size and array
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;			//	enables the menu to loop
+		MenuLoop(SENSOR_CALIB_SIZE);	//	call the menu loop
+
+		//	call the function depending on the button pressed
+		Serial.printf("Sensor Calib Button %d pressed\n\n", ButtonPressed);
+		function = Sensor_Calib[ButtonPressed].function;		//	set the function to be called when the button is pressed
+		(function)();	//	call the function set
+	}
+	SubMenuLoopFlag = 1;
 }
 
 void FlowSensorCalib(){
@@ -683,7 +868,23 @@ void SensorAddrConfig(){
 //  ***********************************************
 
 void SetupFlowSensor(){
-	Serial.print("Setup Flow Sensor Entered\n");
+	while (SubMenuLoopFlag == 1) {
+		Serial.print("Setup Flow Sensor Entered\n");
+
+		ClearScreenHeader();								//	clear the touch screen
+		TFT.print("SETUP FLOW SENSOR", CENTER, 10, 0);				//  prints the menu name and centers it
+		DrawMenuButtonArray(SETUP_FLOW_SIZE, Setup_Flow);	//	draws the menu buttons for the specified menu size and array
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;			//	enables the menu to loop
+		MenuLoop(SETUP_FLOW_SIZE);	//	call the menu loop
+
+		//	call the function depending on the button pressed
+		Serial.printf("User Setup Button %d pressed\n\n", ButtonPressed);
+		function = Setup_Flow[ButtonPressed].function;		//	set the function to be called when the button is pressed
+		(function)();	//	call the function set
+	}
+	SubMenuLoopFlag = 1;
 }
 
 void FlowOnOff() {
@@ -702,7 +903,23 @@ void DisableFlow(){
 //  ***********************************************
 
 void SystemSetup(){
-	Serial.print("System Setup Entered\n");
+	while (SubMenuLoopFlag == 1) {
+		Serial.print("System Setup Entered\n");
+
+		ClearScreenHeader();								//	clear the touch screen
+		TFT.print("SYSTEM SETUP SENSOR", CENTER, 10, 0);				//  prints the menu name and centers it
+		DrawMenuButtonArray(SYSTEM_SETUP_SIZE, System_Setup);	//	draws the menu buttons for the specified menu size and array
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;			//	enables the menu to loop
+		MenuLoop(SYSTEM_SETUP_SIZE);	//	call the menu loop
+
+		//	call the function depending on the button pressed
+		Serial.printf("System Setup Button %d pressed\n\n", ButtonPressed);
+		function = System_Setup[ButtonPressed].function;		//	set the function to be called when the button is pressed
+		(function)();	//	call the function set
+	}
+	SubMenuLoopFlag = 1;
 }
 
 void SerialDebugging(){
@@ -726,4 +943,50 @@ void ExitMenu(){
 //  ***********************************************
 void BackMenu() {
 	SubMenuLoopFlag = 0;
+}
+
+
+void Dummy()
+//  Sets the CHANGEME
+{
+	String CHANGEME;
+	uint8_t menusize = 3;	//  Set how many buttons there are
+
+	Serial.print("CHANGEMEMENU Entered\n");
+	ClearScreenHeader();							//	clear the touch screen
+	TFT.print("CHANGEMEMENUITEM", CENTER, 10, 0);		//  prints the menu name and centers it
+	DrawMenuButtonArray(menusize, CHANGE_ME);		//	draws the menu buttons for the specified menu size and array
+
+	//	loop while we wait for touch screen data
+	MenuLoopFlag = 1;	//	enables the menu to loop
+	MenuLoop(menusize);	//	call the menu loop
+
+	//	call the function depending on the button pressed
+	Serial.printf("CHANGEME Button %d pressed\n", ButtonPressed);
+	ClearScreenHeader();	//	clear the touch screen
+
+	switch (ButtonPressed)	//	switch depending on which button was pressed
+	{
+	case 0:
+		eeprom.write(0, 0);	//	write the data to the eeprom for 24 hour
+
+		//	print to the display to see what was done
+		TFT.print("CHANGEME Set to", CENTER, 70, 0);
+		TFT.print("CHANGEME", CENTER, 130, 0);
+		delay(1000);
+		break;
+	case 1:
+		eeprom.write(0, 1);	//	write the data to the eeprom for 12 hour
+
+		//Need to add a check to make sure the data was written
+
+		//	print to the display to see what was done
+		TFT.print("CHANGEME Set to", CENTER, 70, 0);
+		TFT.print("CHANGEME", CENTER, 130, 0);
+		delay(1000);
+		break;
+	default:
+		break;
+	}
+	Serial.println();
 }
