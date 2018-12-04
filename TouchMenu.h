@@ -18,6 +18,8 @@ extern uint8_t Retro8x16[];			//	make the font availiable to use
 extern uint8_t today;	//	variable used to force the date to be displayed
 extern uint16_t menuTimeout;
 
+void factoryDefaultset();
+
 class TouchMenu
 {
 public:

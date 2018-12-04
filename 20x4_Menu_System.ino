@@ -932,12 +932,12 @@ void CharMenuDo()	//  function for doing the currently selected menu item at the
 				break;
 			case 7:
 				readee = eeprom.read(5);
-				if ((readee & 16) == 16) {		//  see if the 5th bit flag is set.
-					readee = readee - 16;		//  if it is set, turn it off
+				if ((readee & 32) == 32) {		//  see if the 5th bit flag is set.
+					readee = readee - 32;		//  if it is set, turn it off
 					lcd.print("Disabled System Dbg");
 				}
 				else {
-					readee = readee + 16;		//  if it is not set, turn it on
+					readee = readee + 32;		//  if it is not set, turn it on
 					lcd.print("Enabled System Dbg");
 				}
 				eeprom.write(5, readee);

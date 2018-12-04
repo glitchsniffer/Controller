@@ -106,11 +106,11 @@ MENU_ITEM Main_Menu[] = {
 
 //	User Setup Arrays
 MENU_ITEM User_Setup[] = {
-	{ "Brightness",			1, Brightness },
+	{ "Brightness",			4, Brightness },
 	{ "Time Format",		3, TimeFormat },
 	{ "Display Sec",		3, SecondsDisplay },
 	{ "Set Date/Time",		0, SetDateTime },
-	{ "Back",				7, BackMenu }
+	{ "Back",				0, BackMenu }
 };
 
 	MENU_ITEM Backlight_Brightness[] = {
@@ -142,16 +142,16 @@ MENU_ITEM Timer_Setup[] = {
 	{ "Set Timer 6",	2, SetTimer },
 	{ "Set Timer 7",	2, SetTimer },
 	{ "Set Timer 8",	2, SetTimer },
-	{ "Back",			2, BackMenu }
+	{ "Back",			0, BackMenu }
 };
 
 //	Sensor Setup Arrays
 MENU_ITEM Sensor_Setup[] = {
-	{ "Temp Unit",		2, TempUnit },
-	{ "Precision",		2, TempPrecision },
-	{ "Read Delay",		2, TempReadDelay },
-	{ "Sensor Names",	2, REPLACEME },
-	{ "Back",			2, BackMenu }
+	{ "Temp Unit",		3, TempUnit },
+	{ "Precision",		3, TempPrecision },
+	{ "Read Delay",		4, TempReadDelay },
+	{ "Sensor Names",	5, REPLACEME },
+	{ "Back",			0, BackMenu }
 };
 
 	MENU_ITEM Temp_Unit[] = {
@@ -200,11 +200,29 @@ MENU_ITEM Setup_Flow[] = {
 
 //	System Setup
 MENU_ITEM System_Setup[] = {
-	{ "Debugging",			2, REPLACEME },
-	{ "Erase EEPROM",		2, REPLACEME },
-	{ "Restore Defaults",	2, REPLACEME },
+	{ "Debugging",			10, SerialDebugging },
+	{ "Erase EEPROM",		2, EraseEEPROM },
+	{ "Fact Defaults",		2, RestoreDefaults },
 	{ "Back",				2, BackMenu }
 };
+
+	MENU_ITEM Serial_Debugging[] = {
+		{ "All On",			0,	REPLACEME },
+		{ "All Off",		0,  REPLACEME },
+		{ "Temp Sensors",	0,	REPLACEME },
+		{ "Menu",			0,	REPLACEME },
+		{ "Alarms",			0,	REPLACEME },
+		{ "EEPROM",			0,	REPLACEME },
+		{ "Relays",			0,	REPLACEME },
+		{ "System",			0,	REPLACEME },
+		{ "Flow Sensor",	0,	REPLACEME },
+		{ "Back",			0,	REPLACEME }
+	};
+
+MENU_ITEM Yes_No[] = {
+	{ "Yes",		0,	REPLACEME },
+	{ "No",			0,	REPLACEME }
+	};
 
 MENU_ITEM CHANGE_ME[] = {
 	{ "DUMMY", 0, REPLACEME },
@@ -487,74 +505,59 @@ void UserSetup(){
 		Serial.printf("User Setup Button %d pressed\n\n", ButtonPressed);
 		function = User_Setup[ButtonPressed].function;		//	set the function to be called when the button is pressed
 		(function)();	//	call the function set
+		Serial.println();
 	}
 	SubMenuLoopFlag = 1;
 }
 
 void Brightness(){
 	//  Sets the brightness of the lcd screen
+	uint8_t menusize = User_Setup[ButtonPressed].Menu_Size;	//	set the menusize
+
+	Serial.print("Change Brightness Level Entered\n");
+	ClearScreenHeader();									//	clear the touch screen
+	TFT.print("BRIGHTNESS", CENTER, 10, 0);					//  prints the menu name and centers it
+	DrawMenuButtonArray(menusize, Backlight_Brightness);	//	draws the menu buttons for the specified menu size and array
+
+	//	loop while we wait for touch screen data
+	MenuLoopFlag = 1;	//	enables the menu to loop
+	MenuLoop(menusize);	//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
+
+	//	evaluate the button pressed
+	Serial.printf("Brightness Level %d pressed\n", ButtonPressed);
+	ClearScreenHeader();	//	clear the touch screen
+	TFT.print("Backlight Level Set", CENTER, 70, 0);	//	print the header
+
+	byte brightness;		//	byte to store the brightness level
+
+	switch (ButtonPressed)	//	switch depending on which button was pressed
 	{
-		uint8_t menusize = 4;	//  Set how many buttons there are
-
-		Serial.print("Change Brightness Level Entered\n");
-		ClearScreenHeader();									//	clear the touch screen
-		TFT.print("BRIGHTNESS", CENTER, 10, 0);					//  prints the menu name and centers it
-		DrawMenuButtonArray(menusize, Backlight_Brightness);	//	draws the menu buttons for the specified menu size and array
-
-		//	loop while we wait for touch screen data
-		MenuLoopFlag = 1;	//	enables the menu to loop
-		MenuLoop(menusize);	//	call the menu loop
-
-		//	call the function depending on the button pressed
-		Serial.printf("Brightness Level %d pressed\n", ButtonPressed);
-		ClearScreenHeader();	//	clear the touch screen
-		byte brightness;
-		switch (ButtonPressed)	//	switch depending on which button was pressed
-		{
-		case 0:
-			eeprom.write(25, 255);	//	write the data to the eeprom for High
-
-			brightness = eeprom.read(25);
-			analogWrite(TFT_B_LIGHT_PIN, brightness);
-
-			//	print to the display to see what was done
-			TFT.print("Backlight Level Set", CENTER, 70, 0);
-			TFT.print("to High", CENTER, 130, 0);
-			delay(1000);
-			break;
-		case 1:
-			eeprom.write(25, 170);	//	write the data to the eeprom for High
-
-			brightness = eeprom.read(25);
-			analogWrite(TFT_B_LIGHT_PIN, brightness);
-
-			//	print to the display to see what was done
-			TFT.print("Backlight Level Set", CENTER, 70, 0);
-			TFT.print("to Medium", CENTER, 130, 0);
-			delay(1000);
-			break;
-		case 2:
-			eeprom.write(25, 85);	//	write the data to the eeprom for High
-
-			brightness = eeprom.read(25);
-			analogWrite(TFT_B_LIGHT_PIN, brightness);
-
-			//	print to the display to see what was done
-			TFT.print("Backlight Level Set", CENTER, 70, 0);
-			TFT.print("to Low", CENTER, 130, 0);
-			delay(1000);
-			break;
-		default:
-			break;
-		}
-		Serial.println();
+	case 0:
+		brightness = 255;	//	set the brightness to max level
+		TFT.print("to High", CENTER, 130, 0);	//	print to the display to see what was done
+		break;
+	case 1:
+		brightness = 170;	//	set the brightness to mid level
+		TFT.print("to Medium", CENTER, 130, 0);	//	print to the display to see what was done
+		break;
+	case 2:
+		brightness = 70;	//	set the brightness to low level
+		TFT.print("to Low", CENTER, 130, 0);	//	print to the display to see what was done
+		break;
+	default:
+		break;
 	}
+	eeprom.write(25, brightness);	//	write the data to the eeprom
+	brightness = eeprom.read(25);	//	read the data back out
+	analogWrite(TFT_B_LIGHT_PIN, brightness);	//	write the brightness to the PWM pin
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
 void TimeFormat()
 //  Sets the time format to 12h or 24h
 {
-	uint8_t menusize = 3;	//  Set how many buttons there are
+	uint8_t menusize = User_Setup[ButtonPressed].Menu_Size;
 
 	Serial.print("Change Time Format Entered\n");
 	ClearScreenHeader();							//	clear the touch screen
@@ -564,40 +567,32 @@ void TimeFormat()
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
 	MenuLoop(menusize);	//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
-	//	call the function depending on the button pressed
+	//	evaluate the button pressed
 	Serial.printf("Time Format Button %d pressed\n", ButtonPressed);
 	ClearScreenHeader();	//	clear the touch screen
+	TFT.print("Time Format Set to", CENTER, 70, 0);		//	print the header
 
 	switch (ButtonPressed)	//	switch depending on which button was pressed
 	{
 		case 0:
 			eeprom.write(23, 0);	//	write the data to the eeprom for 24 hour
-
-			//	print to the display to see what was done
-			TFT.print("Time Format Set to", CENTER, 70, 0);
-			TFT.print("24 Hour", CENTER, 130, 0);
-			delay(1000);
+			TFT.print("24 Hour", CENTER, 130, 0);	//	print to the display to see what was done
 			break;
 		case 1:
 			eeprom.write(23, 1);	//	write the data to the eeprom for 12 hour
-
-			//Need to add a check to make sure the data was written
-
-			//	print to the display to see what was done
-			TFT.print("Time Format Set to", CENTER, 70, 0);
-			TFT.print("12 Hour", CENTER, 130, 0);
-			delay(1000);
+			TFT.print("12 Hour", CENTER, 130, 0);	//	print to the display to see what was done
 			break;
 		default:
 			break;
 	}
-	Serial.println();
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
 void SecondsDisplay(){
 	//  Set how many buttons there are
-	uint8_t menusize = 3;
+	uint8_t menusize = User_Setup[ButtonPressed].Menu_Size;	//	set the menusize
 
 	Serial.print("Change Seconds Display Entered\n");
 	ClearScreenHeader();								//	clear the touch screen
@@ -607,29 +602,27 @@ void SecondsDisplay(){
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;		//	enables the menu to loop
 	MenuLoop(menusize);		//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
-	//	call the function depending on the button pressed
-	Serial.printf("Seconds Display %d pressed\n\n", ButtonPressed);
+	//	evaluate the button pressed
+	Serial.printf("Seconds Display Button %d pressed\n", ButtonPressed);
 	ClearScreenHeader();								//	clear the touch screen
+	TFT.print("Seconds Display set", CENTER, 70, 0);	//	print the header
 
 	switch (ButtonPressed)
 	{
 	case 0:
-	eeprom.write(24, 0);
-		TFT.print("Seconds Display set", CENTER, 70, 0);
-		TFT.print("to Off", CENTER, 130, 0);
-		delay(1000);
+		eeprom.write(24, 0);	//	write the data to the eeprom
+		TFT.print("to Off", CENTER, 130, 0);	//	print to the display to see what was done
 		break;
 	case 1:
-		eeprom.write(24, 1);
-		TFT.print("Seconds Display set", CENTER, 70, 0);
-		TFT.print("to On", CENTER, 130, 0);
-		delay(1000);
+		eeprom.write(24, 1);	//	write the data to the eeprom
+		TFT.print("to On", CENTER, 130, 0);	//	print to the display to see what was done
 		break;
 	default:
 		break;
 	}
-	Serial.println();
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
 void SetDateTime(){
@@ -642,8 +635,8 @@ void TimerSetup(){
 	while (SubMenuLoopFlag == 1)
 	{
 		Serial.print("Timer Setup Entered\n");
-		ClearScreenHeader();								//	clear the touch screen
-		TFT.print("TIMER SETUP", CENTER, 11, 0);	//  prints the menu name and centers it
+		ClearScreenHeader();									//	clear the touch screen
+		TFT.print("TIMER SETUP", CENTER, 11, 0);				//  prints the menu name and centers it
 		DrawMenuButtonArray(TIMER_SETUP_SIZE, Timer_Setup);		//	draws the menu buttons for the specified menu size and array
 
 		//	loop while we wait for touch screen data
@@ -654,6 +647,7 @@ void TimerSetup(){
 		Serial.printf("Timer Setup Button %d pressed\n\n", ButtonPressed);
 		function = Timer_Setup[ButtonPressed].function;
 		(function)();
+		Serial.println();
 	}
 	SubMenuLoopFlag = 1;
 }
@@ -668,8 +662,8 @@ void SetTimer(){
 	timerstring = String(buffer);		//	create a string for the version
 
 	TFT.print(timerstring, CENTER, 10, 0);
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 
-	delay(2500);
 }
 
 //  SENSOR SETUP MENU
@@ -679,157 +673,130 @@ void SensorSetup(){
 	while (SubMenuLoopFlag == 1) {
 		Serial.print("Sensor Setup Entered\n");
 
-		ClearScreenHeader();								//	clear the touch screen
+		ClearScreenHeader();									//	clear the touch screen
 		TFT.print("SENSOR SETUP", CENTER, 10, 0);				//  prints the menu name and centers it
 		DrawMenuButtonArray(SENSOR_SETUP_SIZE, Sensor_Setup);	//	draws the menu buttons for the specified menu size and array
 
 		//	loop while we wait for touch screen data
-		MenuLoopFlag = 1;			//	enables the menu to loop
+		MenuLoopFlag = 1;				//	enables the menu to loop
 		MenuLoop(SENSOR_SETUP_SIZE);	//	call the menu loop
 
 		//	call the function depending on the button pressed
 		Serial.printf("Sensor Setup Button %d pressed\n\n", ButtonPressed);
 		function = Sensor_Setup[ButtonPressed].function;		//	set the function to be called when the button is pressed
 		(function)();	//	call the function set
+		Serial.println();
 	}
 	SubMenuLoopFlag = 1;
 }
 
 void TempUnit() {
-	//  Sets the temperature unit to celcius of fahrenheit
+//  Sets the temperature unit to celcius of fahrenheit
+	uint8_t menusize = Sensor_Setup[ButtonPressed].Menu_Size;	//	set the menusize
+
+	Serial.print("Change Temp Unit Entered\n");
+	ClearScreenHeader();							//	clear the touch screen
+	TFT.print("TEMP UNIT", CENTER, 10, 0);			//  prints the menu name and centers it
+	DrawMenuButtonArray(menusize, Temp_Unit);		//	draws the menu buttons for the specified menu size and array
+
+	//	loop while we wait for touch screen data
+	MenuLoopFlag = 1;	//	enables the menu to loop
+	MenuLoop(menusize);	//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
+
+	//	evaluate the button pressed
+	Serial.printf("Temp Unit Button %d pressed\n", ButtonPressed);
+	ClearScreenHeader();	//	clear the touch screen
+	TFT.print("Temp Unit Set to", CENTER, 70, 0);	//	print the header
+
+	switch (ButtonPressed)	//	switch depending on which button was pressed
 	{
-		uint8_t menusize = 3;	//  Set how many buttons there are
-
-		Serial.print("Change Temp Unit Entered\n");
-		ClearScreenHeader();							//	clear the touch screen
-		TFT.print("TEMP UNIT", CENTER, 10, 0);		//  prints the menu name and centers it
-		DrawMenuButtonArray(menusize, Temp_Unit);		//	draws the menu buttons for the specified menu size and array
-
-		//	loop while we wait for touch screen data
-		MenuLoopFlag = 1;	//	enables the menu to loop
-		MenuLoop(menusize);	//	call the menu loop
-
-		//	call the function depending on the button pressed
-		Serial.printf("Temp Unit Button %d pressed\n", ButtonPressed);
-		ClearScreenHeader();	//	clear the touch screen
-
-		switch (ButtonPressed)	//	switch depending on which button was pressed
-		{
-		case 0:
-			eeprom.write(20, 0);	//	write the data to the eeprom for celcius
-
-			//	print to the display to see what was done
-			TFT.print("Temp Unit Set to", CENTER, 70, 0);
-			TFT.print("Celcius", CENTER, 130, 0);
-			delay(1000);
-			break;
-		case 1:
-			eeprom.write(20, 1);	//	write the data to the eeprom for fahrenheit
-
-			//	print to the display to see what was done
-			TFT.print("Temp Unit Set to", CENTER, 70, 0);
-			TFT.print("Fahrenheit", CENTER, 130, 0);
-			delay(1000);
-			break;
-		default:
-			break;
-		}
-		Serial.println();
+	case 0:
+		eeprom.write(20, 0);	//	write the data to the eeprom for celcius
+		TFT.print("Celcius", CENTER, 130, 0);	//	print to the display to see what was done
+		break;
+	case 1:
+		eeprom.write(20, 1);	//	write the data to the eeprom for fahrenheit
+		TFT.print("Fahrenheit", CENTER, 130, 0);	//	print to the display to see what was done
+		break;
+	default:
+		break;
 	}
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
 void TempPrecision() {
-	//  Sets the temperature precision to 0, 1, or 2 decimals
+//  Sets the temperature precision to 0, 1, or 2 decimals
+	uint8_t menusize = Sensor_Setup[ButtonPressed].Menu_Size;	//	set the menusize
+
+	Serial.print("Temp Precision Entered\n");
+	ClearScreenHeader();								//	clear the touch screen
+	TFT.print("TEMP PRECISION", CENTER, 10, 0);			//  prints the menu name and centers it
+	DrawMenuButtonArray(menusize, Temp_Precision);		//	draws the menu buttons for the specified menu size and array
+
+	//	loop while we wait for touch screen data
+	MenuLoopFlag = 1;	//	enables the menu to loop
+	MenuLoop(menusize);	//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
+
+	//	evaluate the button pressed
+	Serial.printf("Temp Precision Button %d pressed\n", ButtonPressed);
+	ClearScreenHeader();	//	clear the touch screen
+	TFT.print("Temp Precision Set", CENTER, 70, 0);		//	print the header
+
+	switch (ButtonPressed)	//	switch depending on which button was pressed
 	{
-		uint8_t menusize = 3;	//  Set how many buttons there are
-
-		Serial.print("Temp Precision Entered\n");
-		ClearScreenHeader();							//	clear the touch screen
-		TFT.print("TEMP PRECISION", CENTER, 10, 0);		//  prints the menu name and centers it
-		DrawMenuButtonArray(menusize, Temp_Precision);		//	draws the menu buttons for the specified menu size and array
-
-		//	loop while we wait for touch screen data
-		MenuLoopFlag = 1;	//	enables the menu to loop
-		MenuLoop(menusize);	//	call the menu loop
-
-		//	call the function depending on the button pressed
-		Serial.printf("Temp Precision Button %d pressed\n", ButtonPressed);
-		ClearScreenHeader();	//	clear the touch screen
-
-		switch (ButtonPressed)	//	switch depending on which button was pressed
-		{
-		case 0:
-			eeprom.write(21, 0);	//	write the data to the eeprom for no decimal
-
-			//	print to the display to see what was done
-			TFT.print("Temp Precision Set", CENTER, 70, 0);
-			TFT.print("to No Decimal", CENTER, 130, 0);
-			delay(1000);
-			break;
-		case 1:
-			eeprom.write(21, 1);	//	write the data to the eeprom for 1 decimal
-
-			//	print to the display to see what was done
-			TFT.print("Temp Precision Set", CENTER, 70, 0);
-			TFT.print("to 1 Decimal", CENTER, 130, 0);
-			delay(1000);
-			break;
-		default:
-			break;
-		}
-		Serial.println();
+	case 0:
+		eeprom.write(21, 0);	//	write the data to the eeprom for no decimal
+		TFT.print("to No Decimal", CENTER, 130, 0);	//	print to the display to see what was done
+		break;
+	case 1:
+		eeprom.write(21, 1);	//	write the data to the eeprom for 1 decimal
+		TFT.print("to 1 Decimal", CENTER, 130, 0);	//	print to the display to see what was done
+		break;
+	default:
+		break;
 	}
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
 void TempReadDelay() {
-	//  Sets the delay between reads of the temperature sensors
+//  Sets the delay between reads of the temperature sensors
+	uint8_t menusize = Sensor_Setup[ButtonPressed].Menu_Size;	//	set the menusize
+
+	Serial.print("Temp Read Delay Entered\n");
+	ClearScreenHeader();							//	clear the touch screen
+	TFT.print("TEMP READ DELAY", CENTER, 10, 0);	//  prints the menu name and centers it
+	DrawMenuButtonArray(menusize, Read_Delay);		//	draws the menu buttons for the specified menu size and array
+
+	//	loop while we wait for touch screen data
+	MenuLoopFlag = 1;	//	enables the menu to loop
+	MenuLoop(menusize);	//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
+
+	//	evaluate the button pressed
+	Serial.printf("Temp Read Delay Button %d pressed\n", ButtonPressed);
+	ClearScreenHeader();	//	clear the touch screen
+	TFT.print("Temp Read Delay", CENTER, 70, 0);	//	print the header
+
+	switch (ButtonPressed)	//	switch depending on which button was pressed
 	{
-		uint8_t menusize = 4;	//  Set how many buttons there are
-
-		Serial.print("Temp Read Delay Entered\n");
-		ClearScreenHeader();							//	clear the touch screen
-		TFT.print("TEMP READ DELAY", CENTER, 10, 0);		//  prints the menu name and centers it
-		DrawMenuButtonArray(menusize, Read_Delay);		//	draws the menu buttons for the specified menu size and array
-
-		//	loop while we wait for touch screen data
-		MenuLoopFlag = 1;	//	enables the menu to loop
-		MenuLoop(menusize);	//	call the menu loop
-
-		//	call the function depending on the button pressed
-		Serial.printf("Temp Read Delay Button %d pressed\n", ButtonPressed);
-		ClearScreenHeader();	//	clear the touch screen
-
-		switch (ButtonPressed)	//	switch depending on which button was pressed
-		{
-		case 0:
-			eeprom.write(22, 10);	//	write the data to the eeprom for 10 seconds between reads
-
-			//	print to the display to see what was done
-			TFT.print("Temp Read Delay", CENTER, 70, 0);
-			TFT.print("Set to 10 Sec", CENTER, 130, 0);
-			delay(1000);
-			break;
-		case 1:
-			eeprom.write(22, 20);	//	write the data to the eeprom for 20 sconds between reads
-
-			//	print to the display to see what was done
-			TFT.print("Temp Read Delay", CENTER, 70, 0);
-			TFT.print("Set to 20 Sec", CENTER, 130, 0);
-			delay(1000);
-			break;
-		case 2:
-			eeprom.write(22, 30);	//	write the data to the eeprom for 30 sconds between reads
-
-			//	print to the display to see what was done
-			TFT.print("Temp Read Delay", CENTER, 70, 0);
-			TFT.print("Set to 30 Sec", CENTER, 130, 0);
-			delay(1000);
-			break;
-		default:
-			break;
-		}
-		Serial.println();
+	case 0:
+		eeprom.write(22, 10);	//	write the data to the eeprom for 10 seconds between reads
+		TFT.print("Set to 10 Sec", CENTER, 130, 0);
+		break;
+	case 1:
+		eeprom.write(22, 20);	//	write the data to the eeprom for 20 sconds between reads
+		TFT.print("Set to 20 Sec", CENTER, 130, 0);
+		break;
+	case 2:
+		eeprom.write(22, 30);	//	write the data to the eeprom for 30 sconds between reads
+		TFT.print("Set to 30 Sec", CENTER, 130, 0);
+		break;
+	default:
+		break;
 	}
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
 void SensorNames() {
@@ -841,21 +808,20 @@ void SensorNames() {
 void SensorCalib(){
 	while (SubMenuLoopFlag == 1) {
 		Serial.print("Sensor Calibration Entered\n");
-
-		ClearScreenHeader();								//	clear the touch screen
+		ClearScreenHeader();									//	clear the touch screen
 		TFT.print("SENSOR CALIB", CENTER, 10, 0);				//  prints the menu name and centers it
 		DrawMenuButtonArray(SENSOR_CALIB_SIZE, Sensor_Calib);	//	draws the menu buttons for the specified menu size and array
 
 		//	loop while we wait for touch screen data
-		MenuLoopFlag = 1;			//	enables the menu to loop
+		MenuLoopFlag = 1;				//	enables the menu to loop
 		MenuLoop(SENSOR_CALIB_SIZE);	//	call the menu loop
 
 		//	call the function depending on the button pressed
 		Serial.printf("Sensor Calib Button %d pressed\n\n", ButtonPressed);
 		function = Sensor_Calib[ButtonPressed].function;		//	set the function to be called when the button is pressed
-		(function)();	//	call the function set
+		(function)();	//	call the function se	delay(1000);	//	Small delay to allow the user to see the change on the screen
+		Serial.println();
 	}
-	SubMenuLoopFlag = 1;
 }
 
 void FlowSensorCalib(){
@@ -870,9 +836,8 @@ void SensorAddrConfig(){
 void SetupFlowSensor(){
 	while (SubMenuLoopFlag == 1) {
 		Serial.print("Setup Flow Sensor Entered\n");
-
 		ClearScreenHeader();								//	clear the touch screen
-		TFT.print("SETUP FLOW SENSOR", CENTER, 10, 0);				//  prints the menu name and centers it
+		TFT.print("SETUP FLOW SENSOR", CENTER, 10, 0);		//  prints the menu name and centers it
 		DrawMenuButtonArray(SETUP_FLOW_SIZE, Setup_Flow);	//	draws the menu buttons for the specified menu size and array
 
 		//	loop while we wait for touch screen data
@@ -883,6 +848,7 @@ void SetupFlowSensor(){
 		Serial.printf("User Setup Button %d pressed\n\n", ButtonPressed);
 		function = Setup_Flow[ButtonPressed].function;		//	set the function to be called when the button is pressed
 		(function)();	//	call the function set
+		Serial.println();
 	}
 	SubMenuLoopFlag = 1;
 }
@@ -905,30 +871,261 @@ void DisableFlow(){
 void SystemSetup(){
 	while (SubMenuLoopFlag == 1) {
 		Serial.print("System Setup Entered\n");
-
-		ClearScreenHeader();								//	clear the touch screen
-		TFT.print("SYSTEM SETUP SENSOR", CENTER, 10, 0);				//  prints the menu name and centers it
+		ClearScreenHeader();									//	clear the touch screen
+		TFT.print("SYSTEM SETUP ", CENTER, 10, 0);				//  prints the menu name and centers it
 		DrawMenuButtonArray(SYSTEM_SETUP_SIZE, System_Setup);	//	draws the menu buttons for the specified menu size and array
 
 		//	loop while we wait for touch screen data
-		MenuLoopFlag = 1;			//	enables the menu to loop
+		MenuLoopFlag = 1;				//	enables the menu to loop
 		MenuLoop(SYSTEM_SETUP_SIZE);	//	call the menu loop
 
 		//	call the function depending on the button pressed
 		Serial.printf("System Setup Button %d pressed\n\n", ButtonPressed);
 		function = System_Setup[ButtonPressed].function;		//	set the function to be called when the button is pressed
 		(function)();	//	call the function set
+		Serial.println();
 	}
 	SubMenuLoopFlag = 1;
 }
 
 void SerialDebugging(){
+//  Sets the serial debugging byte to turn on or off messages sent to the serial port
+	uint8_t menusize = System_Setup[ButtonPressed].Menu_Size;	//	set the menusize
+
+	Serial.print("Serial Debugging Entered\n");
+	ClearScreenHeader();								//	clear the touch screen
+	TFT.print("SERIAL DEBUGGING", CENTER, 10, 0);		//  prints the menu name and centers it
+	DrawMenuButtonArray(menusize, Serial_Debugging);	//	draws the menu buttons for the specified menu size and array
+
+	//	loop while we wait for touch screen data
+	MenuLoopFlag = 1;	//	enables the menu to loop
+	MenuLoop(menusize);	//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
+
+	//	evaluate the button pressed
+	Serial.printf("Serial Debugging Button %d pressed\n", ButtonPressed);
+	ClearScreenHeader();	//	clear the touch screen
+	uint8_t	eeread = eeprom.read(5);	//	read out the eeprom for comparison
+		
+	switch (ButtonPressed)	//	switch depending on which button was pressed
+	{
+	case 0:
+		eeread = 255;	//	set the data for all on
+		//	print to the display to see what was done
+		TFT.print("All Debugging is", CENTER, 70, 0);
+		TFT.print("On", CENTER, 130, 0);
+		break;
+	case 1:
+		eeread = 0;		//	set the data for all off
+		//	print to the display to see what was done
+		TFT.print("All Debugging is", CENTER, 70, 0);
+		TFT.print("Off", CENTER, 130, 0);
+		break;
+	case 2:
+		TFT.print("Temp Sensor Debug", CENTER, 70, 0);	// print the tft header
+		if ((eeread & 1) == 1) {	//  see if the bit flag is set.
+			eeread = eeread - 1;	//  if it is set, turn it off
+			TFT.print("is Disabled", CENTER, 130, 0);	//	print to the display what was done
+		}
+		else {
+			eeread = eeread + 1;	//  if it is not set, turn it on
+			TFT.print("is Enabled", CENTER, 130, 0);	//	print to the display what was done
+		}
+		break;
+	case 3:
+		TFT.print("Menu Debugging", CENTER, 70, 0);	// print the tft header
+		if ((eeread & 2) == 2) {	//  see if the 1st bit flag is set.
+			eeread = eeread - 2;	//  if it is set, turn it off
+			TFT.print("is Disabled", CENTER, 130, 0);	//	print to the display what was done
+		}
+		else {
+			eeread = eeread + 2;	//  if it is not set, turn it on
+			TFT.print("is Enabled", CENTER, 130, 0);	//	print to the display what was done				TFT.print("is On", CENTER, 130, 0);
+		}
+		break;
+	case 4:
+		TFT.print("Alarm Debugging", CENTER, 70, 0);	// print the tft header
+		if ((eeread & 4) == 4) {	//  see if the 1st bit flag is set.
+			eeread = eeread - 4;	//  if it is set, turn it off
+			TFT.print("is Disabled", CENTER, 130, 0);	//	print to the display what was done
+		}
+		else {
+			eeread = eeread + 4;	//  if it is not set, turn it on
+			TFT.print("is Enabled", CENTER, 130, 0);	//	print to the display what was done				TFT.print("is On", CENTER, 130, 0);
+		}
+		break;
+	case 5:
+		TFT.print("EEPROM Debugging", CENTER, 70, 0);	// print the tft header
+		if ((eeread & 8) == 8) {	//  see if the 1st bit flag is set.
+			eeread = eeread - 8;	//  if it is set, turn it off
+			TFT.print("is Disabled", CENTER, 130, 0);	//	print to the display what was done
+		}
+		else {
+			eeread = eeread + 8;	//  if it is not set, turn it on
+			TFT.print("is Enabled", CENTER, 130, 0);	//	print to the display what was done				TFT.print("is On", CENTER, 130, 0);
+		}
+		break;
+	case 6:
+		TFT.print("Relay Debugging", CENTER, 70, 0);	// print the tft header
+		if ((eeread & 16) == 16) {	//  see if the 1st bit flag is set.
+			eeread = eeread - 16;	//  if it is set, turn it off
+			TFT.print("is Disabled", CENTER, 130, 0);	//	print to the display what was done
+		}
+		else {
+			eeread = eeread + 16;	//  if it is not set, turn it on
+			TFT.print("is Enabled", CENTER, 130, 0);	//	print to the display what was done				TFT.print("is On", CENTER, 130, 0);
+		}
+		break;
+	case 7:
+		TFT.print("System Debugging", CENTER, 70, 0);	// print the tft header
+		if ((eeread & 32) == 32) {	//  see if the 1st bit flag is set.
+			eeread = eeread - 32;	//  if it is set, turn it off
+			TFT.print("is Disabled", CENTER, 130, 0);	//	print to the display what was done
+		}
+		else {
+			eeread = eeread + 32;	//  if it is not set, turn it on
+			TFT.print("is Enabled", CENTER, 130, 0);	//	print to the display what was done				TFT.print("is On", CENTER, 130, 0);
+		}
+		break;
+	case 8:
+		TFT.print("Flow Sensor Debugging", CENTER, 70, 0);	// print the tft header
+		if ((eeread & 64) == 64) {	//  see if the 1st bit flag is set.
+			eeread = eeread - 64;	//  if it is set, turn it off
+			TFT.print("is Disabled", CENTER, 130, 0);	//	print to the display what was done
+		}
+		else {
+			eeread = eeread + 64;	//  if it is not set, turn it on
+			TFT.print("is Enabled", CENTER, 130, 0);	//	print to the display what was done				TFT.print("is On", CENTER, 130, 0);
+		}
+		break;
+	default:
+		break;
+	}
+	eeprom.write(5, eeread);		//	write the data to the eeprom
+	serialDebug = eeprom.read(5);	//	set serialDebug according to the eeprom
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
 void EraseEEPROM(){
+	//  Erases the EEPROM
+	uint8_t menusize = System_Setup[ButtonPressed].Menu_Size;	//	set the menusize
+
+	Serial.print("Erase EEPROM Entered\n");
+	ClearScreenHeader();							//	clear the touch screen
+	TFT.print("Erase EEPROM", CENTER, 10, 0);	//  prints the menu name and centers it
+	DrawMenuButtonArray(menusize, Yes_No);		//	draws the menu buttons for the specified menu size and array
+
+	//	loop while we wait for touch screen data
+	MenuLoopFlag = 1;	//	enables the menu to loop
+	MenuLoop(menusize);	//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
+
+	//	call the function depending on the button pressed
+	Serial.printf("Erase EEPROM Button %d pressed\n", ButtonPressed);
+	ClearScreenHeader();	//	clear the touch screen
+
+	switch (ButtonPressed)	//	switch depending on which button was pressed
+	{
+	case 0:
+		//	Ask the user to verify the EEPROM erase
+		menusize = 2;	//  Set how many buttons there are
+
+		Serial.print("Are you sure you want to erase EEPROM\n");
+		ClearScreenHeader();							//	clear the touch screen
+		TFT.print("ARE YOU SURE?", CENTER, 10, 0);	//  prints the menu name and centers it
+		DrawMenuButtonArray(menusize, Yes_No);		//	draws the menu buttons for the specified menu size and array
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;	//	enables the menu to loop
+		MenuLoop(menusize);	//	call the menu loop
+		if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
+
+		//	call the function depending on the button pressed
+		Serial.printf("Verify erase button %d pressed\n", ButtonPressed);
+		ClearScreenHeader();	//	clear the touch screen
+
+		switch (ButtonPressed)
+		{
+		case 0:
+			TFT.print("Erasing EEPROM", CENTER, 70, 0);
+			eeprom.eraseAll();
+			ClearScreenHeader();
+			TFT.print("Erase Complete", CENTER, 70, 0);
+			break;
+		default:
+			break;
+		}
+		break;
+	case 1:
+		TFT.print("Not Erasing the", CENTER, 70, 0);
+		TFT.print("EEPROM", CENTER, 130, 0);
+		break;
+	default:
+		break;
+	}
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
 void RestoreDefaults(){
+	//  Erases the EEPROM
+	uint8_t menusize = System_Setup[ButtonPressed].Menu_Size;	//	set the menusize
+
+	Serial.print("Factory Defaults Entered\n");
+	ClearScreenHeader();							//	clear the touch screen
+	TFT.print("Factory Defaults", CENTER, 10, 0);	//  prints the menu name and centers it
+	DrawMenuButtonArray(menusize, Yes_No);		//	draws the menu buttons for the specified menu size and array
+
+	//	loop while we wait for touch screen data
+	MenuLoopFlag = 1;	//	enables the menu to loop
+	MenuLoop(menusize);	//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
+
+	//	call the function depending on the button pressed
+	Serial.printf("Factory Defaults Button %d pressed\n", ButtonPressed);
+	ClearScreenHeader();	//	clear the touch screen
+
+	switch (ButtonPressed)	//	switch depending on which button was pressed
+	{
+	case 0:
+		//	Ask the user to verify the EEPROM erase
+		menusize = 2;	//  Set how many buttons there are
+
+		Serial.print("Are you sure you want to Restore Defaults\n");
+		ClearScreenHeader();							//	clear the touch screen
+		TFT.print("ARE YOU SURE?", CENTER, 10, 0);	//  prints the menu name and centers it
+		DrawMenuButtonArray(menusize, Yes_No);		//	draws the menu buttons for the specified menu size and array
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;	//	enables the menu to loop
+		MenuLoop(menusize);	//	call the menu loop
+		if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
+
+		//	call the function depending on the button pressed
+		Serial.printf("Verify restore button %d pressed\n", ButtonPressed);
+		ClearScreenHeader();	//	clear the touch screen
+
+		switch (ButtonPressed)
+		{
+		case 0:
+			TFT.print("Restoring Factory", CENTER, 70, 0);
+			TFT.print("Defaults", CENTER, 130, 0);
+			factoryDefaultset();
+			ClearScreenHeader();
+			TFT.print("Factory Defaults", CENTER, 70, 0);
+			TFT.print("Restored", CENTER, 130, 0);
+			break;
+		default:
+			break;
+		}
+		break;
+	case 1:
+		TFT.print("Not Restoring", CENTER, 70, 0);
+		TFT.print("Defaults", CENTER, 130, 0);
+		break;
+	default:
+		break;
+	}
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
 //  EXIT MENU
@@ -946,20 +1143,20 @@ void BackMenu() {
 }
 
 
-void Dummy()
+void Dummy() {
 //  Sets the CHANGEME
-{
 	String CHANGEME;
 	uint8_t menusize = 3;	//  Set how many buttons there are
 
 	Serial.print("CHANGEMEMENU Entered\n");
 	ClearScreenHeader();							//	clear the touch screen
-	TFT.print("CHANGEMEMENUITEM", CENTER, 10, 0);		//  prints the menu name and centers it
+	TFT.print("CHANGEMEMENUITEM", CENTER, 10, 0);	//  prints the menu name and centers it
 	DrawMenuButtonArray(menusize, CHANGE_ME);		//	draws the menu buttons for the specified menu size and array
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
 	MenuLoop(menusize);	//	call the menu loop
+	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	call the function depending on the button pressed
 	Serial.printf("CHANGEME Button %d pressed\n", ButtonPressed);
@@ -968,25 +1165,22 @@ void Dummy()
 	switch (ButtonPressed)	//	switch depending on which button was pressed
 	{
 	case 0:
-		eeprom.write(0, 0);	//	write the data to the eeprom for 24 hour
+		eeprom.write(0, 0);	//	write the data to the eeprom for CHANGEME
 
 		//	print to the display to see what was done
 		TFT.print("CHANGEME Set to", CENTER, 70, 0);
 		TFT.print("CHANGEME", CENTER, 130, 0);
-		delay(1000);
 		break;
 	case 1:
-		eeprom.write(0, 1);	//	write the data to the eeprom for 12 hour
-
-		//Need to add a check to make sure the data was written
+		eeprom.write(0, 1);	//	write the data to the eeprom for CHANGEME
 
 		//	print to the display to see what was done
 		TFT.print("CHANGEME Set to", CENTER, 70, 0);
 		TFT.print("CHANGEME", CENTER, 130, 0);
-		delay(1000);
 		break;
 	default:
 		break;
 	}
 	Serial.println();
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }

@@ -53,6 +53,7 @@
     <ClInclude Include="..\..\Arduino\libraries\UTFT\UTFT.h" />
     <ClInclude Include="..\..\Arduino\libraries\UTouch\UTouch.h" />
     <ClInclude Include="..\..\Arduino\libraries\UTouch\UTouchCD.h" />
+    <ClInclude Include="Controller.h" />
     <ClInclude Include="TouchMenu.h" />
     <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\SD.h" />
     <ClInclude Include="C:\Program Files (x86)\Arduino\libraries\SD\src\utility\FatStructs.h" />
