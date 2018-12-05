@@ -18,7 +18,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 40;			//  Sets the build number for the current program
-byte subbuild = 4;			//	Sets the sub build number between major version releases
+byte subbuild = 5;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
