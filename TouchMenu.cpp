@@ -62,6 +62,7 @@ void MainMenu();
 			void RestoreDefaults();
 
 		uint8_t AdjustTime(uint8_t sethours, uint8_t setminutes, uint8_t setseconds);
+		uint8_t AdjustDate(uint8_t setweekday, uint8_t setday, uint8_t setmonth, uint8_t setyear);
 
 		void ExitMenu();
 		void BackMenu();
@@ -229,15 +230,17 @@ MENU_ITEM On_Off[] = {
 	{ "Back",		0,	REPLACEME}
 };
 
-MENU_ITEM Back_Ok[] = {
+MENU_ITEM Back_Next[] = {
 	{ "Back",	0, REPLACEME },
-	{ "Ok",		0, REPLACEME }
+	{ "Next",		0, REPLACEME }
 };
 
 MENU_ITEM CHANGE_ME[] = {
 	{ "DUMMY", 0, REPLACEME },
 	{ "DUMMY", 0, REPLACEME }
 };
+
+char* WEEKDAY[] = { "INV", "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT" };
 
 //  ***********************************************
 //  TouchArea Arrays
@@ -311,6 +314,22 @@ TOUCH_LOC Buttons_13[] = {
 	{6, 144, 172, 192, 206},	//	1st Down Arrow
 	{7, 216, 172, 264, 206},	//	2nd Down Arrow
 	{8, 288, 172, 336, 206}		//	3rd Down Arrow
+};
+
+//	10 Button, 4 Up Arrows, 4 Down Arrows, and 2 Bottom Back and OK buttons Touch Areas
+//	button number, xstart, ystart, xend, yend
+//	menusize = 14
+TOUCH_LOC Buttons_14[] = {
+	{1, 20, 218, 230, 258},		//	Back
+	{2, 250, 218, 460, 258},	//	OK
+	{3, 108, 70, 156, 104},		//	1st Up Arrow
+	{4, 192, 70, 240, 104},		//	2nd Up Arrow
+	{5, 264, 70, 312, 104},		//	3rd Up Arrow
+	{6, 336, 70, 384, 104},		//	4th Up Arrow
+	{7, 108, 172, 156, 206},	//	1st Down Arrow
+	{8, 192, 172, 240, 206},	//	2nd Down Arrow
+	{9, 264, 172, 312, 206},	//	3rd Down Arrow
+	{10, 336, 172, 384, 206}	//	4th Down Arrow
 };
 
 TouchMenu::TouchMenu(){
@@ -437,10 +456,38 @@ void DrawMenuButtonArray(uint8_t maxbuttons, struct MENU_ITEM *currentmenu) {
 
 			 //	print the menu strings only if it is the last 2 buttons for the back and ok buttons
 			 if ((i == 0) || (i == 1)) { TFT.print(menustring, Buttons_13[i].X_Start + 1 + 0, Buttons_13[i].Y_Start + 5); }
+			 //	draw the icons for the arrows
 			 else if ((i >= 2) && (i <= 4)) { TFT.drawBitmap(Buttons_13[i].X_Start + 8, Buttons_13[i].Y_Start + 1, 32, 32, arrow_up); }
 			 else if (i >= 5) { TFT.drawBitmap(Buttons_13[i].X_Start + 8, Buttons_13[i].Y_Start + 1, 32, 32, arrow_down); }
 		 }
 	 }
+	else if (maxbuttons == 14) {
+		maxbuttons = 10;	//	the actual maxbuttons for this loop
+
+		//	loop through and start printing the buttons up to maxbuttons
+		for (byte i = 0; i < maxbuttons; i++) {
+
+			//	variable for storing the button name 
+			char* menustring = currentmenu[i].Menu_Name;
+
+			//	draw the buttons
+			TFT.setColor(VGA_BLUE);
+			TFT.fillRoundRect(Buttons_14[i].X_Start, Buttons_14[i].Y_Start, Buttons_14[i].X_End, Buttons_14[i].Y_End);
+			TFT.setColor(VGA_WHITE);
+			TFT.drawRoundRect(Buttons_14[i].X_Start, Buttons_14[i].Y_Start, Buttons_14[i].X_End, Buttons_14[i].Y_End);
+
+			//	set up the font and colors for the strings
+			TFT.setFont(GroteskBold16x32);
+			TFT.setBackColor(VGA_BLUE);
+			TFT.setColor(VGA_WHITE);
+
+			//	print the menu strings only if it is the last 2 buttons for the back and ok buttons
+			if ((i == 0) || (i == 1)) { TFT.print(menustring, Buttons_14[i].X_Start + 1 + 0, Buttons_14[i].Y_Start + 5); }
+			//	draw the icons for the arrows
+			else if ((i >= 2) && (i <= 5)) { TFT.drawBitmap(Buttons_14[i].X_Start + 8, Buttons_14[i].Y_Start + 1, 32, 32, arrow_up); }
+			else if (i >= 6) { TFT.drawBitmap(Buttons_14[i].X_Start + 8, Buttons_14[i].Y_Start + 1, 32, 32, arrow_down); }
+		}
+	}
 }
 
 void ReadTouchData()
@@ -530,6 +577,27 @@ void AnalyzeMenuTouchData(int menuSize)
 				//  draw a white outline around the box that was pressed
 				TFT.setColor(VGA_WHITE);
 				TFT.drawRoundRect(Buttons_13[i].X_Start, Buttons_13[i].Y_Start, Buttons_13[i].X_End, Buttons_13[i].Y_End);
+
+				ButtonPressed = i;	//	set the button that was pressed
+				i = menuSize;		//	once the button has been found, exit the for loop
+			}
+			else { ButtonPressed = 255; }
+		}
+	}
+	else if (menuSize == 14) {
+		menuSize = 10;	//	the actual maxbuttons for this loop
+		for (int i = 0; i < menuSize; i++) {
+			if ((Touchx >= Buttons_14[i].X_Start) && (Touchx <= Buttons_14[i].X_End) && (Touchy >= Buttons_14[i].Y_Start) && (Touchy <= Buttons_14[i].Y_End))
+			{
+				//  draw a red outline around the box that was pressed
+				TFT.setColor(VGA_RED);
+				TFT.drawRoundRect(Buttons_14[i].X_Start, Buttons_14[i].Y_Start, Buttons_14[i].X_End, Buttons_14[i].Y_End);
+
+				delay(150);	//	short delay to allow the red box to be noticable
+
+				//  draw a white outline around the box that was pressed
+				TFT.setColor(VGA_WHITE);
+				TFT.drawRoundRect(Buttons_14[i].X_Start, Buttons_14[i].Y_Start, Buttons_14[i].X_End, Buttons_14[i].Y_End);
 
 				ButtonPressed = i;	//	set the button that was pressed
 				i = menuSize;		//	once the button has been found, exit the for loop
@@ -716,33 +784,140 @@ void SecondsDisplay(){
 
 void SetDateTime(){
 	//  Set how many buttons there are
-	uint8_t menusize = User_Setup[ButtonPressed].Menu_Size;	//	set the menusize
+	uint8_t menusize;		//	set the menusize
 	uint8_t writetime = 0;	//	when set to 1 will enable the time save to the rtc
 	uint8_t writedate = 0;	//	when set to 1 will wnable the date save to the rtc
 
-	Serial.print("Set Time Entered\n");
+	Serial.print("Set Date/Time Entered\n");
+	
 	ClearScreenHeader();						//	clear the touch screen
+	Serial.print("Setting Date\n");
+	TFT.print("SET DATE", CENTER, 10, 0);		//  prints the menu name and centers it
+	menusize = 14;								//	set the menusize to call the date change display
+	DrawMenuButtonArray(menusize, Back_Next);		//	draws the menu buttons for the specified menu size and array
+	TFT.setBackColor(VGA_NAVY);					//  set the back color
+	TFT.setFont(GroteskBold24x48);				//  set the font to be used
 
+	writedate = AdjustDate(weekday(), day(), month(), year());
+	if (writedate == 0) { return; }	//	exits the funciton if the back button was pressed
+
+	ClearScreenHeader();						//	clear the touch screen
+	Serial.print("Setting Time\n");
 	TFT.print("SET TIME", CENTER, 10, 0);		//  prints the menu name and centers it
-	DrawMenuButtonArray(menusize, Back_Ok);		//	draws the menu buttons for the specified menu size and array
+	menusize = 13;								//	set the menusize to call the time change display
+	DrawMenuButtonArray(menusize, Back_Next);		//	draws the menu buttons for the specified menu size and array
 	TFT.setBackColor(VGA_NAVY);					//  set the back color
 	TFT.setFont(GroteskBold24x48);				//  set the font to be used
 
 	writetime = AdjustTime(hour(), minute(), second());
-	if (writetime = 0) { return; }	//	exits the funciton if the back button was pressed
-	if (writedate = 0) { return; }	//	exits the funciton if the back button was pressed
+	if (writetime == 0) { return; }	//	exits the funciton if the back button was pressed
+
+	ClearScreenHeader();
+	TFT.print("Saving", CENTER, 85, 0);		//  prints the menu name and centers it
+	TFT.print("Date and Time", CENTER, 139, 0);		//  prints the menu name and centers it
+	////	write the date and time to the RTC
+	//if (tmp == 0) { return; }
+	//else {
+	//	Wire.beginTransmission(DS1307RTC);
+	//	Wire.write(byte(0));
+	//	Wire.write(decToBcd(setseconds));
+	//	Wire.write(decToBcd(setminutes));
+	//	Wire.write(decToBcd(sethour));
+	//	Wire.write(decToBcd(setweekday));
+	//	Wire.write(decToBcd(setday));
+	//	Wire.write(decToBcd(setmonth));
+	//	Wire.write(decToBcd(setyear));
+	//	Wire.write(byte(0));
+	//	Wire.endTransmission();
+
+	//	//  GET THE TIME FROM THE RTC
+	//	setSyncProvider(RTC.get);			//  this function get the time from the RTC
+	//	if (timeStatus() != timeSet) {		//  checks to see if it can read the RTC
+	//		RTC_Status = 0;
+	//		Serial.println("Unable to get the RTC");
+	//		Serial.println();
+	//	}
+	//	else { Serial.println("RTC system time"); }
+	//}
 
 	delay(1000);	//	Small delay to allow the user to see the change on the screen
 }
 
-uint8_t AdjustTime(uint8_t sethours, uint8_t setminutes, uint8_t setseconds) {
+uint8_t AdjustDate(uint8_t setweekday, uint8_t setday, uint8_t setmonth, uint8_t setyear) {
 //  Use for anything that needs the time adjusted.
 //	It will store the results in the global variables sethours, setminutes, and setseconds variables for use outsid of this function.
+	uint8_t menusize = 14;		//	set the menusize
+	uint8_t dispyear = setyear - 2000;
+	char buffer[12];			//	a buffer to hold the text to display
+
+	//	loop until we are finished editing the time or until the back button is hit
+	while (SubMenuLoopFlag == 1) {
+		//	assemble the date to display
+		sprintf(buffer, "%s %2d/%02d/%02d", WEEKDAY[setweekday], setmonth, setday, dispyear);	//	print the PM display
+		TFT.print(buffer, 96, 114, 0);		//  prints the menu name
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;		//	enables the menu to loop
+		MenuLoop(menusize, 0);	//	call the menu loop with no delay
+		if (ButtonPressed == 0) { return 0; }	//	return if the back button was pressed
+
+		//	evaluate the button pressed
+		Serial.printf("Set Date Button %d pressed\n", ButtonPressed);
+
+		switch (ButtonPressed) {
+		case 0:		//	BACK BUTTON
+			//	NOT NEEDED AS THE IF FUNCTION ABOVE RETURNS THE FUNCTION
+			break;
+		case 1:		//	OK BUTTON
+			//	returns 1 to verify that the sethours, setminutes, and setseconds are set
+			return 1;
+			break;
+		case 2:		//	WEEKDAY UP BUTTON
+			setweekday++;		//	increment weekday
+			if (setweekday > 7) { setweekday = 1; }
+			break;
+		case 3:		//	MONTHS UP BUTTON
+			setmonth++;	//	increment month
+			if (setmonth > 12) { setmonth = 1; }	//	roll over to 0
+			break;
+		case 4:		//	DAY UP BUTTON
+			setday++;	//	increment seconds
+			if (setday > 31) { setday = 1; }	// roll over to 0
+			break;
+		case 5:		//	YEAR UP BUTTON
+			dispyear++;	//	increment seconds
+			if (dispyear > 99) { dispyear = 0; }	// roll over to 0
+			break;
+		case 6:		//	WEEKDAY DOWN BUTTON
+			setweekday--;		//	decrement the hours
+			if (setweekday == 0) { setweekday = 7; }		//	roll back to 23
+			break;
+		case 7:		//	MONTHS DOWN BUTTON
+			setmonth--;	//	decrement the minutes
+			if (setmonth == 0) { setmonth = 12; }	//	roll back to 59
+			break;
+		case 8:		//	DAY DOWN BUTTON
+			setday--;	//	decrement the seconds
+			if (setday == 0) { setday = 31; }	//	roll back to 59
+			break;
+		case 9:		//	YEAR DOWN BUTTON
+			dispyear--;	//	decrement the seconds
+			if (dispyear == 255) { dispyear = 99; }	//	roll back to 59
+			break;
+		default:
+			break;
+		}
+		setyear = dispyear + 2000;
+	}
+}
+
+uint8_t AdjustTime(uint8_t sethours, uint8_t setminutes, uint8_t setseconds) {
+	//  Use for anything that needs the time adjusted.
+	//	It will store the results in the global variables sethours, setminutes, and setseconds variables for use outsid of this function.
 	uint8_t menusize = 13;	//	set the menusize
 
 	uint8_t disphours = hour();	//	variable for storing the hours to display on the screen
-	//byte ampm = 0;		//	determines if it should be am or pm
-	char buffer[12];	//	a buffer to hold the text to display
+	char buffer[12];			//	a buffer to hold the text to display
 
 	if ((timeFormat == 1) && (sethours > 12)) { disphours = sethours - 12; }	//	sets the display hours to 12 hours when entering the loop
 
@@ -761,8 +936,6 @@ uint8_t AdjustTime(uint8_t sethours, uint8_t setminutes, uint8_t setseconds) {
 			break;
 		}
 		TFT.print(buffer, 144, 114, 0);		//  prints the menu name and centers it
-
-		TFT.printNumI(sethours, 10, 114, 2);
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;		//	enables the menu to loop

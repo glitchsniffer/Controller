@@ -18,7 +18,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 40;			//  Sets the build number for the current program
-byte subbuild = 6;			//	Sets the sub build number between major version releases
+byte subbuild = 7;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -83,16 +83,16 @@ TouchMenu Menu;					    //	start an instance of the TouchMenu class using a dumm
 
 
 //	set the fonts that we will be using for the 4.3" TOUCHSCREEN
-extern uint8_t BigFont[];
+//extern uint8_t BigFont[];
 //extern uint8_t SevenSegNumFont[];
 extern uint8_t GroteskBold16x32[];
 extern uint8_t GroteskBold24x48[];
-extern uint8_t Retro8x16[];
+//extern uint8_t Retro8x16[];
 extern unsigned short gear[0x400];
 extern unsigned short arrow_up[0x400];
 extern unsigned short arrow_down[0x400];
-extern unsigned short arrow_left[0x400];
-extern unsigned short arrow_right[0x400];
+//extern unsigned short arrow_left[0x400];
+//extern unsigned short arrow_right[0x400];
 
 
 //  DEFINE THE MCP23017 IO EXPANDER
@@ -402,7 +402,7 @@ void setup()
 
 	TFT.InitLCD(LANDSCAPE);
 	TFT.clrScr();
-	TFT.setFont(BigFont);
+	TFT.setFont(GroteskBold16x32);
 	TFT.fillScr(VGA_BLUE);
 	TFT.setBackColor(VGA_BLUE);
 	TFT.setColor(VGA_SILVER);
