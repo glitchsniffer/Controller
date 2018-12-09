@@ -4,6 +4,7 @@
 #include <UTFT.h>
 #include <UTouch.h>
 #include <SPI.h>
+#include <TimeLib.h>
 #include "Arduino.h"
 #include "EEprom.h"
 #include "TimeAlarms.h"
@@ -15,6 +16,10 @@ extern EEprom eeprom;	//	transfers the EEprom instance to the touch menu
 extern uint8_t GroteskBold16x32[];	//	make the font availiable to use
 extern uint8_t GroteskBold24x48[];	//	make the font availiable to use
 extern uint8_t Retro8x16[];			//	make the font availiable to use
+extern unsigned short arrow_up[0x400];		//	make the icon availiable for use
+extern unsigned short arrow_down[0x400];	//	make the icon availiable for use
+extern unsigned short arrow_left[0x400];	//	make the icon availiable for use
+extern unsigned short arrow_right[0x400];	//	make the icon availiable for use
 
 extern uint8_t today;	//	variable used to force the date to be displayed
 extern uint16_t menuTimeout;
@@ -24,10 +29,11 @@ extern AlarmID_t flowReadID;
 extern uint16_t flowRateMax;
 extern uint16_t flowPulseTotal;
 extern uint16_t flowRateMax;
-
+extern uint8_t timeFormat;
 
 void factoryDefaultset();
 void FlowSensorRead();
+String TimeString(byte disp, uint8_t hour, uint8_t min, uint8_t sec);
 
 
 class TouchMenu

@@ -373,9 +373,6 @@
     <ClCompile Include="GroteskBold16x32.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gear.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\abi.cpp">
       <Filter>src\_micro-api-readonly\core</Filter>
     </ClCompile>
@@ -536,6 +533,9 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="Retro8x16.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="icons.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

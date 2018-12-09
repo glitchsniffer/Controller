@@ -168,9 +168,9 @@
     <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\libraries\SPI\src\SPI.cpp" />
     <ClCompile Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\libraries\Wire\src\Wire.cpp" />
     <ClCompile Include="EEprom.cpp" />
-    <ClCompile Include="gear.c" />
     <ClCompile Include="GroteskBold16x32.c" />
     <ClCompile Include="GroteskBold24x48.c" />
+    <ClCompile Include="icons.c" />
     <ClCompile Include="MCPExpander.cpp" />
     <ClCompile Include="Retro8x16.c" />
     <ClCompile Include="TouchMenu.cpp" />

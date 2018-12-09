@@ -18,7 +18,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 40;			//  Sets the build number for the current program
-byte subbuild = 5;			//	Sets the sub build number between major version releases
+byte subbuild = 6;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -40,7 +40,7 @@ byte RTC_Status = 1;		//	initializes the byte for the RTC status
 byte backlightLevel;		//	initializes the byte backlightLevel
 byte backlightTimeout;		//  initializes the byte backlighttimeout
 byte secondsDisplay;		//	initializes the byte secondsDisplay
-uint8_t today = 0;				//  Sets the today to the current date to display on the RTC
+uint8_t today = 0;			//  Sets the today to the current date to display on the RTC
 String timestr = "";		//	initialize the string for assembling a time to be displayed and manipulated
 
 
@@ -84,11 +84,16 @@ TouchMenu Menu;					    //	start an instance of the TouchMenu class using a dumm
 
 //	set the fonts that we will be using for the 4.3" TOUCHSCREEN
 extern uint8_t BigFont[];
-extern uint8_t SevenSegNumFont[];
+//extern uint8_t SevenSegNumFont[];
 extern uint8_t GroteskBold16x32[];
 extern uint8_t GroteskBold24x48[];
 extern uint8_t Retro8x16[];
 extern unsigned short gear[0x400];
+extern unsigned short arrow_up[0x400];
+extern unsigned short arrow_down[0x400];
+extern unsigned short arrow_left[0x400];
+extern unsigned short arrow_right[0x400];
+
 
 //  DEFINE THE MCP23017 IO EXPANDER
 //  ***********************************************
@@ -111,7 +116,7 @@ byte menuEnterIntPin = 19;			//	pin on the arduino to use for the interrupt
 uint32_t debouncing_time = 250;		//	debouncing time in millis
 volatile uint32_t last_micros;		//	placeholder variable to store when the interrrupt was triggered
 
-volatile int8_t menuMode = 0;		//  set the variable that will be change to enable the menu in the interrupt
+volatile uint8_t menuMode = 0;		//  set the variable that will be change to enable the menu in the interrupt
 
 
 //  INITIALIZE THE MENU VARIABLES
@@ -503,6 +508,10 @@ void setup()
 		TFT.clrScr();
 		TFT.fillScr(VGA_BLUE);
 		TFT.drawBitmap(10, 240, 32, 32, gear);
+		TFT.drawBitmap(45, 240, 32, 32, arrow_left);
+		TFT.drawBitmap(80, 240, 32, 32, arrow_up);
+		TFT.drawBitmap(115, 240, 32, 32, arrow_down);
+		TFT.drawBitmap(150, 240, 32, 32, arrow_right);
 	}
 
 	//	SETUP THE RELAYS TO DISPLY AND TURN THEM ON IF NEEDED
@@ -684,6 +693,10 @@ void ReadTouchScreen()
 			TFT.fillScr(VGA_BLUE);
 			TFT.setBackColor(VGA_BLUE);
 			TFT.drawBitmap(10, 240, 32, 32, gear);
+			TFT.drawBitmap(45, 240, 32, 32, arrow_left);
+			TFT.drawBitmap(80, 240, 32, 32, arrow_up);
+			TFT.drawBitmap(115, 240, 32, 32, arrow_down);
+			TFT.drawBitmap(150, 240, 32, 32, arrow_right);
 		}
 	}
 }
@@ -836,6 +849,7 @@ String TimeString(byte disp, uint8_t hour, uint8_t min, uint8_t sec)
 	
 	return timestr;	//	return the fully assembled time string
 }
+
 void LCDDateDisplay(byte display, uint8_t col, uint8_t row, uint8_t pad)
 //	display = 0 to not change the date if it is the same day
 //	col = the column to start the print on the character display

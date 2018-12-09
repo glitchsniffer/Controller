@@ -15,6 +15,10 @@ uint8_t SubMenuLoopFlag;
 uint8_t MenuLoopFlag;
 void(*function)(void);	//	stores the function name to be called from the arrays
 
+uint8_t sethours = hour();
+uint8_t setminutes = minute();
+uint8_t setseconds = second();
+
 //  ***********************************************
 //  Defines
 //  ***********************************************
@@ -57,11 +61,12 @@ void MainMenu();
 			void EraseEEPROM();
 			void RestoreDefaults();
 
+		uint8_t AdjustTime(uint8_t sethours, uint8_t setminutes, uint8_t setseconds);
 
 		void ExitMenu();
 		void BackMenu();
 		void DrawMenuButtonArray(uint8_t buttons, struct MENU_ITEM *currentmenu);
-		void MenuLoop(uint8_t menuSize);
+		void MenuLoop(uint8_t menuSize, uint16_t delayms);
 		void ReadTouchData();
 		void AnalyzeMenuTouchData(int menuSize);
 		void ClearScreenHeader();
@@ -109,7 +114,7 @@ MENU_ITEM User_Setup[] = {
 	{ "Brightness",			4, Brightness },
 	{ "Time Format",		3, TimeFormat },
 	{ "Display Sec",		3, SecondsDisplay },
-	{ "Set Date/Time",		0, SetDateTime },
+	{ "Set Date/Time",		13, SetDateTime },
 	{ "Back",				0, BackMenu }
 };
 
@@ -223,6 +228,12 @@ MENU_ITEM On_Off[] = {
 	{ "Off",		0,	REPLACEME },
 	{ "Back",		0,	REPLACEME}
 };
+
+MENU_ITEM Back_Ok[] = {
+	{ "Back",	0, REPLACEME },
+	{ "Ok",		0, REPLACEME }
+};
+
 MENU_ITEM CHANGE_ME[] = {
 	{ "DUMMY", 0, REPLACEME },
 	{ "DUMMY", 0, REPLACEME }
@@ -234,6 +245,7 @@ MENU_ITEM CHANGE_ME[] = {
 
 //	4 Button Main Menu Touch Areas
 //	button number, xstart, ystart, xend, yend
+//	menusize = 1-5
 TOUCH_LOC Buttons_4[] = {
 	{1, 135, 68, 345, 108},
 	{2, 135, 116, 345, 156},
@@ -244,6 +256,7 @@ TOUCH_LOC Buttons_4[] = {
 
 //	8 Button Main Menu Touch Areas
 //	button number, xstart, ystart, xend, yend
+//	menusize = 5-8
 TOUCH_LOC Buttons_8[] = {
 	{1, 20, 68, 230, 108},
 	{2, 250, 68, 460, 108},
@@ -257,6 +270,7 @@ TOUCH_LOC Buttons_8[] = {
 
 //	10 Button Main Menu Touch Areas
 //	button number, xstart, ystart, xend, yend
+//	menusize = 10
 TOUCH_LOC Buttons_10[] = {
 	{1, 20, 68, 230, 101},
 	{2, 250, 68, 460, 101},
@@ -268,6 +282,35 @@ TOUCH_LOC Buttons_10[] = {
 	{8, 250, 188, 460, 221},
 	{9, 20, 228, 230, 261},
 	{10, 250, 228, 460, 261}
+};
+
+//	1 Button Bottom Located Main Menu Touch Areas 
+//	button number, xstart, ystart, xend, yend
+//	menusize = 11
+TOUCH_LOC Buttons_1[] = {
+	{1, 250, 218, 460, 258}
+};
+
+//	2 Buttons Bottom Located Main Menu Touch Areas 
+//	button number, xstart, ystart, xend, yend
+//	menusize = 12
+TOUCH_LOC Buttons_2[] = {
+	{1, 20, 218, 230, 258},
+	{2, 250, 218, 460, 258}
+};
+
+//	8 Button, 3 Up Arrows, 3 Down Arrows, and 2 Bottom Back and OK buttons Touch Areas
+//	button number, xstart, ystart, xend, yend
+//	menusize = 13
+TOUCH_LOC Buttons_13[] = {
+	{1, 20, 218, 230, 258},		//	Back
+	{2, 250, 218, 460, 258},	//	OK
+	{3, 144, 70, 192, 104},		//	1st Up Arrow
+	{4, 216, 70, 264, 104},		//	2nd Up Arrow
+	{5, 288, 70, 336, 104},		//	3rd Up Arrow
+	{6, 144, 172, 192, 206},	//	1st Down Arrow
+	{7, 216, 172, 264, 206},	//	2nd Down Arrow
+	{8, 288, 172, 336, 206}		//	3rd Down Arrow
 };
 
 TouchMenu::TouchMenu(){
@@ -282,8 +325,8 @@ void TouchMenu::EnterMenu()
 	today = 0;	//  set today to 0 so that the date function gets called
 }
 
-void MenuLoop(uint8_t menusize) {
-	delay(300);
+void MenuLoop(uint8_t menusize, uint16_t delayms) {
+	delay(delayms);
 	while (MenuLoopFlag == 1)		//  scans for a button press to do the appropriate action
 	{
 		menuTimeout++;
@@ -292,8 +335,7 @@ void MenuLoop(uint8_t menusize) {
 			ReadTouchData();					//	read the data from the touchscreen
 			AnalyzeMenuTouchData(menusize);		//  analyzes the touch screen data to determine what was pushed
 			//Serial.printf("menuTimeout = %d\n\n", menuTimeout);
-			delay(150);		//	small debounce delay for a touch
-
+			delay(delayms/2);		//	small debounce delay for a touch
 			//  evaluate the button pressed for a valid area.
 			if (ButtonPressed == 255) { MenuLoopFlag = 1; }		//	invalid button, reloop
 			else { MenuLoopFlag = 0; }							//	valid button, exit loop
@@ -328,7 +370,7 @@ void DrawMenuButtonArray(uint8_t maxbuttons, struct MENU_ITEM *currentmenu) {
 			TFT.print(menustring, Buttons_4[i].X_Start + 1 + 0, Buttons_4[i].Y_Start + 5);
 		}
 	}
-	else if ((maxbuttons > 4) && (maxbuttons <=8)) {
+	else if ((maxbuttons > 4) && (maxbuttons <= 8)) {
 		//	loop through and start printing the buttons up to maxbuttons
 		for (byte i = 0; i < maxbuttons; i++) {
 
@@ -373,6 +415,32 @@ void DrawMenuButtonArray(uint8_t maxbuttons, struct MENU_ITEM *currentmenu) {
 			TFT.print(menustring, Buttons_10[i].X_Start + 3, Buttons_10[i].Y_Start + 1);
 		}
 	}
+	else if (maxbuttons == 13) {
+		 maxbuttons = 8;	//	the actual maxbuttons for this loop
+
+		 //	loop through and start printing the buttons up to maxbuttons
+		 for (byte i = 0; i < maxbuttons; i++) {
+
+			 //	variable for storing the button name 
+			 char* menustring = currentmenu[i].Menu_Name;
+
+			 //	draw the buttons
+			 TFT.setColor(VGA_BLUE);
+			 TFT.fillRoundRect(Buttons_13[i].X_Start, Buttons_13[i].Y_Start, Buttons_13[i].X_End, Buttons_13[i].Y_End);
+			 TFT.setColor(VGA_WHITE);
+			 TFT.drawRoundRect(Buttons_13[i].X_Start, Buttons_13[i].Y_Start, Buttons_13[i].X_End, Buttons_13[i].Y_End);
+
+			 //	set up the font and colors for the strings
+			 TFT.setFont(GroteskBold16x32);
+			 TFT.setBackColor(VGA_BLUE);
+			 TFT.setColor(VGA_WHITE);
+
+			 //	print the menu strings only if it is the last 2 buttons for the back and ok buttons
+			 if ((i == 0) || (i == 1)) { TFT.print(menustring, Buttons_13[i].X_Start + 1 + 0, Buttons_13[i].Y_Start + 5); }
+			 else if ((i >= 2) && (i <= 4)) { TFT.drawBitmap(Buttons_13[i].X_Start + 8, Buttons_13[i].Y_Start + 1, 32, 32, arrow_up); }
+			 else if (i >= 5) { TFT.drawBitmap(Buttons_13[i].X_Start + 8, Buttons_13[i].Y_Start + 1, 32, 32, arrow_down); }
+		 }
+	 }
 }
 
 void ReadTouchData()
@@ -448,7 +516,27 @@ void AnalyzeMenuTouchData(int menuSize)
 			else { ButtonPressed = 255; }
 		}
 	}
-	//Serial.printf("Button %d was pressed\n", ButtonPressed);
+	else if (menuSize == 13) {
+		menuSize = 8;	//	the actual maxbuttons for this loop
+		for (int i = 0; i < menuSize; i++) {
+			if ((Touchx >= Buttons_13[i].X_Start) && (Touchx <= Buttons_13[i].X_End) && (Touchy >= Buttons_13[i].Y_Start) && (Touchy <= Buttons_13[i].Y_End))
+			{
+				//  draw a red outline around the box that was pressed
+				TFT.setColor(VGA_RED);
+				TFT.drawRoundRect(Buttons_13[i].X_Start, Buttons_13[i].Y_Start, Buttons_13[i].X_End, Buttons_13[i].Y_End);
+
+				delay(150);	//	short delay to allow the red box to be noticable
+
+				//  draw a white outline around the box that was pressed
+				TFT.setColor(VGA_WHITE);
+				TFT.drawRoundRect(Buttons_13[i].X_Start, Buttons_13[i].Y_Start, Buttons_13[i].X_End, Buttons_13[i].Y_End);
+
+				ButtonPressed = i;	//	set the button that was pressed
+				i = menuSize;		//	once the button has been found, exit the for loop
+			}
+			else { ButtonPressed = 255; }
+		}
+	}
 }
 
 void ClearScreenHeader()
@@ -475,7 +563,7 @@ void MainMenu() {
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;			//	enables the menu to loop
-		MenuLoop(MAIN_MENU_SIZE);	//	call the menu loop
+		MenuLoop(MAIN_MENU_SIZE, 300);	//	call the menu loop with 300ms of delay
 
 		//	call the function depending on the button pressed
 		Serial.printf("Main Menu Button %d pressed\n\n", ButtonPressed);
@@ -498,7 +586,7 @@ void UserSetup(){
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;			//	enables the menu to loop
-		MenuLoop(USER_SETUP_SIZE);	//	call the menu loop
+		MenuLoop(USER_SETUP_SIZE, 300);	//	call the menu loop with 300ms of delay
 
 		//	call the function depending on the button pressed
 		Serial.printf("User Setup Button %d pressed\n\n", ButtonPressed);
@@ -520,7 +608,7 @@ void Brightness(){
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	evaluate the button pressed
@@ -565,7 +653,7 @@ void TimeFormat()
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	evaluate the button pressed
@@ -577,10 +665,12 @@ void TimeFormat()
 	{
 		case 0:
 			eeprom.write(23, 0);	//	write the data to the eeprom for 24 hour
+			timeFormat = 0;
 			TFT.print("24 Hour", CENTER, 130, 0);	//	print to the display to see what was done
 			break;
 		case 1:
 			eeprom.write(23, 1);	//	write the data to the eeprom for 12 hour
+			timeFormat = 1;
 			TFT.print("12 Hour", CENTER, 130, 0);	//	print to the display to see what was done
 			break;
 		default:
@@ -600,7 +690,7 @@ void SecondsDisplay(){
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;		//	enables the menu to loop
-	MenuLoop(menusize);		//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	evaluate the button pressed
@@ -625,6 +715,105 @@ void SecondsDisplay(){
 }
 
 void SetDateTime(){
+	//  Set how many buttons there are
+	uint8_t menusize = User_Setup[ButtonPressed].Menu_Size;	//	set the menusize
+	uint8_t writetime = 0;	//	when set to 1 will enable the time save to the rtc
+	uint8_t writedate = 0;	//	when set to 1 will wnable the date save to the rtc
+
+	Serial.print("Set Time Entered\n");
+	ClearScreenHeader();						//	clear the touch screen
+
+	TFT.print("SET TIME", CENTER, 10, 0);		//  prints the menu name and centers it
+	DrawMenuButtonArray(menusize, Back_Ok);		//	draws the menu buttons for the specified menu size and array
+	TFT.setBackColor(VGA_NAVY);					//  set the back color
+	TFT.setFont(GroteskBold24x48);				//  set the font to be used
+
+	writetime = AdjustTime(hour(), minute(), second());
+	if (writetime = 0) { return; }	//	exits the funciton if the back button was pressed
+	if (writedate = 0) { return; }	//	exits the funciton if the back button was pressed
+
+	delay(1000);	//	Small delay to allow the user to see the change on the screen
+}
+
+uint8_t AdjustTime(uint8_t sethours, uint8_t setminutes, uint8_t setseconds) {
+//  Use for anything that needs the time adjusted.
+//	It will store the results in the global variables sethours, setminutes, and setseconds variables for use outsid of this function.
+	uint8_t menusize = 13;	//	set the menusize
+
+	uint8_t disphours = hour();	//	variable for storing the hours to display on the screen
+	//byte ampm = 0;		//	determines if it should be am or pm
+	char buffer[12];	//	a buffer to hold the text to display
+
+	if ((timeFormat == 1) && (sethours > 12)) { disphours = sethours - 12; }	//	sets the display hours to 12 hours when entering the loop
+
+	//	loop until we are finished editing the time or until the back button is hit
+	while (SubMenuLoopFlag == 1) {
+		//	assemble the time to display depending on the format set
+		switch (timeFormat) {
+		case 0:	//	24 hour display print
+			sprintf(buffer, "%02d:%02d:%02d", disphours, setminutes, setseconds);	//	assemble the time string to print 24 hour display
+			break;
+		case 1:	//	12 hour display print
+			if (sethours >= 12) { sprintf(buffer, "%2d:%02d:%02d PM", disphours, setminutes, setseconds); }	//	print the AM display
+			else sprintf(buffer, "%2d:%02d:%02d AM", disphours, setminutes, setseconds);	//	print the PM display
+			break;
+		default:
+			break;
+		}
+		TFT.print(buffer, 144, 114, 0);		//  prints the menu name and centers it
+
+		TFT.printNumI(sethours, 10, 114, 2);
+
+		//	loop while we wait for touch screen data
+		MenuLoopFlag = 1;		//	enables the menu to loop
+		MenuLoop(menusize, 0);	//	call the menu loop with no delay
+		if (ButtonPressed == 0) { return 0; }	//	return if the back button was pressed
+
+		//	evaluate the button pressed
+		Serial.printf("Set Time Button %d pressed\n", ButtonPressed);
+
+		switch (ButtonPressed) {
+		case 0:		//	BACK BUTTON
+			//	NOT NEEDED AS THE IF FUNCTION ABOVE RETURNS THE FUNCTION
+			break;
+		case 1:		//	OK BUTTON
+			//	returns 1 to verify that the sethours, setminutes, and setseconds are set
+			return 1;
+			break;
+		case 2:		//	HOURS UP BUTTON
+			sethours++;		//	increment hours
+			if (sethours > 23) { sethours = 0; }	//	roll over to 0
+			disphours = sethours;					//	set the hours to display o the screen
+			if ((timeFormat == 1) && (sethours > 12)) { disphours = sethours - 12; }	//	adjust 24 hour time to 12 hour time
+			if ((timeFormat == 1) && (sethours == 0)) { disphours = 12; }				//	adjust 24 hour time to 12 hour time
+			break;
+		case 3:		//	MINUTES UP BUTTON
+			setminutes++;	//	increment minutes
+			if (setminutes > 59) { setminutes = 0; }	//	roll over to 0
+			break;
+		case 4:		//	SECONDS UP BUTTON
+			setseconds++;	//	increment seconds
+			if (setseconds > 59) { setseconds = 0; }	// roll over to 0
+			break;
+		case 5:		//	HOURS DOWN BUTTON
+			sethours--;		//	decrement the hours
+			if (sethours == 255) { sethours = 23; }		//	roll back to 23
+			disphours = sethours;						//	set the hours to display on the screen
+			if ((timeFormat == 1) && (sethours > 12)) { disphours = sethours - 12; }	//	adjust 24 hour time to 12 hour time
+			if ((timeFormat == 1) && (sethours == 0)) { disphours = 12; }				//	adjust 24 hour time to 12 hour time
+			break;
+		case 6:		//	MINUTES DOWN BUTTON
+			setminutes--;	//	decrement the minutes
+			if (setminutes == 255) { setminutes = 59; }	//	roll back to 59
+			break;
+		case 7:		//	SECONDS DOWN BUTTON
+			setseconds--;	//	decrement the seconds
+			if (setseconds == 255) { setseconds = 59; }	//	roll back to 59
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 //  TIMER SETUP MENU
@@ -640,7 +829,7 @@ void TimerSetup(){
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;	//	enables the menu to loop
-		MenuLoop(TIMER_SETUP_SIZE);
+		MenuLoop(TIMER_SETUP_SIZE, 300);	//	call the menu loop with 300ms of delay
 		
 		//	call the function depending on the button pressed
 		Serial.printf("Timer Setup Button %d pressed\n\n", ButtonPressed);
@@ -678,7 +867,7 @@ void SensorSetup(){
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;				//	enables the menu to loop
-		MenuLoop(SENSOR_SETUP_SIZE);	//	call the menu loop
+		MenuLoop(SENSOR_SETUP_SIZE, 300);	//	call the menu loop with 300ms of delay
 
 		//	call the function depending on the button pressed
 		Serial.printf("Sensor Setup Button %d pressed\n\n", ButtonPressed);
@@ -700,7 +889,7 @@ void TempUnit() {
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	evaluate the button pressed
@@ -735,7 +924,7 @@ void TempPrecision() {
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	evaluate the button pressed
@@ -770,7 +959,7 @@ void TempReadDelay() {
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	evaluate the button pressed
@@ -813,7 +1002,7 @@ void SensorCalib(){
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;				//	enables the menu to loop
-		MenuLoop(SENSOR_CALIB_SIZE);	//	call the menu loop
+		MenuLoop(SENSOR_CALIB_SIZE, 300);	//	call the menu loop with 300ms of delay
 
 		//	call the function depending on the button pressed
 		Serial.printf("Sensor Calib Button %d pressed\n\n", ButtonPressed);
@@ -842,7 +1031,7 @@ void SetupFlowSensor(){
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;			//	enables the menu to loop
-		MenuLoop(SETUP_FLOW_SIZE);	//	call the menu loop
+		MenuLoop(SETUP_FLOW_SIZE, 300);	//	call the menu loop with 300ms of delay
 
 		//	call the function depending on the button pressed
 		Serial.printf("User Setup Button %d pressed\n\n", ButtonPressed);
@@ -865,7 +1054,7 @@ void FlowOnOff() {
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	call the function depending on the button pressed
@@ -904,7 +1093,7 @@ void CalibrateFlowSensor() {
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	call the function depending on the button pressed
@@ -924,7 +1113,7 @@ void CalibrateFlowSensor() {
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;	//	enables the menu to loop
-		MenuLoop(menusize);	//	call the menu loop
+		MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 		if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 		//	call the function depending on the button pressed
@@ -957,7 +1146,7 @@ void CalibrateFlowSensor() {
 
 			//	loop while we wait for touch screen data
 			MenuLoopFlag = 1;	//	enables the menu to loop
-			MenuLoop(menusize);	//	call the menu loop
+			MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 			ClearScreenHeader();
 
 			if (ButtonPressed == menusize - 1) {
@@ -998,7 +1187,7 @@ void SystemSetup(){
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;				//	enables the menu to loop
-		MenuLoop(SYSTEM_SETUP_SIZE);	//	call the menu loop
+		MenuLoop(SYSTEM_SETUP_SIZE, 300);	//	call the menu loop with 300ms of delay
 
 		//	call the function depending on the button pressed
 		Serial.printf("System Setup Button %d pressed\n\n", ButtonPressed);
@@ -1020,7 +1209,7 @@ void SerialDebugging(){
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	evaluate the button pressed
@@ -1139,7 +1328,7 @@ void EraseEEPROM(){
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	call the function depending on the button pressed
@@ -1159,7 +1348,7 @@ void EraseEEPROM(){
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;	//	enables the menu to loop
-		MenuLoop(menusize);	//	call the menu loop
+		MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 		if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 		//	call the function depending on the button pressed
@@ -1199,7 +1388,7 @@ void RestoreDefaults(){
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	call the function depending on the button pressed
@@ -1219,7 +1408,7 @@ void RestoreDefaults(){
 
 		//	loop while we wait for touch screen data
 		MenuLoopFlag = 1;	//	enables the menu to loop
-		MenuLoop(menusize);	//	call the menu loop
+		MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 		if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 		//	call the function depending on the button pressed
@@ -1277,7 +1466,7 @@ void Dummy() {
 
 	//	loop while we wait for touch screen data
 	MenuLoopFlag = 1;	//	enables the menu to loop
-	MenuLoop(menusize);	//	call the menu loop
+	MenuLoop(menusize, 300);	//	call the menu loop with 300ms of delay
 	if (ButtonPressed == menusize - 1) { return; }	//	return to the previous menu if the back button was pressed
 
 	//	call the function depending on the button pressed
