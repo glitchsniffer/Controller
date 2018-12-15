@@ -18,7 +18,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 40;			//  Sets the build number for the current program
-byte subbuild = 7;			//	Sets the sub build number between major version releases
+byte subbuild = 8;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -244,7 +244,8 @@ byte relayCount = 7;		//  Set the number of relays
 #if defined(__AVR__)
 #define SD_CHIP_SELECT 53	//	Mega
 #else
-#define SD_CHIP_SELECT 11
+//#define SD_CHIP_SELECT 11		//	external sd card
+#define SD_CHIP_SELECT 53		//	sd card slot on the touchscreen
 //	Due
 #endif
 
@@ -1379,7 +1380,6 @@ byte bcdToDec(byte val)
 {
 	return ((val / 16 * 10) + (val % 16));
 }
-
 void error(char*str)
 {
 	Serial.print("Error: ");
