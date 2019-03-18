@@ -34,6 +34,17 @@ extern uint16_t flowRateMax;
 extern uint16_t flowPulseTotal;
 extern uint16_t flowRateMax;
 extern uint8_t timeFormat;
+extern byte AlarmEnable;			//  byte for storing all 8 alarm's enable flags as bits
+extern byte AlarmState;				//  byte for storing all 8 alarm's state flags as bits
+extern byte AlarmType[8];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
+extern byte AlarmRelay[8];			//  # of the relay this alarm will trigger
+extern byte AlarmHourOn[8];			//  hour time the alarm will come on at
+extern byte AlarmMinOn[8];			//	minute time the alarm will come on at
+extern byte AlarmHourOff[8];		//	hour time the alarm will go off at
+extern byte AlarmMinOff[8];			//  minute time the alarm will go off at
+extern byte RelayState;				//	byte for storing the state of all 8 relays
+extern AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
+extern AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
 
 void factoryDefaultset();
 void FlowSensorRead();

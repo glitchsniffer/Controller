@@ -18,7 +18,7 @@
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 40;			//  Sets the build number for the current program
-byte subbuild = 8;			//	Sets the sub build number between major version releases
+byte subbuild = 9;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -406,7 +406,7 @@ void setup()
 	TFT.setFont(GroteskBold16x32);
 	TFT.fillScr(VGA_BLUE);
 	TFT.setBackColor(VGA_BLUE);
-	TFT.setColor(VGA_SILVER);
+	TFT.setColor(VGA_WHITE);
 
 	Touch.InitTouch();
 	Touch.setPrecision(PREC_MEDIUM);
@@ -529,8 +529,8 @@ void setup()
 	//	RESET MENU MODE
 	menuMode = 0;						//	set the menuMode variable to make sure it is set to 0 when the loop starts
 
-	//RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
-	//TestSDLEDS();			//**********NICE SPOT TO TEST SDLEDS**************
+	RelayToggleALL();		//**********NICE SPOT TO TEST RELAYS**************
+	TestSDLEDS();			//**********NICE SPOT TO TEST SDLEDS**************
 }
 
 void loop()
@@ -573,6 +573,7 @@ void AlarmON()
 		Serial.println();
 	}
 }
+
 void AlarmOFF()
 {
 	uint8_t id;
@@ -730,11 +731,10 @@ void StartScreen()
 	//else
 	{
 		TFT.setFont(GroteskBold24x48);	//	set the font
-		y = 55;		//	this is the total height of the font and the added space between lines
-		TFT.print("GLITCHSNIFFER'S", CENTER, 5, 0);
-		TFT.print("AQUARIUM", CENTER, y * 1, 0);
-		TFT.print("CONTROLLER", CENTER, y * 2, 0);
-		TFT.print(versionString, CENTER, y * 3, 0);
+		TFT.print("GLITCHSNIFFER'S", CENTER, 31, 0);
+		TFT.print("AQUARIUM", CENTER, 85, 0);
+		TFT.print("CONTROLLER", CENTER, 139, 0);
+		TFT.print(versionString, CENTER, 193, 0);
 	}
 }
 
@@ -1380,6 +1380,7 @@ byte bcdToDec(byte val)
 {
 	return ((val / 16 * 10) + (val % 16));
 }
+
 void error(char*str)
 {
 	Serial.print("Error: ");
