@@ -353,9 +353,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Alarms.ino" />
     <None Include="Controller.ino" />
-    <None Include="20x4_Menu_System.ino" />
     <None Include="C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.8\cores\arduino\wiring_pulse_asm.S">
       <Filter>src\_micro-api-readonly\core</Filter>
     </None>

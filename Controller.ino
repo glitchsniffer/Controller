@@ -7,7 +7,6 @@
 #include <OneWire.h>				//OneWire Library for the DS Sensors
 #include <DallasTemperature.h>		//Dallas Temperature library
 #include <Wire.h>					//I2C Wire library
-#include <LiquidCrystal_I2C.h>		//LCD I2C library
 #include <DS1307RTC.h>
 #include "EEprom.h"
 #include "MCPExpander.h"
@@ -17,8 +16,8 @@
 //	VERSIONING VARIABLES
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
-byte build = 40;			//  Sets the build number for the current program
-byte subbuild = 9;			//	Sets the sub build number between major version releases
+byte build = 41;			//  Sets the build number for the current program
+byte subbuild = 0;			//	Sets the sub build number between major version releases
 
 
 //  INITIALIZE THE EEPROM
@@ -43,51 +42,17 @@ byte secondsDisplay;		//	initializes the byte secondsDisplay
 uint8_t today = 0;			//  Sets the today to the current date to display on the RTC
 String timestr = "";		//	initialize the string for assembling a time to be displayed and manipulated
 
-
-//  DEFINE THE LCD SCREENS
-//  ***********************************************
-//	**** set the LCD type to 0 for the 20x4 LCD Character screen
-//	**** set the LCD type to 1 for the 4.3" TFT Touchscreen
-#define LCD_TYPE 1
-
-//  DEFINE THE LCD CHARACTER DISPLAY
-//  ***********************************************
-#define LCD_DEV_ADDR 0x3F		//  Set the address of the LCD screen	(Both systems)
-
-// Define the LCD Pins for the I2C
-#define B_Light 3
-#define En 2
-#define Rw 1
-#define Rs 0
-#define D4 4
-#define D5 5
-#define D6 6
-#define D7 7
-LiquidCrystal_I2C lcd(LCD_DEV_ADDR, En, Rw, Rs, D4, D5, D6, D7);  // Pass the lcd pins for the LiquidCrystal_I2C library to use
-const int16_t backlight = 8;		//	variable used to store the pin for the backlight
-
-//  SETUP CUSTOM CHARACTERS
-byte degree[8] = { B01100,B10010,B10010,B01100,B00000,B00000,B00000, };		//  set the lcd char for the degree symbol
-byte rarrow[8] = { B00000,B01000,B01100,B01110,B01100,B01000,B00000, };		//  set the lcd char for the right arrow symbol
-byte uarrow[8] = { B00000,B00000,B00100,B01110,B11111,B00000,B00000, };		//  set the lcd char for the up arrow symbol
-byte clock[8] = { B00000,B01110,B10101,B10111,B10001,B01110,B00000, };		//	set the lcd char for the clock symbol
-
-
 //  INITIALIZE THE 4.3" TFT TOUCHSCREEN
 //  ***********************************************
-#define TFT_B_LIGHT_PIN 9				//	the pin used for the backlight of the lcd screen
+#define TFT_B_LIGHT_PIN 9			//	the pin used for the backlight of the lcd screen
 UTFT TFT(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
 UTouch Touch(6, 5, 32, 3, 2);		//	start an instance of the UTouch class using the pins used
 TouchMenu Menu;					    //	start an instance of the TouchMenu class using a dummy variable
-
-
+uint16_t menuTimeout;				//	variable to count for a menu system timeout
 
 //	set the fonts that we will be using for the 4.3" TOUCHSCREEN
-//extern uint8_t BigFont[];
-//extern uint8_t SevenSegNumFont[];
 extern uint8_t GroteskBold16x32[];
 extern uint8_t GroteskBold24x48[];
-//extern uint8_t Retro8x16[];
 extern unsigned short gear[0x400];
 extern unsigned short arrow_up[0x400];
 extern unsigned short arrow_down[0x400];
@@ -115,88 +80,29 @@ byte menuEnterInterrupt = 4;		//	interrupt to trigger to enter the menu
 byte menuEnterIntPin = 19;			//	pin on the arduino to use for the interrupt
 uint32_t debouncing_time = 250;		//	debouncing time in millis
 volatile uint32_t last_micros;		//	placeholder variable to store when the interrrupt was triggered
-
 volatile uint8_t menuMode = 0;		//  set the variable that will be change to enable the menu in the interrupt
-
-
-//  INITIALIZE THE MENU VARIABLES
-//  ***********************************************
-byte mPoint = 0;		//  current main menu pointer position
-byte mCur = 1;			//  current position of the main menu cursor
-byte mStart = 0;		//  current starting cursor
-uint8_t mLevel = 0;		//  current menu level.  main menu level=0, menu items=1, menu item selected=2
-byte m1Sel = 0;			//  current selection for menu level 1
-byte m2Sel = 0;			//	current selection for menu level 2
-byte m3Sel = 0;			//  current selection for menu level 3
-byte m0Start = 0;		//	starting cursor position for mLevel0
-byte m1Start = 0;		//	starting cursor position for mLevel1
-byte m2Start = 0;		//  starting cursor position for mLevel2
-byte m3Start = 0;		//  starting cursor position for mLevel3
-byte miMax = 0;			//  current selected menu item for purposes of up and down movement
-byte mRet = 0;			//	variable to determine if the menu has just started.  if it has then it calls MenuLoop, otherwise it returns
-uint16_t menuTimeout;	//	variable to count for a menu system timeout
-uint8_t to = 0;		//	generic variable to determine if the menu system needs to time out
-
-char* m0Items[] = { "", "User Setup", "Timers Setup", "Sensor Addr Setup","Sensor Setup","System Setup", ""};  //  setup menu items here  Min Cursor = 0 and Max Cursor = 4
-char* m1Items0[] = { "", "Temp Type", "Temp Precision", "Temp Read Delay", "B Light Brightness", "Time Format", "Seconds Display", "Set Date/Time", "Flow Sensor On/Off", "XXXXXX", "" };  //  setup menu item 1 for System Config Min 0 Max 8
-	char* m2Items00[] = { "", "Celsius", "Fahrenheit", ""};
-	char* m2Items01[] = { "", "No Decimal", "1 Decimal", ""};
-	char* m2Items02[] = { "", "Set Temp Read Delay", "" };
-	char* m2Items03[] = { "", "Set BL Brightness", "" };
-	char* m2Items04[] = { "", "24 Hour", "12 Hour", ""};
-	char* m2Items05[] = { "", "No", "Yes", "" };
-	char* m2Items06[] = { "", "Exit", "Set Date and Time", ""};
-	char* m2Items07[] = { "", "Disable", "Enable", "" };
-	char* m2Items08[] = { "", "XXXX", "XXXX", "" };
-char* m1Items1[] = { "", "Set Timer 1", "Set Timer 2", "Set Timer 3", "Set Timer 4", "Set Timer 5", "Set Timer 6", "Set Timer 7", "Set Timer 8", "" };  //  setup menu item 2 for Timer Setup Min 0 Max 3
-	char* m2Items10[] = { "", "Edit", "Exit", ""};
-char* m1Items2[] = { "", "Temp Sens 1 Addr", "Temp Sens 2 Addr", "Temp Sens 3 Addr", "Temp Sens 4 Addr", ""};  //  setup menu item 3 for Timer Setup Min 0 Max 3
-	char* m2Items20[] = { "", "Address Sens ", "Exit", ""};
-char* m1Items3[] = { "", "Temp 1 Calib", "Temp 2 Calib", "Temp 3 Calib", "Temp 4 Calib", "Flow Calib", ""};  //  setup menu item 4 for Sensor Calibration Min 0 Max 4
-	char* m2Items30[] = { "", "Calibrate Sensor ", "Exit", ""};
-	char* m2Items34[] = { "", "Calibrate Flow Sens", "Set Min Flow", "Disable Flow Sensor", "Exit", "" };
-char* m1Items4[] = { "", "Serial Debugging", "Erase EEPROM", "Restore Defaults", "" };	//	setup menu item 4 for System Setup
-	char* m2Items40[] = { "", "Disabled", "All", "Temp Sensors", "Menu", "Alarm", "EEPROM", "Relays", "System", "Flow Sensor", "" };
-	char* m2Items41[] = { "", "Exit Erase EEPROM", "Erase EEPROM", "" };
-	char* m2Items42[] = { "", "Exit", "Restore Defaults", "" };
-
-	char* weekdays[] = { "Invalid Number", " Sunday  ", " Monday  ", " Tuesday ", "Wednesday", "Thursday ", " Friday  ", "Saturday " };
-
-String strExiting = "Exiting";
 
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
-//  define the DS18B20 global variables
-
 //	Set the pin that the temp sensors are connected to
-#if defined(__AVR__)
-#define TEMP_SENSOR_PIN 4		//	define which pin for the Mega
-#else
 #define TEMP_SENSOR_PIN 8		//	define which pin for the Due
-#endif
-
 #define TEMP_SENSOR_PRECISION 11		//	set the temperature precision to 11 bits.  this is needed to get the proper precision for 1 decimal
-
 OneWire oneWire(TEMP_SENSOR_PIN);			//  Setup oneWire instances to communicate with any OneWire Devices
 DallasTemperature tempSensors(&oneWire);	//	pass onewire reference to Dallas temperatures.
 DeviceAddress tempSensorAddr[4];			//  arrays to hold device addresses for 4 sensors
-
 byte numberOfSensors = 0;	//	define the byte to store the number of sensors that is found on the pin
 byte tempType;				//  initializes the byte tempType
 byte tempPrecision;			//	initializes the byte tempPrecision
 byte tempReadDelay;			//	initializes the byte tempReadDelay
-
 float tempRead[4];			//	array to hold the temperature readings taken
-
 //	set the strings for the sensor names
-char* tempSensorNameChar[] = { "T1", "T2", "T3", "T4", "T5" };		//	names for the character display
 char* tempSensorNameGraph[] = { "Temp 1", "Temp 2", "Temp 3", "Temp 4", "Temp 5" };		//	names for the graphic display
+
 
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
-#define LOOP_INTERVAL 1000		//	millis between log readings
-
+#define LOOP_INTERVAL 1000	//	millis between log readings
 byte AlarmEnable;			//  byte for storing all 8 alarm's enable flags as bits
 byte AlarmState;			//  byte for storing all 8 alarm's state flags as bits
 byte AlarmType[8];			//  type of alarm 0=Day Lights, 1=Night Lights, ""room to expand""
@@ -206,7 +112,6 @@ byte AlarmMinOn[8];			//	minute time the alarm will come on at
 byte AlarmHourOff[8];		//	hour time the alarm will go off at
 byte AlarmMinOff[8];		//  minute time the alarm will go off at
 byte RelayState;			//	byte for storing the state of all 8 relays
-
 AlarmID_t tempReadID;		//  delay between reading the temperature sensors
 AlarmID_t flowReadID;		//	delay between reading the flow sensor
 AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
@@ -219,12 +124,9 @@ byte flowSensorInterrupt = 5;			//	interrupt to trigger for the flow sensor
 byte flowSensorIntPin = 18;				//	pin on the arduino to use for the interrupt
 byte flowSensorEnable;					//	initializes the byte flowSensorEnable
 byte flowReadDelay = 30;				//	initializes the byte flowReadDelay (currently in seconds)
-
 volatile uint16_t flowPulseCount = 0;	//	number of pulses trigger in the interrupt
-		
 uint16_t flowRateMax;					//	maximum flow rate as calibrated by the user
 uint16_t flowRateMin;					//  minimum flow rate before an alarm is triggered, this is a percentage of flowRateMax
-
 uint16_t flowPulseReading[5];			//	the array to store the last 5 flow pulse readings in
 byte flowPulseIndex = 0;				//	the number that selects the number of the flowPulseReadings array to write to
 uint16_t flowPulseTotal;				//	the variable used to store the running total of the last 5 flowPulseCount samples
@@ -239,16 +141,8 @@ byte relayCount = 7;		//  Set the number of relays
 //  INITIALIZE THE SD CARD
 //  ***********************************************
 #define	SDCARD_WRITE_INTERVAL 60000		//	millis between SD Card writes
-
-//	pin for the chip select line on the SD Card
-#if defined(__AVR__)
-#define SD_CHIP_SELECT 53	//	Mega
-#else
-//#define SD_CHIP_SELECT 11		//	external sd card
-#define SD_CHIP_SELECT 53		//	sd card slot on the touchscreen
-//	Due
-#endif
-
+//#define SD_CHIP_SELECT 11		//	external sd card cs
+#define SD_CHIP_SELECT 53		//	sd card slot on the touchscreen cs
 uint32_t SDLastSyncTime = 0;			//	time of the last sync
 uint8_t SDexist = 0;					//	variable to determine if there is a problem with the sd card.  If there is then dont use the SD card.
 File SDLogfile;							//	initialize the file to log to
@@ -269,7 +163,6 @@ void setup()
 //  SETUP THE SERIAL PORT
 //  ***********************************************
 	Wire.begin();
-
 	Serial.begin(115200);			//  start the serial port
 
 	//  SETUP THE RTC
@@ -384,17 +277,6 @@ void setup()
 	pinMode(flowSensorIntPin, INPUT);		//	set the flow sensor as an input to the pin number in the variable
 	digitalWrite(flowSensorIntPin, HIGH);	//	write the pin high to be active low
 
-//  SETUP THE LCD SCREEN
-//  ***********************************************
-	lcd.begin(20, 4);						//  setup the LCD's number of columns and rows
-	lcd.createChar(1, degree);				//  init custom characters as numbers
-	lcd.createChar(2, rarrow);				//  init custom characters as numbers
-	lcd.createChar(3, uarrow);				//  init custom characters as numbers
-	lcd.setBacklightPin(B_Light, POSITIVE); //  set the backlight pin and polarity
-	lcd.setBacklight(HIGH);					//  toggle the backlight on
-	//pinMode(backlight, OUTPUT);				//	set the pin for the backlight as an output
-	//analogWrite(backlight, backlightLevel);	//	write the backlightlevel to the pin for the backlight
-
 //	SETUP THE TFT LCD
 //  ***********************************************
 	// Set the backlight for the LCD
@@ -498,14 +380,8 @@ void setup()
 		SDLogfile.println("millis, stamp, time, ,temptype, temp1, temp2, temp3, temp4, relaystate");
 	}
 
-	//	CLEAR THE LCD SCREENS
+	//	CLEAR THE TFT SCREEN
 	//  ***********************************************
-	if (LCD_TYPE == 1) {	//	if the LCD type is set to 0 then use the character lcd
-		lcd.setCursor(0, 0);
-		lcd.clear();
-	}
-	if (LCD_TYPE == 1) {	//	temporary to show both screens
-	//else
 		TFT.clrScr();
 		TFT.fillScr(VGA_BLUE);
 		TFT.drawBitmap(10, 240, 32, 32, gear);
@@ -513,7 +389,6 @@ void setup()
 		TFT.drawBitmap(80, 240, 32, 32, arrow_up);
 		TFT.drawBitmap(115, 240, 32, 32, arrow_down);
 		TFT.drawBitmap(150, 240, 32, 32, arrow_right);
-	}
 
 	//	SETUP THE RELAYS TO DISPLY AND TURN THEM ON IF NEEDED
 	//  ***********************************************
@@ -538,7 +413,7 @@ void loop()
 	//  calls the MenuTitle as long as menuMode = 1
 	if (menuMode == 1) {
 		Serial.println("Entering Menu");
-		CharMenuTitle();
+		//CharMenuTitle();
 		Serial.println("Exiting Menu");
 	}
 
@@ -667,10 +542,6 @@ void RelayStatusDisplay(uint8_t col, uint8_t row)
 		if ((RelayState & (1 << i)) == (1 << i)) { relayString = relayString + "+"; }
 		else relayString = relayString + "-";;
 		}
-	//	Print to the character LCD screen
-	//	***************************************
-	lcd.setCursor(col, row);
-	lcd.print(relayString);
 
 	//	Print to the 4.3" LCD touch screen
 	//	***************************************
@@ -712,30 +583,13 @@ void StartScreen()
 	sprintf(buffer, "Version %d.%02d.%02d", version, build, subbuild);	//	prepare the string to print for the version
 	versionString = String(buffer);		//	create a string for the version
 
-	//	Print to the character LCD screen
-	//	***************************************
-	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
-	{
-		lcd.setCursor(3, 0);
-		lcd.print("GLITCHSNIFFER'S");
-		lcd.setCursor(6, 1);
-		lcd.print("AQUARIUM");
-		lcd.setCursor(5, 2);
-		lcd.print("CONTROLLER");
-		lcd.setCursor(3, 3);
-		lcd.print(versionString);
-	}
 	//	Print to the 4.3" LCD touch screen
 	//	***************************************
-	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
-	//else
-	{
-		TFT.setFont(GroteskBold24x48);	//	set the font
-		TFT.print("GLITCHSNIFFER'S", CENTER, 31, 0);
-		TFT.print("AQUARIUM", CENTER, 85, 0);
-		TFT.print("CONTROLLER", CENTER, 139, 0);
-		TFT.print(versionString, CENTER, 193, 0);
-	}
+	TFT.setFont(GroteskBold24x48);	//	set the font
+	TFT.print("GLITCHSNIFFER'S", CENTER, 31, 0);
+	TFT.print("AQUARIUM", CENTER, 85, 0);
+	TFT.print("CONTROLLER", CENTER, 139, 0);
+	TFT.print(versionString, CENTER, 193, 0);
 }
 
 void TimeDisplay()	//	MUST ASSEMBLE THE TIME STRING USING	TimeString() BEFORE CALLING THIS FUNCTION
@@ -765,33 +619,13 @@ void PrintTimeDisplay(String timestring, uint8_t col, uint8_t row, uint8_t maxle
 {
 	uint8_t length = timestring.length();		//	get the length of the time string to use in determining where to start the cursor
 
-	//	Print to the character LCD screen
-	//	***************************************
-	if (LCD_TYPE == 1)		//	if the LCD type is set to 0 then use the character lcd
-	{
-		lcd.setCursor(col, row);			//	set the cursor to erase the current line
-		for (int i = 1; i == maxlength; i++); { lcd.print(" "); }	//  print maxlength spaces to erase the previous line
-		if (length == 10) { lcd.setCursor(col, row); }		//	determine where to set the cursor row
-		else { lcd.setCursor(col + 1, row); }
+	int x = (col * 24);					//	use col variable to decide where to start
+	int y = (row * 48) + 5;				//	use row variable to decide where to start + 5 to pad the rows
+	x = ((240 - (length * 24)) / 2);	//	determine where to start printing to center the date
 
-		lcd.print(timestring);				//	print the date string to the lcd screen
-	}
-
-	//	Print to the 4.3" LCD touch screen
-	//	***************************************
-	if (LCD_TYPE == 1)		// temporary to test both displays at the same time.
-							//else
-	{
-		int x = (col * 24);					//	use col variable to decide where to start
-		int y = (row * 48) + 5;				//	use row variable to decide where to start + 5 to pad the rows
-		x = ((240 - (length * 24)) / 2);	//	determine where to start printing to center the date
-
-		// 4 is the minimum ammount of digits to display.  clear preceeding digits when appropriate.
-
-		TFT.setFont(GroteskBold24x48);	//	set the font
-		TFT.print(timestring, x, y);		//	print the date string to x and y coordinates
-		//TFT.drawBitmap(10, 240, 32, 32, gear);	//	draw the settings gear
-	}
+	// 4 is the minimum ammount of digits to display.  clear preceeding digits when appropriate.
+	TFT.setFont(GroteskBold24x48);	//	set the font
+	TFT.print(timestring, x, y);		//	print the date string to x and y coordinates
 }
 
 String TimeString(byte disp, uint8_t hour, uint8_t min, uint8_t sec)
@@ -863,38 +697,25 @@ void LCDDateDisplay(byte display, uint8_t col, uint8_t row, uint8_t pad)
 		//	***************************************
 		int m = month();			//	convert the month to an integer to combine in the string
 		int d = day();				//	convert the day to an integer to combine in the string
-		int y = year();				//	convert the year to an integer to combine in the string
+		int y1 = year();				//	convert the year to an integer to combine in the string
 		int length = 0;				//	variable to store the length of the string
 		String datestring = "";		//	create a string for the date
 		char buffer[12];			//	create a buffer to hold the date string
 
-		if (pad = 1) { sprintf(buffer, "%d/%02d/%d", m, d, y); }
-		else { sprintf(buffer, "%d/%d/%d", m, d, y); }	//	assemble the date as a string
+		if (pad = 1) { sprintf(buffer, "%d/%02d/%d", m, d, y1); }
+		else { sprintf(buffer, "%d/%d/%d", m, d, y1); }	//	assemble the date as a string
 		datestring = String(buffer);			//	convert the char array to a string
 		length = datestring.length();			//	get the length of the date string to use in determining where to start the cursor
 
-		//	Print to the character LCD screen
-		//	***************************************
-		if (LCD_TYPE == 1) {		//	if the LCD type is set to 0 then use the character lcd
-			lcd.setCursor(col, row);			//	set the cursor to erase the current line
-			lcd.print("          ");			//	erase the current line
-			if (length == 10) { lcd.setCursor(col, row); }		//	determine where to set the cursor row
-			else { lcd.setCursor(col + 1, row); }
-			lcd.print(datestring);				//	print the date string to the lcd screen
-		}
+		////	Print to the 4.3" LCD touch screen
+		////	***************************************
+		int x = (col * 24);					//	use col variable to decide where to start
+		int y = (row * 48) + 5;				//	use row variable to decide where to start + 5 to pad the rows
+		x = ((240 - (length * 24)) / 2);	//	determine where to start printing to center the date
 
-		//	Print to the 4.3" LCD touch screen
-		//	***************************************
-		if (LCD_TYPE == 1) {	// temporary to test both displays at the same time.
-		//else
-			int x = (col * 24);					//	use col variable to decide where to start
-			int y = (row * 48) + 5;				//	use row variable to decide where to start + 5 to pad the rows
-			x = ((240 - (length * 24)) / 2);	//	determine where to start printing to center the date
-
-			TFT.print("          ", x, y);	//	this will clear the current spot for the date and allow an shorter date to be written clearly
-			TFT.setFont(GroteskBold24x48);	//	set the font
-			TFT.print(datestring, x, y);		//	print the date string to x and y coordinates
-		}
+		TFT.print("          ", x, y);	//	this will clear the current spot for the date and allow an shorter date to be written clearly
+		TFT.setFont(GroteskBold24x48);	//	set the font
+		TFT.print(datestring, x, y);		//	print the date string to x and y coordinates
 		today = day(); //	set the day = to today so that it doesn't refresh the display with it until tomorrow
 	}
 }
@@ -928,57 +749,33 @@ void ReadTempSensors()
 		i = int(tempRead[j]);		//	get the integer portion of the reading
 		d = round((tempRead[j] - i) * 10);	//	round the decimal portion of the reading and make it an integer
 
-		//	Print to the character LCD screen
-		//	***************************************
-		if (LCD_TYPE == 1) {	//	if the LCD type is set to 0 then use the character lcd
-			//	determine which tempPrecision to use
-			switch (tempPrecision) {
-			case 0:	//	0 decimal
-				lcd.setCursor(13, j);	//  Set the lcd cursor depending on what sensor your are reading
-				if (sensorConnected == 1) lcd.printf("%s%3d", tempSensorNameChar[j + 1], round(tempRead[j]));	//	print the sensor name and temp
-				else lcd.printf("%s --", tempSensorNameChar[j + 1]);	//	print the sensor name and blanks
-				break;
-			case 1:	//	1 decimal
-				lcd.setCursor(11, j);	//  Set the lcd cursor depending on what sensor your are reading
-				if (sensorConnected == 1) lcd.printf("%s%3d.%d", tempSensorNameChar[j], i, d);	//	print the sensor name and temp
-				else lcd.printf("%s ----", tempSensorNameChar[j + 1]);	//	print the sensor name and blanks
-				break;
-			}
-			lcd.write(byte(1));		//	print the degree symbol
-			if (tempType == 0) lcd.print("C");	//	print the temp type if C
-			else lcd.print("F");				//	print the temp type if F
-		}
-
 		//	Print to the 4.3" LCD touch screen
 		//	***************************************
-		if (LCD_TYPE == 1) {	// temporary to test both displays at the same time.
-		//else
-			int y = (j * 32) + 3;		//	use row variable to decide where to start + 5 to pad the rows
-			String tempString;			//	string to store the completed temp string to print to the screen
-			char buffer[20];			//	buffer to store the sprintf data
+		int y = (j * 32) + 3;		//	use row variable to decide where to start + 5 to pad the rows
+		String tempString;			//	string to store the completed temp string to print to the screen
+		char buffer[20];			//	buffer to store the sprintf data
 
-			switch (tempPrecision) {	//	decide what temp precision to print
-			case 0:	//	0 decimal
-				if (sensorConnected == 1) {	//	if there is a sensor connected then print the following
-					if (tempType == 0)	sprintf(buffer, "  %s%3d`C", tempSensorNameGraph[j], round(tempRead[j]));	//	assemble the string to print if C and no decimal point
-					else  sprintf(buffer, "  %s%3d`F", tempSensorNameGraph[j], round(tempRead[j]));					//	assemble the string to print if F and no decimal point
-				}
-				else sprintf(buffer, "  %s ----", tempSensorNameGraph[j]);	//	print nothing if there isnt a sensor connected
-				break;
-			case 1:	//	1 decimal
-				if (sensorConnected == 1) {	//	if there is a sensor connected then print the following
-					if (tempType == 0)	sprintf(buffer, "%s%3d.%d`C", tempSensorNameGraph[j], i, d);	//	assemble the string to print if C and 1 decimal point
-					else  sprintf(buffer, "%s%3d.%d`F", tempSensorNameGraph[j], i, d);				//	assemble the string to print if F and 1 decimal point
-				}
-				else sprintf(buffer, "%s ------", tempSensorNameGraph[j]);	//	print nothing if there isnt a sensor connected
-				break;
+		switch (tempPrecision) {	//	decide what temp precision to print
+		case 0:	//	0 decimal
+			if (sensorConnected == 1) {	//	if there is a sensor connected then print the following
+				if (tempType == 0)	sprintf(buffer, "  %s%3d`C", tempSensorNameGraph[j], round(tempRead[j]));	//	assemble the string to print if C and no decimal point
+				else  sprintf(buffer, "  %s%3d`F", tempSensorNameGraph[j], round(tempRead[j]));					//	assemble the string to print if F and no decimal point
 			}
-
-			tempString = buffer;	//	save the buffer
-
-			TFT.setFont(GroteskBold16x32);	//	set the font
-			TFT.print(tempString, RIGHT, y);	//	print the date string to x and y coordinates
+			else sprintf(buffer, "  %s ----", tempSensorNameGraph[j]);	//	print nothing if there isnt a sensor connected
+			break;
+		case 1:	//	1 decimal
+			if (sensorConnected == 1) {	//	if there is a sensor connected then print the following
+				if (tempType == 0)	sprintf(buffer, "%s%3d.%d`C", tempSensorNameGraph[j], i, d);	//	assemble the string to print if C and 1 decimal point
+				else  sprintf(buffer, "%s%3d.%d`F", tempSensorNameGraph[j], i, d);				//	assemble the string to print if F and 1 decimal point
+			}
+			else sprintf(buffer, "%s ------", tempSensorNameGraph[j]);	//	print nothing if there isnt a sensor connected
+			break;
 		}
+
+		tempString = buffer;	//	save the buffer
+
+		TFT.setFont(GroteskBold16x32);	//	set the font
+		TFT.print(tempString, RIGHT, y);	//	print the date string to x and y coordinates
 
 		//	Print to the serial port
 		//	***************************************
@@ -1168,11 +965,11 @@ void FlowSensorRead()
 
 	//	print the flow status to the LCD
 	//	can use this area to determine an alarm alert to the user.
-	if (flowRateMax > 0) {
-		lcd.setCursor(0, 2);
-		if (flowPulseTotal / 5 <= flowRateMax * (0.01 * flowRateMin)) { lcd.print("Flow Alarm"); }
-		else lcd.print("Flow Good ");
-	}
+	//////if (flowRateMax > 0) {
+	//////	lcd.setCursor(0, 2);
+	//////	if (flowPulseTotal / 5 <= flowRateMax * (0.01 * flowRateMin)) { lcd.print("Flow Alarm"); }
+	//////	else lcd.print("Flow Good ");
+	//////}
 	//	in case the millis counter overflows to 0 after approx 50 days, recalculate the time for the next flow reading
 	if (flowEndTime < flowStartTime) {
 		flowEndTime = (4294967295 - flowStartTime) + 1 + flowEndTime;	//	set flowEndTime to the total duration
