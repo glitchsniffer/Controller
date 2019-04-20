@@ -13,21 +13,25 @@
 #include "TouchMenu.h"
 #include "Controller.h"
 
+
 //	VERSIONING VARIABLES
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 41;			//  Sets the build number for the current program
-byte subbuild = 0;			//	Sets the sub build number between major version releases
+byte subbuild = 1;			//	Sets the sub build number between major version releases
+
+//	DEFINES
+//	***********************************************
+#define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
+#define DS1307RTC 0x68			//	Set the address of the DS1307 RTC
+#define TFT_B_LIGHT_PIN 9			//	the pin used for the backlight of the lcd screen
+#define MCP17A 0x20				//	Set the address of the MCP17A IO Expander
+#define TEMP_SENSOR_PIN 8		//	define which pin for the Due
 
 
 //  INITIALIZE THE EEPROM
 //  ***********************************************
-#define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
 EEprom eeprom(EEPROM_DEV_ADDR);	//	start an instance of the EEprom class
-
-//  INITIALIZE THE RTC
-//  ***********************************************
-#define DS1307RTC 0x68			//	Set the address of the DS1307 RTC
 
 //  CONFIGURATION SETUP
 //  ***********************************************
@@ -44,7 +48,6 @@ String timestr = "";		//	initialize the string for assembling a time to be displ
 
 //  INITIALIZE THE 4.3" TFT TOUCHSCREEN
 //  ***********************************************
-#define TFT_B_LIGHT_PIN 9			//	the pin used for the backlight of the lcd screen
 UTFT TFT(ITDB43, 25, 26, 27, 28);	//	start an instance of the UTFT class using the display model and the pins used
 UTouch Touch(6, 5, 32, 3, 2);		//	start an instance of the UTouch class using the pins used
 TouchMenu Menu;					    //	start an instance of the TouchMenu class using a dummy variable
@@ -62,22 +65,22 @@ extern unsigned short arrow_down[0x400];
 
 //  DEFINE THE MCP23017 IO EXPANDER
 //  ***********************************************
-#define MCP17A 0x20
 MCPExpander mcpA(MCP17A);
 MCPExpander mcpB(MCP17A);
 
 
 //  DEFINE BUTTON PINS ON THE MCP23017 IO EXPANDER
 //  ***********************************************
-#define menubuttonbank 0		//	this is the bank of ports that the switches are on
-#define upButton 5				//  set the up button to port 0.5
-#define leftButton 6			//  set the right button to port 0.6
-#define rightButton 3			//  set the left button to port 0.3
-#define downButton 4			//  set the down button to port 0.4
-#define menuenterbutton 7		//	set the menu enter button to port 0.7
+//#define menubuttonbank 0		//	this is the bank of ports that the switches are on
+//#define upButton 5				//  set the up button to port 0.5
+//#define leftButton 6			//  set the right button to port 0.6
+//#define rightButton 3			//  set the left button to port 0.3
+//#define downButton 4			//  set the down button to port 0.4
+//#define menuenterbutton 7		//	set the menu enter button to port 0.7
 
 byte menuEnterInterrupt = 4;		//	interrupt to trigger to enter the menu
-byte menuEnterIntPin = 19;			//	pin on the arduino to use for the interrupt
+//define menuEnterIntPin = 19		//	pin on the arduino to use for the interrupt
+byte menuEnterIntPin = 19;		//	pin on the arduino to use for the interrupt
 uint32_t debouncing_time = 250;		//	debouncing time in millis
 volatile uint32_t last_micros;		//	placeholder variable to store when the interrrupt was triggered
 volatile uint8_t menuMode = 0;		//  set the variable that will be change to enable the menu in the interrupt
@@ -86,7 +89,6 @@ volatile uint8_t menuMode = 0;		//  set the variable that will be change to enab
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
 //	Set the pin that the temp sensors are connected to
-#define TEMP_SENSOR_PIN 8		//	define which pin for the Due
 #define TEMP_SENSOR_PRECISION 11		//	set the temperature precision to 11 bits.  this is needed to get the proper precision for 1 decimal
 OneWire oneWire(TEMP_SENSOR_PIN);			//  Setup oneWire instances to communicate with any OneWire Devices
 DallasTemperature tempSensors(&oneWire);	//	pass onewire reference to Dallas temperatures.
@@ -748,6 +750,7 @@ void ReadTempSensors()
 		//	convert the float to 2 integer parts.  this is necessary because the mega board cannot handle a printf with a float
 		i = int(tempRead[j]);		//	get the integer portion of the reading
 		d = round((tempRead[j] - i) * 10);	//	round the decimal portion of the reading and make it an integer
+		if (d == 10) { d = 1; }				//	prevent the overflow of the decimal if it was equal to 1 before the int conversion
 
 		//	Print to the 4.3" LCD touch screen
 		//	***************************************
