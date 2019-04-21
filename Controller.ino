@@ -1,3 +1,5 @@
+#include <Adafruit_MCP23008.h>
+#include <Stepper.h>
 #include <UTFT.h>
 #include <UTouch.h>
 #include <SD.h>
@@ -12,22 +14,24 @@
 #include "MCPExpander.h"
 #include "TouchMenu.h"
 #include "Controller.h"
+#include <RF24.h>
 
 
 //	VERSIONING VARIABLES
 //	***********************************************
 byte version = 0;			//  Sets the version number for the current program
 byte build = 41;			//  Sets the build number for the current program
-byte subbuild = 1;			//	Sets the sub build number between major version releases
+byte subbuild = 2;			//	Sets the sub build number between major version releases
 
 //	DEFINES
 //	***********************************************
 #define EEPROM_DEV_ADDR 0x50	//  Set the address of the EEPROM
 #define DS1307RTC 0x68			//	Set the address of the DS1307 RTC
-#define TFT_B_LIGHT_PIN 9			//	the pin used for the backlight of the lcd screen
+#define TFT_B_LIGHT_PIN 9		//	the pin used for the backlight of the lcd screen
 #define MCP17A 0x20				//	Set the address of the MCP17A IO Expander
 #define TEMP_SENSOR_PIN 8		//	define which pin for the Due
-
+#define RF24_CE	15				//	RF24 CE Line
+#define RF24_CSN 14				//	RF24 CSN Line
 
 //  INITIALIZE THE EEPROM
 //  ***********************************************
@@ -68,23 +72,57 @@ extern unsigned short arrow_down[0x400];
 MCPExpander mcpA(MCP17A);
 MCPExpander mcpB(MCP17A);
 
-
-//  DEFINE BUTTON PINS ON THE MCP23017 IO EXPANDER
-//  ***********************************************
-//#define menubuttonbank 0		//	this is the bank of ports that the switches are on
-//#define upButton 5				//  set the up button to port 0.5
-//#define leftButton 6			//  set the right button to port 0.6
-//#define rightButton 3			//  set the left button to port 0.3
-//#define downButton 4			//  set the down button to port 0.4
-//#define menuenterbutton 7		//	set the menu enter button to port 0.7
-
 byte menuEnterInterrupt = 4;		//	interrupt to trigger to enter the menu
 //define menuEnterIntPin = 19		//	pin on the arduino to use for the interrupt
-byte menuEnterIntPin = 19;		//	pin on the arduino to use for the interrupt
+byte menuEnterIntPin = 19;			//	pin on the arduino to use for the interrupt
 uint32_t debouncing_time = 250;		//	debouncing time in millis
 volatile uint32_t last_micros;		//	placeholder variable to store when the interrrupt was triggered
 volatile uint8_t menuMode = 0;		//  set the variable that will be change to enable the menu in the interrupt
 
+//  TEMP NODE SETTINGS
+//  ***********************************************
+//byte nodeAddress = 0;				//	set the node address as the Master
+unsigned long startTime = 0;			//	long to store the timeout time
+unsigned long currentTime = 0;		//	long to store the current time
+
+//  INITIALIZE THE NRF2401 RADIO SETTINGS
+//  ***********************************************
+RF24 radio(RF24_CE, RF24_CSN);						// CE, CSN for the RFN2401
+const byte addresses[][6] = { "00001", "00002" };	//	array for the addresses of the pipes
+
+//	COMMAND PACKET STRUCT **MAX 32 BYTES**
+struct Command_Package {
+	byte com_address;	//	intended address for the command
+	byte command;		//	the command to be issued
+};
+Command_Package comm;	//	create a variable for the above structure
+
+//  DATA PACKAGE STRUCT **MAX 32 BYTES**
+struct Data_Package {
+	byte origin_addr;	//	originating address
+	byte temp_1I;		//	1 bytes
+	byte temp_1D;		//	1 bytes
+	byte temp_2I;		//	1 bytes
+	byte temp_2D;		//	1 bytes
+};
+Data_Package data;		//	create a variable for the above structure
+
+//  REMOTE TEMPS STRUCT
+struct Remote_Sensors {
+	byte temp_1_int;	//	Temp 1 integer portion
+	byte temp_1_dec;	//	Temp 1 decimal portion
+	byte temp_2_int;	//	Temp 2 integer portion
+	byte temp_2_dec;	//	Temp 2 decimal portion
+	byte temp_3_int;	//	Temp 3 integer portion
+	byte temp_3_dec;	//	Temp 3 decimal portion
+	byte temp_4_int;	//	Temp 4 integer portion
+	byte temp_4_dec;	//	Temp 4 decimal portion
+	byte temp_5_int;	//	Temp 5 integer portion
+	byte temp_5_dec;	//	Temp 5 decimal portion
+	byte temp_6_int;	//	Temp 6 integer portion
+	byte temp_6_dec;	//	Temp 6 decimal portion
+};
+Remote_Sensors remoteTemp;
 
 //  INITIALIZE THE DS18B20 TEMPERATURE SENSORS
 //  ***********************************************
@@ -99,8 +137,8 @@ byte tempPrecision;			//	initializes the byte tempPrecision
 byte tempReadDelay;			//	initializes the byte tempReadDelay
 float tempRead[4];			//	array to hold the temperature readings taken
 //	set the strings for the sensor names
-char* tempSensorNameGraph[] = { "Temp 1", "Temp 2", "Temp 3", "Temp 4", "Temp 5" };		//	names for the graphic display
-
+char* tempSensorNameGraph[] = { "Desk R", "Comp A", "Desk L", "Comp C", "Temp 5" };		//	local sensor names for the graphic display
+char* remoteSensorNameGraph[] = { "5.5g", "20g ", "2.5W", "2.5E", "6.6g", "" };		//  remote sensor names for the graphic display
 
 //  INITIALIZE THE ALARM Variables
 //  ***********************************************
@@ -114,8 +152,9 @@ byte AlarmMinOn[8];			//	minute time the alarm will come on at
 byte AlarmHourOff[8];		//	hour time the alarm will go off at
 byte AlarmMinOff[8];		//  minute time the alarm will go off at
 byte RelayState;			//	byte for storing the state of all 8 relays
-AlarmID_t tempReadID;		//  delay between reading the temperature sensors
-AlarmID_t flowReadID;		//	delay between reading the flow sensor
+AlarmID_t tempReadID;		//  alarm ID for the temperature sensors
+AlarmID_t tempRemoteReadID;	//  alarm ID for the remote temperature sensors
+AlarmID_t flowReadID;		//	alarm ID for the reading of the flow sensor
 AlarmID_t AlarmIDOn[8];		//  alarm IDs for each alarm's On event
 AlarmID_t AlarmIDOff[8];	//	alarm IDs for each alarm's Off event
 
@@ -200,6 +239,7 @@ void setup()
 
 	//  READ ALARM SETTINGS FROM EEPROM AND SETUP THE ALARMS IN THE TIMEALARMS LIBRARY
 	tempReadID = Alarm.timerRepeat(tempReadDelay, ReadTempSensors);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
+	tempRemoteReadID = Alarm.timerRepeat(tempReadDelay, GetRemoteSensors);		//	sets an alarm to read the temp sensors at the specified delay and returns the Alarm_ID to tempReadID
 	AlarmEnable = eeprom.read(100);		//	reads out the byte for the enable flags for all 8 alarms
 	AlarmState = eeprom.read(101);		//	reads out the byte for the state flags for all 8 alarms
 	RelayState = eeprom.read(150);
@@ -346,6 +386,14 @@ void setup()
 		}
 	}
 	if ((serialDebug & 1) == 1) { Serial.println(); }		//	Print a line space for the next function
+
+//	SETUP THE NRF24LO1+ RADIO
+//  ***********************************************
+	radio.begin();
+	radio.openWritingPipe(addresses[0]);	// "00002"	TX
+	radio.openReadingPipe(1, addresses[1]); // "00001"	RX
+	Serial.println("Master Set");
+	radio.setPALevel(RF24_PA_HIGH);			//	set the radio PA to High
 
 //	INITIALIZE THE SD CARD
 //  ***********************************************
@@ -798,6 +846,114 @@ void ReadTempSensors()
 	}
 	if ((serialDebug & 1) == 1)	Serial.println();	//	print a line break
 	if(SDexist == 1){ logger(); }	//	log the data if the SD card is present
+}
+
+void GetRemoteSensors()
+//	This function will send the command to all nodes to send in their temperatures
+{
+	TFT.setFont(GroteskBold16x32);	//	set the font
+
+	char buffer[20];			//	buffer to store the sprintf data
+	
+
+	for (byte i = 1; i < 4; i++)
+	{
+		int timeoutFlag = 0;
+		comm.com_address = i;
+		comm.command = 1;
+		//	Send the command
+		radio.stopListening();
+		radio.write(&comm, sizeof(Command_Package));
+		Serial.printf("Command %d Sent to Address %d\n", comm.command, comm.com_address);
+
+		radio.startListening();
+		Serial.print("Waiting\n");
+
+		// Check whether we keep trying to recieve data or we timeout
+		startTime = millis();				// set the time for a timeout comparison
+
+		while (!radio.available()) {
+			//	if it has been more than second since we started listening break from the while loop
+			currentTime = millis();
+			if (currentTime - startTime > 700) {
+				Serial.print("Timout Occured\n\n");
+				timeoutFlag = 1;
+				break;
+			}
+		}
+
+		Serial.printf("i = %d, t/o = %d\n", i, timeoutFlag);
+
+		if (radio.available()) {
+			radio.read(&data, sizeof(Data_Package));
+			Serial.print("Recieved\n");
+			Serial.printf("Add = %d, T1 = %d.%d: T2 = %d.%d\n", data.origin_addr, data.temp_1I, data.temp_1D, data.temp_2I, data.temp_2D);
+		}
+
+		switch (i)	//	use the node orgin address to determine the variables to store the data
+		{
+		case 1:		//	node 1 sensor readings
+			remoteTemp.temp_1_int = data.temp_1I;
+			remoteTemp.temp_1_dec = data.temp_1D;
+			remoteTemp.temp_2_int = data.temp_2I;
+			remoteTemp.temp_2_dec = data.temp_2D;
+			if (timeoutFlag == 1) {
+				sprintf(buffer, "%s 00.0`F", remoteSensorNameGraph[0], remoteTemp.temp_1_int, remoteTemp.temp_1_dec);
+				TFT.print(buffer, LEFT, 135);
+				sprintf(buffer, "%s 00.0`F", remoteSensorNameGraph[1], remoteTemp.temp_1_int, remoteTemp.temp_1_dec);
+				TFT.print(buffer, LEFT, 170);
+			}
+			else {
+				Serial.printf("Addr %d, T1 %d.%d, T2 %d.%d\n\n", data.origin_addr, remoteTemp.temp_1_int, remoteTemp.temp_1_dec, remoteTemp.temp_2_int, remoteTemp.temp_2_dec);
+				sprintf(buffer, "%s %d.%d`F", remoteSensorNameGraph[0], remoteTemp.temp_1_int, remoteTemp.temp_1_dec);
+				TFT.print(buffer, LEFT, 135);
+				sprintf(buffer, "%s %d.%d`F", remoteSensorNameGraph[1], remoteTemp.temp_2_int, remoteTemp.temp_2_dec);
+				TFT.print(buffer, LEFT, 170);
+			}
+			break;
+		case 2:		//	node 2 sensor readings
+			remoteTemp.temp_3_int = data.temp_1I;
+			remoteTemp.temp_3_dec = data.temp_1D;
+			remoteTemp.temp_4_int = data.temp_2I;
+			remoteTemp.temp_4_dec = data.temp_2D;
+			if (timeoutFlag == 1) {
+				sprintf(buffer, "%s 00.0`F", remoteSensorNameGraph[2], remoteTemp.temp_1_int, remoteTemp.temp_1_dec);
+				TFT.print(buffer, LEFT, 203);
+				sprintf(buffer, "%s 00.0`F", remoteSensorNameGraph[3], remoteTemp.temp_1_int, remoteTemp.temp_1_dec);
+				TFT.print(buffer, RIGHT, 135);
+			}
+			else {
+				Serial.printf("Addr %d, T1 %d.%d, T2 %d.%d\n\n", data.origin_addr, remoteTemp.temp_3_int, remoteTemp.temp_3_dec, remoteTemp.temp_4_int, remoteTemp.temp_4_dec);
+				sprintf(buffer, "%s %d.%d`F", remoteSensorNameGraph[2], remoteTemp.temp_3_int, remoteTemp.temp_3_dec);
+				TFT.print(buffer, LEFT, 203);
+				sprintf(buffer, "%s %d.%d`F", remoteSensorNameGraph[3], remoteTemp.temp_4_int, remoteTemp.temp_4_dec);
+				TFT.print(buffer, RIGHT, 135);
+			}
+			break;
+		case 3:		//	node 3 sensor readings
+			remoteTemp.temp_5_int = data.temp_1I;
+			remoteTemp.temp_5_dec = data.temp_1D;
+			remoteTemp.temp_6_int = data.temp_2I;
+			remoteTemp.temp_6_dec = data.temp_2D;
+			if (timeoutFlag == 1) {
+				sprintf(buffer, "%s 00.0`F", remoteSensorNameGraph[4], remoteTemp.temp_1_int, remoteTemp.temp_1_dec);
+				TFT.print(buffer, RIGHT, 170);
+				sprintf(buffer, "%s 00.0`F", remoteSensorNameGraph[5], remoteTemp.temp_1_int, remoteTemp.temp_1_dec);
+				TFT.print(buffer, RIGHT, 203);
+			}
+			else {
+				Serial.printf("Addr %d, T1 %d.%d, T2 %d.%d\n\n", data.origin_addr, remoteTemp.temp_5_int, remoteTemp.temp_5_dec, remoteTemp.temp_6_int, remoteTemp.temp_6_dec);
+				sprintf(buffer, "%s %d.%d`F", remoteSensorNameGraph[4], remoteTemp.temp_5_int, remoteTemp.temp_5_dec);
+				TFT.print(buffer, RIGHT, 170);
+				sprintf(buffer, "%s %d.%d`F", remoteSensorNameGraph[5], remoteTemp.temp_6_int, remoteTemp.temp_6_dec);
+				TFT.print(buffer, RIGHT, 203);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	radio.stopListening();
 }
 
 String convertTempSensorAddress(DeviceAddress deviceAddress)

@@ -1,9 +1,35 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controller", "Controller.vcxproj", "{6883228A-0FE6-47B9-BE61-9B61ED5766EB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RF24-master", "..\..\Arduino\libraries\RF24-master\RF24-master.vcxitems", "{744AB320-BF2E-4849-88ED-386DA14422E9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UTFT", "..\..\Arduino\libraries\UTFT\UTFT.vcxitems", "{E8587661-FB9B-4D9F-AD2F-FF2C76EAD3EF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UTouch", "..\..\Arduino\libraries\UTouch\UTouch.vcxitems", "{6EE85E58-00F4-444E-8071-3F17D2E3A826}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SD", "..\..\Arduino\libraries\SD\SD.vcxitems", "{EBD95BFE-87F9-484D-A475-C303102A0915}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TimeAlarms", "..\..\Arduino\libraries\TimeAlarms\TimeAlarms.vcxitems", "{751264F5-5729-480B-BB54-32CD8871C046}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OneWire", "..\..\Arduino\libraries\OneWire\OneWire.vcxitems", "{59492EB4-984F-41A9-AF90-F56D56578DFC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DallasTemperature", "..\..\Arduino\libraries\DallasTemperature\DallasTemperature.vcxitems", "{573CA973-2894-47AE-BF2E-507D60FC261A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RF24", "..\..\Arduino\libraries\RF24\RF24.vcxitems", "{AB3E1FE3-2A11-4691-B174-C23E31BF3346}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Time-master", "..\..\Arduino\libraries\Time-master\Time-master.vcxitems", "{A41CED8D-C895-4815-BE5B-B1DCFFF1BBDD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DS1307RTC-master", "..\..\Arduino\libraries\DS1307RTC-master\DS1307RTC-master.vcxitems", "{1FC113AC-8B51-4B8D-9A12-2A55F4FABBA4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Adafruit-MCP23008-library-master", "..\..\Arduino\libraries\Adafruit-MCP23008-library-master\Adafruit-MCP23008-library-master.vcxitems", "{90DEFEBB-7A6E-4A84-B7FF-5E89BCD9FB76}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SPI", "C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.11\libraries\SPI\SPI.vcxitems", "{9CE9A19F-4CE6-415E-987D-3FF3F215E663}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Wire", "C:\Users\Robbie\AppData\Local\arduino15\packages\arduino\hardware\sam\1.6.11\libraries\Wire\Wire.vcxitems", "{C5549281-B6D9-47C1-A0D5-BF6E60132848}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +50,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8E4B559F-0F7D-4FF8-A585-D42CD91A9E69}
 	EndGlobalSection
 EndGlobal
